@@ -98,6 +98,8 @@ import PoSSubscription from "./pos/Subscription";
 import Delistments from "./products/Delistments";
 import Accessories from "./utilities/Accessories";
 import Affiliates from "./utilities/Affiliates";
+import OrderList from "./ecommerce/OrderList";
+import RejectedTransactions from "./ecommerce/RejectedTransactions";
 
 // const Item = styled(Paper)(({ theme }) => ({
 //   backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#fff",
@@ -292,12 +294,12 @@ function Dashboard(props) {
               </Typography>
               <MenuItem
                 className={
-                  slug === "ecommerce-orders" ? classes.selected : null
+                  slug === "ecommerce-transactions" ? classes.selected : null
                 }
-                selected={slug === "ecommerce-orders" ? true : false}
+                selected={slug === "ecommerce-transactions" ? true : false}
                 onClick={(event) => {
                   event.preventDefault();
-                  history.push(`/dashboard/ecommerce-orders`);
+                  history.push(`/dashboard/ecommerce-transactions`);
                 }}
               >
                 <ListItemIcon>
@@ -322,6 +324,21 @@ function Dashboard(props) {
               </MenuItem>
               <MenuItem
                 className={
+                  slug === "ecommerce-orderslist" ? classes.selected : null
+                }
+                selected={slug === "ecommerce-orderslist" ? true : false}
+                onClick={(event) => {
+                  event.preventDefault();
+                  history.push(`/dashboard/ecommerce-orderslist`);
+                }}
+              >
+                <ListItemIcon>
+                  <AssignmentReturnIcon fontSize="small" />
+                </ListItemIcon>
+                <ListItemText>Orders List</ListItemText>
+              </MenuItem>
+              <MenuItem
+                className={
                   slug === "ecommerce-payment" ? classes.selected : null
                 }
                 selected={slug === "ecommerce-payment" ? true : false}
@@ -334,6 +351,21 @@ function Dashboard(props) {
                   <PaymentsIcon fontSize="small" />
                 </ListItemIcon>
                 <ListItemText>Payment & Reconciliation</ListItemText>
+              </MenuItem>
+              <MenuItem
+                className={
+                  slug === "ecommerce-packagings" ? classes.selected : null
+                }
+                selected={slug === "ecommerce-packagings" ? true : false}
+                onClick={(event) => {
+                  event.preventDefault();
+                  history.push(`/dashboard/ecommerce-packagings`);
+                }}
+              >
+                <ListItemIcon>
+                  <RequestQuoteIcon fontSize="small" />
+                </ListItemIcon>
+                <ListItemText>Packaging & Offboarding</ListItemText>
               </MenuItem>
 
               <MenuItem
@@ -366,6 +398,21 @@ function Dashboard(props) {
                 </ListItemIcon>
                 <ListItemText>Returns</ListItemText>
               </MenuItem>
+              <MenuItem
+                className={
+                  slug === "ecommerce-rejections" ? classes.selected : null
+                }
+                selected={slug === "ecommerce-rejections" ? true : false}
+                onClick={(event) => {
+                  event.preventDefault();
+                  history.push(`/dashboard/ecommerce-rejections`);
+                }}
+              >
+                <ListItemIcon>
+                  <LuggageIcon fontSize="small" />
+                </ListItemIcon>
+                <ListItemText>Rejections</ListItemText>
+              </MenuItem>
               {/* <MenuItem
                 className={
                   slug === "ecommerce-subscriptions" ? classes.selected : null
@@ -396,21 +443,7 @@ function Dashboard(props) {
                 </ListItemIcon>
                 <ListItemText>Biddings</ListItemText>
               </MenuItem> */}
-              {/* <MenuItem
-                className={
-                  slug === "ecommerce-quotations" ? classes.selected : null
-                }
-                selected={slug === "ecommerce-quotations" ? true : false}
-                onClick={(event) => {
-                  event.preventDefault();
-                  history.push(`/dashboard/ecommerce-quotations`);
-                }}
-              >
-                <ListItemIcon>
-                  <RequestQuoteIcon fontSize="small" />
-                </ListItemIcon>
-                <ListItemText>Quotations</ListItemText>
-              </MenuItem> */}
+
               <Divider />
               <Typography style={{ marginLeft: 10, fontWeight: "Bold" }}>
                 Point of Sale (PoS) Transactions
@@ -870,9 +903,25 @@ function Dashboard(props) {
             <Delistments />
           </Grid>
         )}
-        {slug === "ecommerce-orders" && (
+        {slug === "ecommerce-transactions" && (
           <Grid item xs={9.5}>
             <Orders />
+          </Grid>
+        )}
+
+        {slug === "ecommerce-quotes" && (
+          <Grid item xs={9.5}>
+            <Quotations />
+          </Grid>
+        )}
+        {slug === "ecommerce-orderslist" && (
+          <Grid item xs={9.5}>
+            <OrderList />
+          </Grid>
+        )}
+        {slug === "ecommerce-rejections" && (
+          <Grid item xs={9.5}>
+            <RejectedTransactions />
           </Grid>
         )}
         {slug === "ecommerce-payment" && (
@@ -895,6 +944,11 @@ function Dashboard(props) {
             <Returns />
           </Grid>
         )}
+        {slug === "ecommerce-packagings" && (
+          <Grid item xs={9.5}>
+            <Packaging />
+          </Grid>
+        )}
         {slug === "ecommerce-subscriptions" && (
           <Grid item xs={9.5}>
             <Subscription />
@@ -905,11 +959,7 @@ function Dashboard(props) {
             <Bidding />
           </Grid>
         )}
-        {slug === "ecommerce-quotations" && (
-          <Grid item xs={9.5}>
-            <Quotations />
-          </Grid>
-        )}
+
         {slug === "direct-orders" && (
           <Grid item xs={9.5}>
             <DirectOrders />

@@ -257,14 +257,14 @@ function Payments(props) {
       <Grid container spacing={1} direction="column">
         <Grid item xs>
           <Grid container spacing={2}>
-            <Grid item xs={10}>
+            <Grid item xs={8.5}>
               {/* <Item>xs=8</Item> */}
-              <Typography variant="h4">Payments</Typography>
+              <Typography variant="h5">Payments</Typography>
             </Grid>
-            <Grid item xs={2}>
+            <Grid item xs={3.5}>
               <div>
                 <Button variant="contained" onClick={handleOpen}>
-                  Process Payment
+                  Update Payment confirmation Status
                 </Button>
                 <Backdrop
                   sx={{

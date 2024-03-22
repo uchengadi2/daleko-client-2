@@ -298,7 +298,7 @@ function Returns(props) {
             <Grid item xs={2}>
               <div>
                 <Button variant="contained" onClick={handleOpen}>
-                  Process Returns
+                  Manage Returns
                 </Button>
                 <Backdrop
                   sx={{

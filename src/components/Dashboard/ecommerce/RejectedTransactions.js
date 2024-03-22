@@ -35,7 +35,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function Orders(props) {
+function RejectedTransactions(props) {
   const classes = useStyles();
   const theme = useTheme();
   const matchesMD = useMediaQuery(theme.breakpoints.down("md"));
@@ -48,12 +48,6 @@ function Orders(props) {
   const [selectedRows, setSelectedRows] = useState([]);
   const [selectedRowId, setSelectedRowId] = useState();
   const [rowNumber, setRowNumber] = useState(0);
-  const [updateTransactionCounter, setUpdateTransactionCounter] =
-    useState(false);
-  const [updateEdittedTransactionCounter, setUpdateEdittedTransactionCounter] =
-    useState(false);
-  const [updateDeletedTransactionCounter, setUpdateDeletedTransactionCounter] =
-    useState(false);
   const [transactionList, setTransactionList] = useState([]);
   const [currencyName, setCurrencyName] = useState();
   const [loading, setLoading] = useState(false);
@@ -126,11 +120,7 @@ function Orders(props) {
     //call the function
 
     fetchData().catch(console.error);
-  }, [
-    updateTransactionCounter,
-    updateEdittedTransactionCounter,
-    updateDeletedTransactionCounter,
-  ]);
+  }, []);
 
   useEffect(() => {
     // 👇️ scroll to top on page load
@@ -166,18 +156,6 @@ function Orders(props) {
 
   const handleDeleteDialogOpenStatus = () => {
     setDeleteOpen(false);
-  };
-
-  const renderTransactionUpdateCounter = () => {
-    setUpdateTransactionCounter((prevState) => !prevState);
-  };
-
-  const renderTransactionEdittedUpdateCounter = () => {
-    setUpdateEdittedTransactionCounter((prevState) => !prevState);
-  };
-
-  const renderTransactionDeletedUpdateCounter = () => {
-    setUpdateDeletedTransactionCounter((prevState) => !prevState);
   };
 
   const handleSuccessfulCreateSnackbar = (message) => {
@@ -443,16 +421,16 @@ function Orders(props) {
       <Grid container spacing={1} direction="column">
         <Grid item xs>
           <Grid container spacing={2}>
-            <Grid item xs={4.4}>
+            <Grid item xs={10}>
               {/* <Item>xs=8</Item> */}
-              <Typography variant="h5">Transactions</Typography>
+              <Typography variant="h5">Rejected Transactions List</Typography>
             </Grid>
-            <Grid item xs={7.6}>
+            <Grid item xs={2}>
               <div>
                 <Stack direction="row" spacing={1.5}>
-                  <Button variant="contained" onClick={handleAddOpen}>
+                  {/* <Button variant="contained" onClick={handleAddOpen}>
                     Confirm Payment
-                  </Button>
+                  </Button> */}
                   <Dialog
                     //style={{ zIndex: 1302 }}
                     fullScreen={matchesXS}
@@ -474,7 +452,7 @@ function Orders(props) {
                     </DialogContent>
                   </Dialog>
                   <Button variant="contained" onClick={handleEditOpen}>
-                    Update Delivery Status
+                    Manage Rejections
                   </Button>
                   <Dialog
                     //style={{ zIndex: 1302 }}
@@ -500,37 +478,9 @@ function Orders(props) {
                     </DialogContent>
                   </Dialog>
 
-                  <Button variant="contained" onClick={handleDeleteOpen}>
+                  {/* <Button variant="contained" onClick={handleDeleteOpen}>
                     Reject Transaction
-                  </Button>
-                  <Dialog
-                    //style={{ zIndex: 1302 }}
-                    fullScreen={matchesXS}
-                    open={deleteOpen}
-                    // onClose={() => [setOpen(false), history.push("/utilities/countries")]}
-                    onClose={() => [setDeleteOpen(false)]}
-                  >
-                    <DialogContent>
-                      {/* <ProductDeleteForm
-                        token={token}
-                        userId={userId}
-                        params={selectedRows}
-                        handleDeleteDialogOpenStatus={
-                          handleDeleteDialogOpenStatus
-                        }
-                        handleSuccessfulDeletedItemSnackbar={
-                          handleSuccessfulDeletedItemSnackbar
-                        }
-                        handleFailedSnackbar={handleFailedSnackbar}
-                        renderProductDeletedUpdateCounter={
-                          renderProductDeletedUpdateCounter
-                        }
-                      /> */}
-                    </DialogContent>
-                  </Dialog>
-                  <Button variant="contained" onClick={handleDeleteOpen}>
-                    Place Order
-                  </Button>
+                  </Button> */}
                   <Dialog
                     //style={{ zIndex: 1302 }}
                     fullScreen={matchesXS}
@@ -582,4 +532,4 @@ function Orders(props) {
   );
 }
 
-export default Orders;
+export default RejectedTransactions;

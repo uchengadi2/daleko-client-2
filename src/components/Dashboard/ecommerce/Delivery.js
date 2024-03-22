@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import Typography from "@mui/material/Typography";
+import Stack from "@mui/material/Stack";
+import useMediaQuery from "@material-ui/core/useMediaQuery";
+import Snackbar from "@material-ui/core/Snackbar";
 
 import { styled } from "@mui/material/styles";
 import Box from "@mui/material/Box";
@@ -32,10 +35,30 @@ const useStyles = makeStyles((theme) => ({
 
 function Delivery(props) {
   const classes = useStyles();
+  const theme = useTheme();
+  const matchesMD = useMediaQuery(theme.breakpoints.down("md"));
+  const matchesSM = useMediaQuery(theme.breakpoints.down("sm"));
+  const matchesXS = useMediaQuery(theme.breakpoints.down("xs"));
 
   const [open, setOpen] = React.useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [selectedRows, setSelectedRows] = useState([]);
+  const [selectedRowId, setSelectedRowId] = useState();
+  const [rowNumber, setRowNumber] = useState(0);
+
   const [deliveriesList, setDeliveriesList] = useState([]);
+  const [updateDeliveryCounter, setUpdateDeliveryCounter] = useState(false);
+  const [updateEdittedDeliveryCounter, setUpdateEdittedDeliveryCounter] =
+    useState(false);
+  const [updateDeletedDeliveryCounter, setUpdateDeletedDeliveryCounter] =
+    useState(false);
   const [loading, setLoading] = useState(false);
+  const [alert, setAlert] = useState({
+    open: false,
+    message: "",
+    backgroundColor: "",
+  });
 
   useEffect(() => {
     setLoading(true);
@@ -77,7 +100,11 @@ function Delivery(props) {
     //call the function
 
     fetchData().catch(console.error);
-  }, []);
+  }, [
+    updateDeliveryCounter,
+    updateEdittedDeliveryCounter,
+    updateDeletedDeliveryCounter,
+  ]);
 
   useEffect(() => {
     // 👇️ scroll to top on page load
@@ -87,8 +114,92 @@ function Delivery(props) {
   const handleClose = () => {
     setOpen(false);
   };
-  const handleOpen = () => {
+  const handleAddOpen = () => {
     setOpen(true);
+  };
+
+  const handleEditOpen = () => {
+    setEditOpen(true);
+  };
+
+  const handleDeleteOpen = () => {
+    setDeleteOpen(true);
+  };
+
+  const handleOnboardOpen = () => {
+    //setOnboardOpen(true);
+  };
+
+  const handleDialogOpenStatus = () => {
+    setOpen(false);
+  };
+
+  const handleEditDialogOpenStatus = () => {
+    setEditOpen(false);
+  };
+
+  const handleDeleteDialogOpenStatus = () => {
+    setDeleteOpen(false);
+  };
+
+  const renderDeliveryUpdateCounter = () => {
+    setUpdateDeliveryCounter((prevState) => !prevState);
+  };
+
+  const renderDeliveryEdittedUpdateCounter = () => {
+    setUpdateEdittedDeliveryCounter((prevState) => !prevState);
+  };
+
+  const renderDeliveryDeletedUpdateCounter = () => {
+    setUpdateDeletedDeliveryCounter((prevState) => !prevState);
+  };
+
+  const handleSuccessfulCreateSnackbar = (message) => {
+    //setBecomePartnerOpen(false);
+    setAlert({
+      open: true,
+      message: message,
+      //backgroundColor: "#4BB543",
+      backgroundColor: "#FF731D",
+    });
+  };
+  const handleSuccessfulEditSnackbar = (message) => {
+    //setBecomePartnerOpen(false);
+    setAlert({
+      open: true,
+      message: message,
+      //backgroundColor: "#4BB543",
+      backgroundColor: "#FF731D",
+    });
+  };
+
+  const handleSuccessfulDeletedItemSnackbar = (message) => {
+    //setBecomePartnerOpen(false);
+    setAlert({
+      open: true,
+      message: message,
+      //backgroundColor: "#4BB543",
+      backgroundColor: "#FF731D",
+    });
+  };
+
+  const handleFailedSnackbar = (message) => {
+    setAlert({
+      open: true,
+      message: message,
+      backgroundColor: "#FF3232",
+    });
+    //setBecomePartnerOpen(true);
+  };
+
+  const onRowsSelectionHandler = (ids, rows) => {
+    const selectedIDs = new Set(ids);
+    const selectedRowsData = ids.map((id) => rows.find((row) => row.id === id));
+    setSelectedRows(selectedRowsData);
+    setRowNumber(selectedIDs.size);
+    selectedIDs.forEach(function (value) {
+      setSelectedRowId(value);
+    });
   };
 
   const renderDataGrid = () => {
@@ -295,14 +406,14 @@ function Delivery(props) {
       <Grid container spacing={1} direction="column">
         <Grid item xs>
           <Grid container spacing={2}>
-            <Grid item xs={10}>
+            <Grid item xs={9.6}>
               {/* <Item>xs=8</Item> */}
               <Typography variant="h4">Deliveries</Typography>
             </Grid>
-            <Grid item xs={2}>
+            <Grid item xs={2.4}>
               <div>
-                <Button variant="contained" onClick={handleOpen}>
-                  Process Delivery
+                <Button variant="contained" onClick={handleEditOpen}>
+                  Update Delivery Status
                 </Button>
                 <Backdrop
                   sx={{
@@ -324,6 +435,16 @@ function Delivery(props) {
             {!loading && renderDataGrid()}
           </Box>
         </Grid>
+        <Snackbar
+          open={alert.open}
+          message={alert.message}
+          ContentProps={{
+            style: { backgroundColor: alert.backgroundColor },
+          }}
+          anchorOrigin={{ vertical: "top", horizontal: "center" }}
+          onClose={() => setAlert({ ...alert, open: false })}
+          autoHideDuration={4000}
+        />
       </Grid>
     </Box>
   );
