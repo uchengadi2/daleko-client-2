@@ -4,6 +4,8 @@ import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
 import useMediaQuery from "@material-ui/core/useMediaQuery";
 import Snackbar from "@material-ui/core/Snackbar";
+import useToken from "../../../custom-hooks/useToken";
+import useUserId from "../../../custom-hooks/useUserId";
 import { styled } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
@@ -37,6 +39,8 @@ const useStyles = makeStyles((theme) => ({
 
 function Packaging(props) {
   const classes = useStyles();
+  const { token, setToken } = useToken();
+  const { userId, setUserId } = useUserId();
   const theme = useTheme();
   const matchesMD = useMediaQuery(theme.breakpoints.down("md"));
   const matchesSM = useMediaQuery(theme.breakpoints.down("sm"));
@@ -426,6 +430,7 @@ function Packaging(props) {
         pageSizeOptions={[5]}
         checkboxSelection
         disableRowSelectionOnClick
+        onSelectionModelChange={(ids) => onRowsSelectionHandler(ids, rows)}
         sx={{
           boxShadow: 3,
           border: 3,

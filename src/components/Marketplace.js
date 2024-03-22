@@ -562,6 +562,64 @@ const Marketplace = (props) => {
         setCurrency(allData[0].currency);
         setIsLoading(false);
       } //ends here
+
+      if (path === "community") {
+        //data.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+        const response = await api.get("/products?sort=desc", {
+          params: { displayOnStore: "yes", salesPreference: "community" },
+        });
+        const workingData = response.data.data.data;
+        workingData.map((product) => {
+          allData.push({
+            id: product._id,
+            name: product.name,
+            image: product.imageCover,
+            shortDescription: product.shortDescription,
+            fullDescription: product.fullDescription,
+            pricePerUnit: product.pricePerUnit,
+            category: product.category,
+            minimumQuantity: product.minimumQuantity,
+            currency: product.currency,
+            unit: product.unit,
+            isFeaturedProduct: product.isFeaturedProduct,
+            configuration: product.configuration,
+            displayOnStore: product.displayOnStore,
+            brand: product.brand,
+            salesPreference: product.salesPreference,
+            keyword1: product.keyword1,
+            keyword2: product.keyword2,
+            keyword3: product.keyword3,
+            slug: product.slug,
+            images: product.images,
+            sku: product.sku,
+            pricingMechanism: product.pricingMechanism,
+            priceLabel: product.priceLabel,
+            weightPerUnit: product.weightPerUnit,
+            stockStatus: product.stockStatus,
+            allowSubscription: product.allowSubscription,
+            isVatable: product.isVatable,
+            hasVariant: product.hasVariant,
+            barcode: product.barcode,
+            marketPricingCondition: product.marketPricingCondition,
+            deliverability: product.deliverability,
+            pickupInfo: product.pickupInfo,
+            allowPriceFreezing: product.allowPriceFreezing,
+            allowFreezedPriceLowBound: product.allowFreezedPriceLowBound,
+            freezedPriceLowBound: product.freezedPriceLowBound,
+            chargesPerWeekOnFreezedPriceServiceWithoutPriceLowBound:
+              product.chargesPerWeekOnFreezedPriceServiceWithoutPriceLowBound,
+            chargesPerWeekOnFreezedPriceServiceWithPriceLowBound:
+              product.chargesPerWeekOnFreezedPriceServiceWithPriceLowBound,
+            freezedPriceMaximumDurationInWeeks:
+              product.freezedPriceMaximumDurationInWeeks,
+            minimumFreezableQuantity: product.minimumFreezableQuantity,
+            datePriceWasSet: product.datePriceWasSet,
+          });
+        });
+        setProductsList(allData);
+        setCurrency(allData[0].currency);
+        setIsLoading(false);
+      } //ends here
     };
 
     //call the function
@@ -852,6 +910,9 @@ const Marketplace = (props) => {
         {!isLoading && path === "derica" && <Grid item>{allProductList}</Grid>}
         {!isLoading && path === "paint" && <Grid item>{allProductList}</Grid>}
         {!isLoading && path === "wholesale" && (
+          <Grid item>{allProductList}</Grid>
+        )}
+        {!isLoading && path === "community" && (
           <Grid item>{allProductList}</Grid>
         )}
 

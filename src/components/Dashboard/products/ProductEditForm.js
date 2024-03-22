@@ -1207,6 +1207,7 @@ function ProductEditForm(props) {
             <MenuItem value={"derica"}>Derica</MenuItem>
             <MenuItem value={"paint"}>Paint</MenuItem>
             <MenuItem value={"wholesale"}>Wholesale(Bulk Sales)</MenuItem>
+            <MenuItem value={"community"}>Community Purchase</MenuItem>
           </Select>
           <FormHelperText>Product Sales Preference</FormHelperText>
         </FormControl>

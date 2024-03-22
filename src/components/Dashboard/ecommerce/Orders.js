@@ -3,6 +3,8 @@ import { makeStyles, useTheme } from "@material-ui/core/styles";
 import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
 import useMediaQuery from "@material-ui/core/useMediaQuery";
+import useToken from "../../../custom-hooks/useToken";
+import useUserId from "../../../custom-hooks/useUserId";
 import Snackbar from "@material-ui/core/Snackbar";
 import { styled } from "@mui/material/styles";
 import Box from "@mui/material/Box";
@@ -16,6 +18,10 @@ import DialogContent from "@material-ui/core/DialogContent";
 import CircularProgress from "@mui/material/CircularProgress";
 import Button from "@mui/material/Button";
 import api from "./../../../apis/local";
+import TransactionForm from "./TransactionForm";
+import UpdateDeliveryStatusForm from "./UpdateDeliveryStatusForm";
+import RejectTransactionForm from "./RejectTransactionForm";
+import PlaceOrderForm from "./PlaceOrderForm";
 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#fff",
@@ -37,14 +43,17 @@ const useStyles = makeStyles((theme) => ({
 
 function Orders(props) {
   const classes = useStyles();
+  const { token, setToken } = useToken();
+  const { userId, setUserId } = useUserId();
   const theme = useTheme();
   const matchesMD = useMediaQuery(theme.breakpoints.down("md"));
   const matchesSM = useMediaQuery(theme.breakpoints.down("sm"));
   const matchesXS = useMediaQuery(theme.breakpoints.down("xs"));
 
-  const [open, setOpen] = useState(false);
-  const [editOpen, setEditOpen] = useState(false);
-  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [editDeliveryOpen, setEditDeliveryOpen] = useState(false);
+  const [editRejectOpen, setEditRejectOpen] = useState(false);
+  const [placeOrderOpen, setPlaceOrderOpen] = useState(false);
   const [selectedRows, setSelectedRows] = useState([]);
   const [selectedRowId, setSelectedRowId] = useState();
   const [rowNumber, setRowNumber] = useState(0);
@@ -54,6 +63,10 @@ function Orders(props) {
     useState(false);
   const [updateDeletedTransactionCounter, setUpdateDeletedTransactionCounter] =
     useState(false);
+  const [
+    updatePlaceOrderTransactionCounter,
+    setUpdatePlaceOrderTransactionCounter,
+  ] = useState(false);
   const [transactionList, setTransactionList] = useState([]);
   const [currencyName, setCurrencyName] = useState();
   const [loading, setLoading] = useState(false);
@@ -67,7 +80,7 @@ function Orders(props) {
     setLoading(true);
     const fetchData = async () => {
       let allData = [];
-      api.defaults.headers.common["Authorization"] = `Bearer ${props.token}`;
+      api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
       const response = await api.get(`/transactions`, {
         params: { shopType: "online" },
       });
@@ -130,6 +143,7 @@ function Orders(props) {
     updateTransactionCounter,
     updateEdittedTransactionCounter,
     updateDeletedTransactionCounter,
+    updatePlaceOrderTransactionCounter,
   ]);
 
   useEffect(() => {
@@ -138,34 +152,38 @@ function Orders(props) {
   }, []);
 
   const handleClose = () => {
-    setOpen(false);
+    setConfirmOpen(false);
   };
-  const handleAddOpen = () => {
-    setOpen(true);
-  };
-
-  const handleEditOpen = () => {
-    setEditOpen(true);
+  const handleConfirmOpen = () => {
+    setConfirmOpen(true);
   };
 
-  const handleDeleteOpen = () => {
-    setDeleteOpen(true);
+  const handleEditDeliveryOpen = () => {
+    setEditDeliveryOpen(true);
   };
 
-  const handleOnboardOpen = () => {
-    //setOnboardOpen(true);
+  const handleEditRejectOpen = () => {
+    setEditRejectOpen(true);
+  };
+
+  const handlePlaceOrderOpen = () => {
+    setPlaceOrderOpen(true);
   };
 
   const handleDialogOpenStatus = () => {
-    setOpen(false);
+    setConfirmOpen(false);
   };
 
   const handleEditDialogOpenStatus = () => {
-    setEditOpen(false);
+    setEditDeliveryOpen(false);
   };
 
-  const handleDeleteDialogOpenStatus = () => {
-    setDeleteOpen(false);
+  const handleEditRejectDialogOpenStatus = () => {
+    setEditRejectOpen(false);
+  };
+
+  const handlePlaceOrderDialogOpenStatus = () => {
+    setPlaceOrderOpen(false);
   };
 
   const renderTransactionUpdateCounter = () => {
@@ -178,6 +196,10 @@ function Orders(props) {
 
   const renderTransactionDeletedUpdateCounter = () => {
     setUpdateDeletedTransactionCounter((prevState) => !prevState);
+  };
+
+  const renderPlaceOrderTransactionUpdateCounter = () => {
+    setUpdatePlaceOrderTransactionCounter((prevState) => !prevState);
   };
 
   const handleSuccessfulCreateSnackbar = (message) => {
@@ -200,6 +222,16 @@ function Orders(props) {
   };
 
   const handleSuccessfulDeletedItemSnackbar = (message) => {
+    //setBecomePartnerOpen(false);
+    setAlert({
+      open: true,
+      message: message,
+      //backgroundColor: "#4BB543",
+      backgroundColor: "#FF731D",
+    });
+  };
+
+  const handleSuccessfulPlaceOrderItemSnackbar = (message) => {
     //setBecomePartnerOpen(false);
     setAlert({
       open: true,
@@ -409,6 +441,7 @@ function Orders(props) {
         recipientCountryName: transaction.recipientCountryName,
         recipientStateName: transaction.recipientStateName,
         recipientCityName: transaction.recipientCityName,
+        currency: transaction.currency,
       };
       rows.push(row);
     });
@@ -427,6 +460,7 @@ function Orders(props) {
         pageSizeOptions={[5]}
         checkboxSelection
         disableRowSelectionOnClick
+        onSelectionModelChange={(ids) => onRowsSelectionHandler(ids, rows)}
         sx={{
           boxShadow: 3,
           border: 3,
@@ -443,25 +477,25 @@ function Orders(props) {
       <Grid container spacing={1} direction="column">
         <Grid item xs>
           <Grid container spacing={2}>
-            <Grid item xs={4.4}>
+            <Grid item xs={4.2}>
               {/* <Item>xs=8</Item> */}
-              <Typography variant="h5">Transactions</Typography>
+              <Typography variant="h4">Transactions</Typography>
             </Grid>
-            <Grid item xs={7.6}>
+            <Grid item xs={7.8}>
               <div>
                 <Stack direction="row" spacing={1.5}>
-                  <Button variant="contained" onClick={handleAddOpen}>
+                  <Button variant="contained" onClick={handleConfirmOpen}>
                     Confirm Payment
                   </Button>
                   <Dialog
                     //style={{ zIndex: 1302 }}
                     fullScreen={matchesXS}
-                    open={open}
+                    open={confirmOpen}
                     // onClose={() => [setOpen(false), history.push("/utilities/countries")]}
-                    onClose={() => [setOpen(false)]}
+                    onClose={() => [setConfirmOpen(false)]}
                   >
                     <DialogContent>
-                      {/* <ProductForm
+                      <TransactionForm
                         token={token}
                         userId={userId}
                         handleDialogOpenStatus={handleDialogOpenStatus}
@@ -469,22 +503,24 @@ function Orders(props) {
                           handleSuccessfulCreateSnackbar
                         }
                         handleFailedSnackbar={handleFailedSnackbar}
-                        renderProductUpdateCounter={renderProductUpdateCounter}
-                      /> */}
+                        renderProductUpdateCounter={
+                          renderTransactionUpdateCounter
+                        }
+                      />
                     </DialogContent>
                   </Dialog>
-                  <Button variant="contained" onClick={handleEditOpen}>
+                  <Button variant="contained" onClick={handleEditDeliveryOpen}>
                     Update Delivery Status
                   </Button>
                   <Dialog
                     //style={{ zIndex: 1302 }}
                     fullScreen={matchesXS}
-                    open={editOpen}
+                    open={editDeliveryOpen}
                     // onClose={() => [setOpen(false), history.push("/utilities/countries")]}
-                    onClose={() => [setEditOpen(false)]}
+                    onClose={() => [setEditDeliveryOpen(false)]}
                   >
                     <DialogContent>
-                      {/* <ProductEditForm
+                      <UpdateDeliveryStatusForm
                         token={token}
                         userId={userId}
                         params={selectedRows}
@@ -493,67 +529,67 @@ function Orders(props) {
                         handleSuccessfulEditSnackbar={
                           handleSuccessfulEditSnackbar
                         }
-                        renderProductEdittedUpdateCounter={
-                          renderProductEdittedUpdateCounter
+                        renderTransactionEdittedUpdateCounter={
+                          renderTransactionEdittedUpdateCounter
                         }
-                      /> */}
+                      />
                     </DialogContent>
                   </Dialog>
 
-                  <Button variant="contained" onClick={handleDeleteOpen}>
+                  <Button variant="contained" onClick={handleEditRejectOpen}>
                     Reject Transaction
                   </Button>
                   <Dialog
                     //style={{ zIndex: 1302 }}
                     fullScreen={matchesXS}
-                    open={deleteOpen}
+                    open={editRejectOpen}
                     // onClose={() => [setOpen(false), history.push("/utilities/countries")]}
-                    onClose={() => [setDeleteOpen(false)]}
+                    onClose={() => [setEditRejectOpen(false)]}
                   >
                     <DialogContent>
-                      {/* <ProductDeleteForm
+                      <RejectTransactionForm
                         token={token}
                         userId={userId}
                         params={selectedRows}
-                        handleDeleteDialogOpenStatus={
-                          handleDeleteDialogOpenStatus
+                        handleEditRejectDialogOpenStatus={
+                          handleEditRejectDialogOpenStatus
                         }
                         handleSuccessfulDeletedItemSnackbar={
                           handleSuccessfulDeletedItemSnackbar
                         }
                         handleFailedSnackbar={handleFailedSnackbar}
-                        renderProductDeletedUpdateCounter={
-                          renderProductDeletedUpdateCounter
+                        renderTransactionDeletedUpdateCounter={
+                          renderTransactionDeletedUpdateCounter
                         }
-                      /> */}
+                      />
                     </DialogContent>
                   </Dialog>
-                  <Button variant="contained" onClick={handleDeleteOpen}>
+                  <Button variant="contained" onClick={handlePlaceOrderOpen}>
                     Place Order
                   </Button>
                   <Dialog
                     //style={{ zIndex: 1302 }}
                     fullScreen={matchesXS}
-                    open={deleteOpen}
+                    open={placeOrderOpen}
                     // onClose={() => [setOpen(false), history.push("/utilities/countries")]}
-                    onClose={() => [setDeleteOpen(false)]}
+                    onClose={() => [setPlaceOrderOpen(false)]}
                   >
                     <DialogContent>
-                      {/* <ProductDeleteForm
+                      <PlaceOrderForm
                         token={token}
                         userId={userId}
                         params={selectedRows}
-                        handleDeleteDialogOpenStatus={
-                          handleDeleteDialogOpenStatus
+                        handlePlaceOrderDialogOpenStatus={
+                          handlePlaceOrderDialogOpenStatus
                         }
-                        handleSuccessfulDeletedItemSnackbar={
-                          handleSuccessfulDeletedItemSnackbar
+                        handleSuccessfulPlaceOrderItemSnackbar={
+                          handleSuccessfulPlaceOrderItemSnackbar
                         }
                         handleFailedSnackbar={handleFailedSnackbar}
-                        renderProductDeletedUpdateCounter={
-                          renderProductDeletedUpdateCounter
+                        renderPlaceOrderTransactionUpdateCounter={
+                          renderPlaceOrderTransactionUpdateCounter
                         }
-                      /> */}
+                      />
                     </DialogContent>
                   </Dialog>
                 </Stack>

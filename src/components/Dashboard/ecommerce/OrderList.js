@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
+import useToken from "../../../custom-hooks/useToken";
+import useUserId from "../../../custom-hooks/useUserId";
 import useMediaQuery from "@material-ui/core/useMediaQuery";
 import Snackbar from "@material-ui/core/Snackbar";
 import { styled } from "@mui/material/styles";
@@ -16,6 +18,8 @@ import DialogContent from "@material-ui/core/DialogContent";
 import CircularProgress from "@mui/material/CircularProgress";
 import Button from "@mui/material/Button";
 import api from "./../../../apis/local";
+import ConfirmStockAvailabilityForm from "./ConfirmStockAvailabilityForm";
+import UpdatePackageReadinessForm from "./UpdatePackageReadinessForm";
 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#fff",
@@ -37,6 +41,8 @@ const useStyles = makeStyles((theme) => ({
 
 function OrderList(props) {
   const classes = useStyles();
+  const { token, setToken } = useToken();
+  const { userId, setUserId } = useUserId();
   const theme = useTheme();
   const matchesMD = useMediaQuery(theme.breakpoints.down("md"));
   const matchesSM = useMediaQuery(theme.breakpoints.down("sm"));
@@ -51,9 +57,11 @@ function OrderList(props) {
   const [updateOrderListCounter, setUpdateOrderListCounter] = useState(false);
   const [updateEdittedOrderListCounter, setUpdateEdittedOrderListCounter] =
     useState(false);
-  const [updateDeletedOrderListCounter, setUpdateDeletedOrderListCounter] =
-    useState(false);
-  const [transactionList, setTransactionList] = useState([]);
+  const [
+    updateOrderListPackageReadinessCounter,
+    setUpdateOrderListPackageReadinessCounter,
+  ] = useState(false);
+  const [orderList, setOrderList] = useState([]);
   const [currencyName, setCurrencyName] = useState();
   const [loading, setLoading] = useState(false);
   const [alert, setAlert] = useState({
@@ -66,57 +74,62 @@ function OrderList(props) {
     setLoading(true);
     const fetchData = async () => {
       let allData = [];
-      api.defaults.headers.common["Authorization"] = `Bearer ${props.token}`;
-      const response = await api.get(`/transactions`, {
-        params: { shopType: "online" },
+      api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+      const response = await api.get(`/orders`, {
+        // params: { shopType: "online" },
       });
       const workingData = response.data.data.data;
-      workingData.map((transaction) => {
+      workingData.map((order) => {
         allData.push({
-          id: transaction._id,
-          orderNumber: transaction.orderNumber,
-          currency: transaction.currency,
-          totalDeliveryCost: transaction.totalDeliveryCost,
-          totalProductCost: transaction.totalProductCost,
-          transactionDate: transaction.transactionDate,
-          orderedBy: transaction.orderedBy,
-          paymentStatus: transaction.paymentStatus,
-          paymentMethod: transaction.paymentMethod,
-          status: transaction.status,
-          rejectionReason: transaction.rejectionReason,
-          customerName: transaction.customerName,
-          customerPhoneNumber: transaction.customerPhoneNumber,
-          customerEmailAddress: transaction.customerEmailAddress,
-          customerEmailAddress: transaction.customerEmailAddress,
-          recipientName: transaction.recipientName,
-          recipientPhoneNumber: transaction.recipientPhoneNumber,
-          recipientEmailAddress: transaction.recipientEmailAddress,
-          recipientAddress: transaction.recipientAddress,
-          nearestBusstop: transaction.nearestBusstop,
-          postalCode: transaction.postalCode,
-          recipientCountry: transaction.recipientCountry,
-          recipientState: transaction.recipientState,
-          recipientCity: transaction.recipientCity,
-          vatRate: transaction.vatRate,
-          vat: transaction.vat,
-          totalWeight: transaction.totalWeight,
-          payOnDeliveryMaxWeightInKg: transaction.payOnDeliveryMaxWeightInKg,
-          implementVatCollection: transaction.implementVatCollection,
-          salesTax: transaction.salesTax,
-          revenue: transaction.revenue,
-          origin: transaction.origin,
-          allowOriginSalesTax: transaction.allowOriginSalesTax,
-          implementSalesTaxCollection: transaction.implementSalesTaxCollection,
-          deliveryStatus: transaction.deliveryStatus,
-          deliveryMode: transaction.deliveryMode,
-          daysToDelivery: transaction.daysToDelivery,
-          recipientCountryName: transaction.recipientCountryName,
-          recipientStateName: transaction.recipientStateName,
-          recipientCityName: transaction.recipientCityName,
-          shopType: transaction.shopType,
+          id: order._id,
+          orderNumber: order.orderNumber,
+          cartId: order.cartId,
+          transaction: order.transactionId,
+          product: order.product,
+          productCategory: order.productCategory,
+          productVendor: order.productVendor,
+          quantityAdddedToCart: order.quantityAdddedToCart,
+          orderedQuantity: order.orderedQuantity,
+          orderedPrice: order.orderedPrice,
+          currency: order.currency,
+          customerName: order.customerName,
+          customerPhoneNumber: order.customerPhoneNumber,
+          customerEmailAddress: order.customerEmailAddress,
+          recipientName: order.recipientName,
+          recipientPhoneNumber: order.recipientPhoneNumber,
+          recipientEmailAddress: order.recipientEmailAddress,
+          recipientAddress: order.recipientAddress,
+          postalCode: order.postalCode,
+          nearestBusstop: order.nearestBusstop,
+          recipientCountry: order.recipientCountry,
+          recipientState: order.recipientState,
+          recipientCity: order.recipientCity,
+          dateAddedToCart: order.dateAddedToCart,
+          dateOrdered: order.dateOrdered,
+          orderedBy: order.orderedBy,
+          paymentStatus: order.paymentStatus,
+          paymentMethod: order.paymentMethod,
+          salesTax: order.salesTax,
+          revenue: order.revenue,
+          vatRate: order.vatRate,
+          vat: order.vat,
+          origin: order.origin,
+          allowOriginSalesTax: order.allowOriginSalesTax,
+          implementSalesTaxCollection: order.implementSalesTaxCollection,
+          isVatable: order.isVatable,
+          deliveryStatus: order.deliveryStatus,
+          deliveryMode: order.deliveryMode,
+          daysToDelivery: order.daysToDelivery,
+          recipientCountryName: order.recipientCountryName,
+          recipientStateName: order.recipientStateName,
+          recipientCityName: order.recipientCityName,
+          shopType: order.shopType,
+          stockAvailabilityStatus: order.stockAvailabilityStatus,
+          availabilityComment: order.availabilityComment,
+          packagingReadinessStatus: order.packagingReadinessStatus,
         });
       });
-      setTransactionList(allData);
+      setOrderList(allData);
       //setCurrencyName(allData[0].currency.name.toLowerCase());
 
       setLoading(false);
@@ -128,7 +141,7 @@ function OrderList(props) {
   }, [
     updateOrderListCounter,
     updateEdittedOrderListCounter,
-    updateDeletedOrderListCounter,
+    updateOrderListPackageReadinessCounter,
   ]);
 
   useEffect(() => {
@@ -139,7 +152,7 @@ function OrderList(props) {
   const handleClose = () => {
     setOpen(false);
   };
-  const handleAddOpen = () => {
+  const handleOpen = () => {
     setOpen(true);
   };
 
@@ -171,12 +184,8 @@ function OrderList(props) {
     setUpdateOrderListCounter((prevState) => !prevState);
   };
 
-  const renderOrderListEdittedUpdateCounter = () => {
-    setUpdateEdittedOrderListCounter((prevState) => !prevState);
-  };
-
-  const renderOrderListDeletedUpdateCounter = () => {
-    setUpdateDeletedOrderListCounter((prevState) => !prevState);
+  const renderOrderListUpdateUpdateCounter = () => {
+    setUpdateOrderListPackageReadinessCounter((prevState) => !prevState);
   };
 
   const handleSuccessfulCreateSnackbar = (message) => {
@@ -248,8 +257,8 @@ function OrderList(props) {
         width: 100,
       },
       {
-        field: "transactionDate",
-        headerName: "Transaction Date",
+        field: "dateOrdered",
+        headerName: "Ordered Date",
         width: 150,
 
         //editable: true,
@@ -262,19 +271,34 @@ function OrderList(props) {
         //editable: true,
       },
       {
-        field: "shopType",
-        headerName: "Transaction From",
+        field: "transactionNumber",
+        headerName: "Transaction Number",
         width: 150,
 
         //editable: true,
       },
       {
-        field: "status",
-        headerName: "Status",
+        field: "shopType",
+        headerName: "Transaction Platform",
         width: 150,
 
         //editable: true,
       },
+      {
+        field: "productName",
+        headerName: "Product Name",
+        width: 150,
+
+        //editable: true,
+      },
+      {
+        field: "sku",
+        headerName: "Sku",
+        width: 150,
+
+        //editable: true,
+      },
+
       {
         field: "paymentStatus",
         headerName: "Payment Status",
@@ -282,20 +306,7 @@ function OrderList(props) {
 
         //editable: true,
       },
-      {
-        field: "totalProductCost",
-        headerName: `Total Product Cost`,
-        width: 180,
 
-        //editable: true,
-      },
-      {
-        field: "totalDeliveryCost",
-        headerName: `Total Delivery Cost`,
-        width: 180,
-
-        //editable: true,
-      },
       {
         field: "deliveryStatus",
         headerName: `Delivery Status`,
@@ -325,89 +336,92 @@ function OrderList(props) {
         //editable: true,
       },
       {
-        field: "orderaction",
-        headerName: "",
-        width: 30,
-        description: "transaction row",
-        renderCell: (params) => (
-          <strong>
-            {/* {params.value.getFullYear()} */}
-            <ViewListIcon
-              style={{ cursor: "pointer" }}
-              onClick={() => [
-                // this.setState({
-                //   editOpen: true,
-                //   id: params.id,
-                //   params: params.row,
-                // }),
-                // history.push(`/products/onboard/${params.id}`),
-              ]}
-            />
-          </strong>
-        ),
+        field: "orderedQuantity",
+        headerName: `Ordered Quantity`,
+        width: 180,
+
+        //editable: true,
       },
     ];
 
-    transactionList.map((transaction, index) => {
+    orderList.map((order, index) => {
+      console.log("order is:", order.transaction.orderNumber);
       let row = {
         numbering: ++counter,
-        id: transaction.id,
-        orderNumber: transaction.orderNumber.toUpperCase(),
-        totalProductCost: transaction.totalProductCost,
-        totalDeliveryCost: transaction.totalDeliveryCost,
-        transactionDate: transaction.transactionDate
-          ? new Date(transaction.transactionDate).toLocaleDateString()
+        id: order.id,
+        orderNumber: order.orderNumber.toUpperCase(),
+
+        dateOrdered: order.dateOrdered
+          ? new Date(order.dateOrdered).toLocaleDateString()
           : "",
-        status: transaction.status.replace(
+        // status: order.status.replace(
+        //   /(^\w|\s\w)(\S*)/g,
+        //   (_, m1, m2) => m1.toUpperCase() + m2.toLowerCase()
+        // ),
+        shopType: order.shopType.replace(
           /(^\w|\s\w)(\S*)/g,
           (_, m1, m2) => m1.toUpperCase() + m2.toLowerCase()
         ),
-        shopType: transaction.shopType.replace(
+        deliveryStatus: order.deliveryStatus.replace(
           /(^\w|\s\w)(\S*)/g,
           (_, m1, m2) => m1.toUpperCase() + m2.toLowerCase()
         ),
-        deliveryStatus: transaction.deliveryStatus.replace(
-          /(^\w|\s\w)(\S*)/g,
-          (_, m1, m2) => m1.toUpperCase() + m2.toLowerCase()
-        ),
-        deliveryMode: transaction.deliveryMode.replace(
+        deliveryMode: order.deliveryMode.replace(
           /(^\w|\s\w)(\S*)/g,
           (_, m1, m2) => m1.toUpperCase() + m2.toLowerCase()
         ),
 
-        daysToDelivery: transaction.daysToDelivery,
-        paymentMethod: transaction.paymentMethod,
-        paymentStatus: transaction.paymentStatus,
-        rejectionReason: transaction.rejectionReason,
-        customerName: transaction.customerName,
-        customerPhoneNumber: transaction.customerPhoneNumber,
-        customerEmailAddress: transaction.customerEmailAddress,
-        customerEmailAddress: transaction.customerEmailAddress,
-        recipientName: transaction.recipientName,
-        recipientPhoneNumber: transaction.recipientPhoneNumber,
-        recipientEmailAddress: transaction.recipientEmailAddress,
-        recipientAddress: transaction.recipientAddress,
-        nearestBusstop: transaction.nearestBusstop,
-        postalCode: transaction.postalCode,
-        recipientCountry: transaction.recipientCountry,
-        recipientState: transaction.recipientState,
-        recipientCity: transaction.recipientCity,
-        vatRate: transaction.vatRate,
-        vat: transaction.vat,
-        totalWeight: transaction.totalWeight,
-        payOnDeliveryMaxWeightInKg: transaction.payOnDeliveryMaxWeightInKg,
-        implementVatCollection: transaction.implementVatCollection,
-        salesTax: transaction.salesTax,
-        revenue: transaction.revenue,
-        origin: transaction.origin,
-        allowOriginSalesTax: transaction.allowOriginSalesTax,
-        implementSalesTaxCollection: transaction.implementSalesTaxCollection,
-        deliveryStatus: transaction.deliveryStatus,
-        deliveryMode: transaction.deliveryMode,
-        daysToDelivery: transaction.daysToDelivery,
-        recipientCountryName: transaction.recipientCountryName,
-        recipientStateName: transaction.recipientStateName,
-        recipientCityName: transaction.recipientCityName,
+        orderNumber: order.orderNumber.toUpperCase(),
+        cartId: order.cartId,
+        transaction: order.transaction,
+        transactionNumber: order.transaction.orderNumber,
+        transactionId: order.transaction.id,
+        product: order.product,
+        productName: order.product.name,
+        sku: order.product.sku,
+        productCategory: order.productCategory,
+        productVendor: order.productVendor,
+        quantityAdddedToCart: order.quantityAdddedToCart,
+        orderedQuantity: order.orderedQuantity,
+        orderedPrice: order.orderedPrice,
+        currency: order.currency,
+        customerName: order.customerName,
+        customerPhoneNumber: order.customerPhoneNumber,
+        customerEmailAddress: order.customerEmailAddress,
+        recipientName: order.recipientName,
+        recipientPhoneNumber: order.recipientPhoneNumber,
+        recipientEmailAddress: order.recipientEmailAddress,
+        recipientAddress: order.recipientAddress,
+        postalCode: order.postalCode,
+        nearestBusstop: order.nearestBusstop,
+        recipientCountry: order.recipientCountry,
+        recipientState: order.recipientState,
+        recipientCity: order.recipientCity,
+        dateAddedToCart: order.dateAddedToCart,
+
+        orderedBy: order.orderedBy,
+
+        paymentStatus: order.paymentStatus,
+        paymentMethod: order.paymentMethod,
+        salesTax: order.salesTax,
+        revenue: order.revenue,
+        vatRate: order.vatRate,
+        vat: order.vat,
+        origin: order.origin,
+        allowOriginSalesTax: order.allowOriginSalesTax,
+        implementSalesTaxCollection: order.implementSalesTaxCollection,
+        isVatable: order.isVatable,
+
+        daysToDelivery: order.daysToDelivery,
+        recipientCountryName: order.recipientCountryName,
+
+        recipientStateName: order.recipientStateName,
+        recipientCityName: order.recipientCityName,
+
+        stockAvailabilityStatus: order.stockAvailabilityStatus,
+
+        availabilityComment: order.availabilityComment,
+        packagingReadinessStatus: order.packagingReadinessStatus,
       };
       rows.push(row);
     });
@@ -426,6 +440,7 @@ function OrderList(props) {
         pageSizeOptions={[5]}
         checkboxSelection
         disableRowSelectionOnClick
+        onSelectionModelChange={(ids) => onRowsSelectionHandler(ids, rows)}
         sx={{
           boxShadow: 3,
           border: 3,
@@ -449,9 +464,9 @@ function OrderList(props) {
             <Grid item xs={6.5}>
               <div>
                 <Stack direction="row" spacing={1.5}>
-                  {/* <Button variant="contained" onClick={handleAddOpen}>
-                    Confirm Payment
-                  </Button> */}
+                  <Button variant="contained" onClick={handleOpen}>
+                    Confirm Stock Availability Status
+                  </Button>
                   <Dialog
                     //style={{ zIndex: 1302 }}
                     fullScreen={matchesXS}
@@ -460,7 +475,7 @@ function OrderList(props) {
                     onClose={() => [setOpen(false)]}
                   >
                     <DialogContent>
-                      {/* <ProductForm
+                      <ConfirmStockAvailabilityForm
                         token={token}
                         userId={userId}
                         handleDialogOpenStatus={handleDialogOpenStatus}
@@ -468,12 +483,14 @@ function OrderList(props) {
                           handleSuccessfulCreateSnackbar
                         }
                         handleFailedSnackbar={handleFailedSnackbar}
-                        renderProductUpdateCounter={renderProductUpdateCounter}
-                      /> */}
+                        renderOrderListUpdateCounter={
+                          renderOrderListUpdateCounter
+                        }
+                      />
                     </DialogContent>
                   </Dialog>
                   <Button variant="contained" onClick={handleEditOpen}>
-                    Confirm Stock Availability Status
+                    Update Packaging Readiness Status
                   </Button>
                   <Dialog
                     //style={{ zIndex: 1302 }}
@@ -483,7 +500,7 @@ function OrderList(props) {
                     onClose={() => [setEditOpen(false)]}
                   >
                     <DialogContent>
-                      {/* <ProductEditForm
+                      <UpdatePackageReadinessForm
                         token={token}
                         userId={userId}
                         params={selectedRows}
@@ -492,16 +509,16 @@ function OrderList(props) {
                         handleSuccessfulEditSnackbar={
                           handleSuccessfulEditSnackbar
                         }
-                        renderProductEdittedUpdateCounter={
-                          renderProductEdittedUpdateCounter
+                        renderOrderListUpdateUpdateCounter={
+                          renderOrderListUpdateUpdateCounter
                         }
-                      /> */}
+                      />
                     </DialogContent>
                   </Dialog>
 
-                  <Button variant="contained" onClick={handleDeleteOpen}>
+                  {/* <Button variant="contained" onClick={handleDeleteOpen}>
                     Update Packaging Readiness Status
-                  </Button>
+                  </Button> */}
                   <Dialog
                     //style={{ zIndex: 1302 }}
                     fullScreen={matchesXS}

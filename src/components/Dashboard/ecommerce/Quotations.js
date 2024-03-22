@@ -4,6 +4,8 @@ import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
 import useMediaQuery from "@material-ui/core/useMediaQuery";
 import Snackbar from "@material-ui/core/Snackbar";
+import useToken from "../../../custom-hooks/useToken";
+import useUserId from "../../../custom-hooks/useUserId";
 import { styled } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
@@ -16,6 +18,7 @@ import DialogContent from "@material-ui/core/DialogContent";
 import CircularProgress from "@mui/material/CircularProgress";
 import Button from "@mui/material/Button";
 import api from "./../../../apis/local";
+import RequestedQuoteForm from "./RequestedQuoteForm";
 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#fff",
@@ -37,6 +40,8 @@ const useStyles = makeStyles((theme) => ({
 
 function Quotations(props) {
   const classes = useStyles();
+  const { token, setToken } = useToken();
+  const { userId, setUserId } = useUserId();
   const theme = useTheme();
   const matchesMD = useMediaQuery(theme.breakpoints.down("md"));
   const matchesSM = useMediaQuery(theme.breakpoints.down("sm"));
@@ -48,7 +53,11 @@ function Quotations(props) {
   const [selectedRows, setSelectedRows] = useState([]);
   const [selectedRowId, setSelectedRowId] = useState();
   const [rowNumber, setRowNumber] = useState(0);
-  const [transactionList, setTransactionList] = useState([]);
+  const [
+    updateRequestedQuoteStatusCounter,
+    setUpdateRequestedQuoteStatusCounter,
+  ] = useState(false);
+  const [quotesList, setQuotesList] = useState([]);
   const [currencyName, setCurrencyName] = useState();
   const [loading, setLoading] = useState(false);
   const [alert, setAlert] = useState({
@@ -62,56 +71,36 @@ function Quotations(props) {
     const fetchData = async () => {
       let allData = [];
       api.defaults.headers.common["Authorization"] = `Bearer ${props.token}`;
-      const response = await api.get(`/transactions`, {
-        params: { shopType: "online" },
+      const response = await api.get(`/quotes`, {
+        params: { status: "pending" },
       });
       const workingData = response.data.data.data;
-      workingData.map((transaction) => {
+      workingData.map((quote) => {
         allData.push({
-          id: transaction._id,
-          orderNumber: transaction.orderNumber,
-          currency: transaction.currency,
-          totalDeliveryCost: transaction.totalDeliveryCost,
-          totalProductCost: transaction.totalProductCost,
-          transactionDate: transaction.transactionDate,
-          orderedBy: transaction.orderedBy,
-          paymentStatus: transaction.paymentStatus,
-          paymentMethod: transaction.paymentMethod,
-          status: transaction.status,
-          rejectionReason: transaction.rejectionReason,
-          customerName: transaction.customerName,
-          customerPhoneNumber: transaction.customerPhoneNumber,
-          customerEmailAddress: transaction.customerEmailAddress,
-          customerEmailAddress: transaction.customerEmailAddress,
-          recipientName: transaction.recipientName,
-          recipientPhoneNumber: transaction.recipientPhoneNumber,
-          recipientEmailAddress: transaction.recipientEmailAddress,
-          recipientAddress: transaction.recipientAddress,
-          nearestBusstop: transaction.nearestBusstop,
-          postalCode: transaction.postalCode,
-          recipientCountry: transaction.recipientCountry,
-          recipientState: transaction.recipientState,
-          recipientCity: transaction.recipientCity,
-          vatRate: transaction.vatRate,
-          vat: transaction.vat,
-          totalWeight: transaction.totalWeight,
-          payOnDeliveryMaxWeightInKg: transaction.payOnDeliveryMaxWeightInKg,
-          implementVatCollection: transaction.implementVatCollection,
-          salesTax: transaction.salesTax,
-          revenue: transaction.revenue,
-          origin: transaction.origin,
-          allowOriginSalesTax: transaction.allowOriginSalesTax,
-          implementSalesTaxCollection: transaction.implementSalesTaxCollection,
-          deliveryStatus: transaction.deliveryStatus,
-          deliveryMode: transaction.deliveryMode,
-          daysToDelivery: transaction.daysToDelivery,
-          recipientCountryName: transaction.recipientCountryName,
-          recipientStateName: transaction.recipientStateName,
-          recipientCityName: transaction.recipientCityName,
-          shopType: transaction.shopType,
+          id: quote._id,
+          quoteRequestNumber: quote.quoteRequestNumber,
+          customerName: quote.customerName,
+          product: quote.product,
+          productName: quote.productName,
+          sku: quote.sku,
+          quantityRequested: quote.quantityRequested,
+          minimumOrderQuantity: quote.minimumOrderQuantity,
+          whatsappNumber: quote.whatsappNumber,
+          customerEmail: quote.customerEmail,
+          deliveryPreference: quote.deliveryPreference,
+          country: quote.country,
+          state: quote.state,
+          city: quote.city,
+          address: quote.address,
+          status: quote.status,
+          timeToLiveInHours: quote.timeToLiveInHours,
+          addToWhatsappGroup: quote.addToWhatsappGroup,
+          addToEmailList: quote.addToEmailList,
+          dateRequested: quote.dateRequested,
+          comment: quote.comment,
         });
       });
-      setTransactionList(allData);
+      setQuotesList(allData);
       //setCurrencyName(allData[0].currency.name.toLowerCase());
 
       setLoading(false);
@@ -120,7 +109,7 @@ function Quotations(props) {
     //call the function
 
     fetchData().catch(console.error);
-  }, []);
+  }, [updateRequestedQuoteStatusCounter]);
 
   useEffect(() => {
     // 👇️ scroll to top on page load
@@ -130,7 +119,7 @@ function Quotations(props) {
   const handleClose = () => {
     setOpen(false);
   };
-  const handleAddOpen = () => {
+  const handleOpen = () => {
     setOpen(true);
   };
 
@@ -148,6 +137,10 @@ function Quotations(props) {
 
   const handleDialogOpenStatus = () => {
     setOpen(false);
+  };
+
+  const renderRequestedQuoteStatusUpdateCounter = () => {
+    setUpdateRequestedQuoteStatusCounter((prevState) => !prevState);
   };
 
   const handleEditDialogOpenStatus = () => {
@@ -227,166 +220,137 @@ function Quotations(props) {
         width: 100,
       },
       {
-        field: "transactionDate",
-        headerName: "Transaction Date",
+        field: "dateRequested",
+        headerName: "Date Requested",
         width: 150,
 
         //editable: true,
       },
       {
-        field: "orderNumber",
-        headerName: "Order Number",
-        width: 150,
-
-        //editable: true,
-      },
-      {
-        field: "shopType",
-        headerName: "Transaction From",
-        width: 150,
+        field: "quoteRequestNumber",
+        headerName: "Quotation Request Number",
+        width: 220,
 
         //editable: true,
       },
       {
         field: "status",
         headerName: "Status",
+        width: 120,
+
+        //editable: true,
+      },
+      {
+        field: "deliveryPreference",
+        headerName: `Delivery Preference`,
         width: 150,
 
         //editable: true,
       },
       {
-        field: "paymentStatus",
-        headerName: "Payment Status",
+        field: "quantityRequested",
+        headerName: "Quantity Requested",
         width: 150,
 
         //editable: true,
       },
+
       {
-        field: "totalProductCost",
-        headerName: `Total Product Cost`,
+        field: "minimumOrderQuantity",
+        headerName: "Minimum Quantity Required",
+        width: 150,
+
+        //editable: true,
+      },
+
+      {
+        field: "addToWhatsappGroup",
+        headerName: "Add To Whatsapp Group?",
         width: 180,
 
         //editable: true,
       },
       {
-        field: "totalDeliveryCost",
-        headerName: `Total Delivery Cost`,
+        field: "addToEmailList",
+        headerName: "Add To Email List",
         width: 180,
 
         //editable: true,
       },
-      {
-        field: "deliveryStatus",
-        headerName: `Delivery Status`,
-        width: 180,
 
-        //editable: true,
-      },
-      {
-        field: "deliveryMode",
-        headerName: `Delivery Mode`,
-        width: 180,
-
-        //editable: true,
-      },
-      {
-        field: "daysToDelivery",
-        headerName: `Days To Delivery`,
-        width: 180,
-
-        //editable: true,
-      },
-      {
-        field: "paymentMethod",
-        headerName: `Payment Method`,
-        width: 180,
-
-        //editable: true,
-      },
-      {
-        field: "orderaction",
-        headerName: "",
-        width: 30,
-        description: "transaction row",
-        renderCell: (params) => (
-          <strong>
-            {/* {params.value.getFullYear()} */}
-            <ViewListIcon
-              style={{ cursor: "pointer" }}
-              onClick={() => [
-                // this.setState({
-                //   editOpen: true,
-                //   id: params.id,
-                //   params: params.row,
-                // }),
-                // history.push(`/products/onboard/${params.id}`),
-              ]}
-            />
-          </strong>
-        ),
-      },
+      // {
+      //   field: "orderaction",
+      //   headerName: "",
+      //   width: 30,
+      //   description: "transaction row",
+      //   renderCell: (params) => (
+      //     <strong>
+      //       {/* {params.value.getFullYear()} */}
+      //       <ViewListIcon
+      //         style={{ cursor: "pointer" }}
+      //         onClick={() => [
+      //           // this.setState({
+      //           //   editOpen: true,
+      //           //   id: params.id,
+      //           //   params: params.row,
+      //           // }),
+      //           // history.push(`/products/onboard/${params.id}`),
+      //         ]}
+      //       />
+      //     </strong>
+      //   ),
+      // },
     ];
 
-    transactionList.map((transaction, index) => {
+    quotesList.map((quote, index) => {
       let row = {
         numbering: ++counter,
-        id: transaction.id,
-        orderNumber: transaction.orderNumber.toUpperCase(),
-        totalProductCost: transaction.totalProductCost,
-        totalDeliveryCost: transaction.totalDeliveryCost,
-        transactionDate: transaction.transactionDate
-          ? new Date(transaction.transactionDate).toLocaleDateString()
-          : "",
-        status: transaction.status.replace(
-          /(^\w|\s\w)(\S*)/g,
-          (_, m1, m2) => m1.toUpperCase() + m2.toLowerCase()
-        ),
-        shopType: transaction.shopType.replace(
-          /(^\w|\s\w)(\S*)/g,
-          (_, m1, m2) => m1.toUpperCase() + m2.toLowerCase()
-        ),
-        deliveryStatus: transaction.deliveryStatus.replace(
-          /(^\w|\s\w)(\S*)/g,
-          (_, m1, m2) => m1.toUpperCase() + m2.toLowerCase()
-        ),
-        deliveryMode: transaction.deliveryMode.replace(
-          /(^\w|\s\w)(\S*)/g,
-          (_, m1, m2) => m1.toUpperCase() + m2.toLowerCase()
-        ),
 
-        daysToDelivery: transaction.daysToDelivery,
-        paymentMethod: transaction.paymentMethod,
-        paymentStatus: transaction.paymentStatus,
-        rejectionReason: transaction.rejectionReason,
-        customerName: transaction.customerName,
-        customerPhoneNumber: transaction.customerPhoneNumber,
-        customerEmailAddress: transaction.customerEmailAddress,
-        customerEmailAddress: transaction.customerEmailAddress,
-        recipientName: transaction.recipientName,
-        recipientPhoneNumber: transaction.recipientPhoneNumber,
-        recipientEmailAddress: transaction.recipientEmailAddress,
-        recipientAddress: transaction.recipientAddress,
-        nearestBusstop: transaction.nearestBusstop,
-        postalCode: transaction.postalCode,
-        recipientCountry: transaction.recipientCountry,
-        recipientState: transaction.recipientState,
-        recipientCity: transaction.recipientCity,
-        vatRate: transaction.vatRate,
-        vat: transaction.vat,
-        totalWeight: transaction.totalWeight,
-        payOnDeliveryMaxWeightInKg: transaction.payOnDeliveryMaxWeightInKg,
-        implementVatCollection: transaction.implementVatCollection,
-        salesTax: transaction.salesTax,
-        revenue: transaction.revenue,
-        origin: transaction.origin,
-        allowOriginSalesTax: transaction.allowOriginSalesTax,
-        implementSalesTaxCollection: transaction.implementSalesTaxCollection,
-        deliveryStatus: transaction.deliveryStatus,
-        deliveryMode: transaction.deliveryMode,
-        daysToDelivery: transaction.daysToDelivery,
-        recipientCountryName: transaction.recipientCountryName,
-        recipientStateName: transaction.recipientStateName,
-        recipientCityName: transaction.recipientCityName,
+        // orderNumber: transaction.orderNumber.toUpperCase(),
+        // totalProductCost: transaction.totalProductCost,
+        // totalDeliveryCost: transaction.totalDeliveryCost,
+        // transactionDate: transaction.transactionDate
+        //   ? new Date(transaction.transactionDate).toLocaleDateString()
+        //   : "",
+        // status: transaction.status.replace(
+        //   /(^\w|\s\w)(\S*)/g,
+        //   (_, m1, m2) => m1.toUpperCase() + m2.toLowerCase()
+        // ),
+        // shopType: transaction.shopType.replace(
+        //   /(^\w|\s\w)(\S*)/g,
+        //   (_, m1, m2) => m1.toUpperCase() + m2.toLowerCase()
+        // ),
+        // deliveryStatus: transaction.deliveryStatus.replace(
+        //   /(^\w|\s\w)(\S*)/g,
+        //   (_, m1, m2) => m1.toUpperCase() + m2.toLowerCase()
+        // ),
+        // deliveryMode: transaction.deliveryMode.replace(
+        //   /(^\w|\s\w)(\S*)/g,
+        //   (_, m1, m2) => m1.toUpperCase() + m2.toLowerCase()
+        // ),
+        id: quote.id,
+        quoteRequestNumber: quote.quoteRequestNumber,
+        customerName: quote.customerName,
+        product: quote.product,
+        productName: quote.productName,
+        sku: quote.sku,
+        quantityRequested: quote.quantityRequested,
+        minimumOrderQuantity: quote.minimumOrderQuantity,
+        whatsappNumber: quote.whatsappNumber,
+        customerEmail: quote.customerEmail,
+        deliveryPreference: quote.deliveryPreference,
+        country: quote.country,
+        state: quote.state,
+        city: quote.city,
+        address: quote.address,
+        status: quote.status,
+        timeToLiveInHours: quote.timeToLiveInHours,
+        addToWhatsappGroup: quote.addToWhatsappGroup,
+        addToEmailList: quote.addToEmailList,
+        comment: quote.comment,
+        dateRequested: quote.dateRequested
+          ? new Date(quote.dateRequested).toLocaleDateString()
+          : "",
       };
       rows.push(row);
     });
@@ -405,6 +369,7 @@ function Quotations(props) {
         pageSizeOptions={[5]}
         checkboxSelection
         disableRowSelectionOnClick
+        onSelectionModelChange={(ids) => onRowsSelectionHandler(ids, rows)}
         sx={{
           boxShadow: 3,
           border: 3,
@@ -439,7 +404,7 @@ function Quotations(props) {
                     onClose={() => [setOpen(false)]}
                   >
                     <DialogContent>
-                      {/* <ProductForm
+                      <RequestedQuoteForm
                         token={token}
                         userId={userId}
                         handleDialogOpenStatus={handleDialogOpenStatus}
@@ -447,11 +412,13 @@ function Quotations(props) {
                           handleSuccessfulCreateSnackbar
                         }
                         handleFailedSnackbar={handleFailedSnackbar}
-                        renderProductUpdateCounter={renderProductUpdateCounter}
-                      /> */}
+                        renderRequestedQuoteStatusUpdateCounter={
+                          renderRequestedQuoteStatusUpdateCounter
+                        }
+                      />
                     </DialogContent>
                   </Dialog>
-                  <Button variant="contained" onClick={handleEditOpen}>
+                  <Button variant="contained" onClick={handleOpen}>
                     Update Quotation Status
                   </Button>
                   <Dialog
@@ -459,7 +426,7 @@ function Quotations(props) {
                     fullScreen={matchesXS}
                     open={editOpen}
                     // onClose={() => [setOpen(false), history.push("/utilities/countries")]}
-                    onClose={() => [setEditOpen(false)]}
+                    onClose={() => [setOpen(false)]}
                   >
                     <DialogContent>
                       {/* <ProductEditForm

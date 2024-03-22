@@ -795,7 +795,7 @@ const renderMinimumFreezableQuantityField = ({
 
 const MAX_COUNT = 12;
 
-function ProductForm(props) {
+function TransactionForm(props) {
   const classes = useStyles();
   const [city, setCity] = useState("");
   const [category, setCategory] = useState("");
@@ -1185,7 +1185,6 @@ function ProductForm(props) {
             <MenuItem value={"derica"}>Derica</MenuItem>
             <MenuItem value={"paint"}>Paint</MenuItem>
             <MenuItem value={"wholesale"}>Wholesale(Bulk Sales)</MenuItem>
-            <MenuItem value={"community"}>Community Purchase</MenuItem>
           </Select>
           <FormHelperText>Product Sales Preference</FormHelperText>
         </FormControl>
@@ -1675,7 +1674,7 @@ function ProductForm(props) {
 
   return (
     <div>
-      <form id="productForm" className={classes.formStyles}>
+      <form id="transactionForm" className={classes.formStyles}>
         <Grid
           item
           container
@@ -2141,5 +2140,5 @@ function ProductForm(props) {
 }
 
 export default reduxForm({
-  form: "productForm",
-})(ProductForm);
+  form: "transactionForm",
+})(TransactionForm);

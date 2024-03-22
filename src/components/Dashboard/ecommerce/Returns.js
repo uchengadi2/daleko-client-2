@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import Typography from "@mui/material/Typography";
-
+import Stack from "@mui/material/Stack";
+import useMediaQuery from "@material-ui/core/useMediaQuery";
+import Snackbar from "@material-ui/core/Snackbar";
+import useToken from "../../../custom-hooks/useToken";
+import useUserId from "../../../custom-hooks/useUserId";
 import { styled } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
@@ -32,10 +36,26 @@ const useStyles = makeStyles((theme) => ({
 
 function Returns(props) {
   const classes = useStyles();
-
+  const { token, setToken } = useToken();
+  const { userId, setUserId } = useUserId();
   const [open, setOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [selectedRows, setSelectedRows] = useState([]);
+  const [selectedRowId, setSelectedRowId] = useState();
+  const [rowNumber, setRowNumber] = useState(0);
+  const [updateReturnsCounter, setUpdateReturnsCounter] = useState(false);
+  const [updateEdittedReturnsCounter, setUpdateEdittedReturnsCounter] =
+    useState(false);
+  const [updateDeletedReturnsCounter, setUpdateDeletedReturnsCounter] =
+    useState(false);
   const [returnsList, setReturnsList] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [alert, setAlert] = useState({
+    open: false,
+    message: "",
+    backgroundColor: "",
+  });
 
   useEffect(() => {
     setLoading(true);
@@ -75,17 +95,107 @@ function Returns(props) {
     //call the function
 
     fetchData().catch(console.error);
-  }, []);
+  }, [
+    updateReturnsCounter,
+    updateEdittedReturnsCounter,
+    updateDeletedReturnsCounter,
+  ]);
 
   useEffect(() => {
     // 👇️ scroll to top on page load
     window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
   }, []);
+
   const handleClose = () => {
     setOpen(false);
   };
+
   const handleOpen = () => {
     setOpen(true);
+  };
+
+  const handleEditOpen = () => {
+    setEditOpen(true);
+  };
+
+  const handleDeleteOpen = () => {
+    setDeleteOpen(true);
+  };
+
+  const handleOnboardOpen = () => {
+    //setOnboardOpen(true);
+  };
+
+  const handleDialogOpenStatus = () => {
+    setOpen(false);
+  };
+
+  const handleEditDialogOpenStatus = () => {
+    setEditOpen(false);
+  };
+
+  const handleDeleteDialogOpenStatus = () => {
+    setDeleteOpen(false);
+  };
+
+  const renderReturnsUpdateCounter = () => {
+    setUpdateReturnsCounter((prevState) => !prevState);
+  };
+
+  const renderReturnsEdittedUpdateCounter = () => {
+    setUpdateEdittedReturnsCounter((prevState) => !prevState);
+  };
+
+  const renderReturnsDeletedUpdateCounter = () => {
+    setUpdateDeletedReturnsCounter((prevState) => !prevState);
+  };
+
+  const handleSuccessfulCreateSnackbar = (message) => {
+    //setBecomePartnerOpen(false);
+    setAlert({
+      open: true,
+      message: message,
+      //backgroundColor: "#4BB543",
+      backgroundColor: "#FF731D",
+    });
+  };
+  const handleSuccessfulEditSnackbar = (message) => {
+    //setBecomePartnerOpen(false);
+    setAlert({
+      open: true,
+      message: message,
+      //backgroundColor: "#4BB543",
+      backgroundColor: "#FF731D",
+    });
+  };
+
+  const handleSuccessfulDeletedItemSnackbar = (message) => {
+    //setBecomePartnerOpen(false);
+    setAlert({
+      open: true,
+      message: message,
+      //backgroundColor: "#4BB543",
+      backgroundColor: "#FF731D",
+    });
+  };
+
+  const handleFailedSnackbar = (message) => {
+    setAlert({
+      open: true,
+      message: message,
+      backgroundColor: "#FF3232",
+    });
+    //setBecomePartnerOpen(true);
+  };
+
+  const onRowsSelectionHandler = (ids, rows) => {
+    const selectedIDs = new Set(ids);
+    const selectedRowsData = ids.map((id) => rows.find((row) => row.id === id));
+    setSelectedRows(selectedRowsData);
+    setRowNumber(selectedIDs.size);
+    selectedIDs.forEach(function (value) {
+      setSelectedRowId(value);
+    });
   };
 
   const renderDataGrid = () => {
@@ -273,8 +383,9 @@ function Returns(props) {
           },
         }}
         pageSizeOptions={[5]}
-        //checkboxSelection
+        checkboxSelection
         disableRowSelectionOnClick
+        onSelectionModelChange={(ids) => onRowsSelectionHandler(ids, rows)}
         sx={{
           boxShadow: 3,
           border: 3,
@@ -320,6 +431,16 @@ function Returns(props) {
             {!loading && renderDataGrid()}
           </Box>
         </Grid>
+        <Snackbar
+          open={alert.open}
+          message={alert.message}
+          ContentProps={{
+            style: { backgroundColor: alert.backgroundColor },
+          }}
+          anchorOrigin={{ vertical: "top", horizontal: "center" }}
+          onClose={() => setAlert({ ...alert, open: false })}
+          autoHideDuration={4000}
+        />
       </Grid>
     </Box>
   );

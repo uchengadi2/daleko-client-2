@@ -184,6 +184,9 @@ export default function ShoppingPreferences(props) {
             <MenuItem value={"derica"}>Derica</MenuItem>
             <MenuItem value={"paint"}>Paint</MenuItem>
             <MenuItem value={"wholesale"}>Wholesale(Bulk Purchase)</MenuItem>
+            <MenuItem value={"community"}>
+              Community Purchase(Shopping In Community)
+            </MenuItem>
           </Select>
           <FormHelperText>Choose Shopping Preference</FormHelperText>
         </FormControl>
