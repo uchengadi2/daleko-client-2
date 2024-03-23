@@ -349,8 +349,6 @@ function OrderList(props) {
       let row = {
         numbering: ++counter,
         id: order.id,
-        orderNumber: order.orderNumber.toUpperCase(),
-
         dateOrdered: order.dateOrdered
           ? new Date(order.dateOrdered).toLocaleDateString()
           : "",
@@ -385,6 +383,7 @@ function OrderList(props) {
         orderedQuantity: order.orderedQuantity,
         orderedPrice: order.orderedPrice,
         currency: order.currency,
+        currencyName: order.currency.name,
         customerName: order.customerName,
         customerPhoneNumber: order.customerPhoneNumber,
         customerEmailAddress: order.customerEmailAddress,
@@ -478,6 +477,7 @@ function OrderList(props) {
                       <ConfirmStockAvailabilityForm
                         token={token}
                         userId={userId}
+                        params={selectedRows}
                         handleDialogOpenStatus={handleDialogOpenStatus}
                         handleSuccessfulCreateSnackbar={
                           handleSuccessfulCreateSnackbar

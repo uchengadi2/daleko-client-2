@@ -306,28 +306,6 @@ function Quotations(props) {
       let row = {
         numbering: ++counter,
 
-        // orderNumber: transaction.orderNumber.toUpperCase(),
-        // totalProductCost: transaction.totalProductCost,
-        // totalDeliveryCost: transaction.totalDeliveryCost,
-        // transactionDate: transaction.transactionDate
-        //   ? new Date(transaction.transactionDate).toLocaleDateString()
-        //   : "",
-        // status: transaction.status.replace(
-        //   /(^\w|\s\w)(\S*)/g,
-        //   (_, m1, m2) => m1.toUpperCase() + m2.toLowerCase()
-        // ),
-        // shopType: transaction.shopType.replace(
-        //   /(^\w|\s\w)(\S*)/g,
-        //   (_, m1, m2) => m1.toUpperCase() + m2.toLowerCase()
-        // ),
-        // deliveryStatus: transaction.deliveryStatus.replace(
-        //   /(^\w|\s\w)(\S*)/g,
-        //   (_, m1, m2) => m1.toUpperCase() + m2.toLowerCase()
-        // ),
-        // deliveryMode: transaction.deliveryMode.replace(
-        //   /(^\w|\s\w)(\S*)/g,
-        //   (_, m1, m2) => m1.toUpperCase() + m2.toLowerCase()
-        // ),
         id: quote.id,
         quoteRequestNumber: quote.quoteRequestNumber,
         customerName: quote.customerName,
@@ -340,10 +318,14 @@ function Quotations(props) {
         customerEmail: quote.customerEmail,
         deliveryPreference: quote.deliveryPreference,
         country: quote.country,
+        countryName: quote.country ? quote.country.name : null,
         state: quote.state,
+        stateName: quote.state ? quote.state.name : null,
         city: quote.city,
+        cityName: quote.city ? quote.city.name : null,
         address: quote.address,
         status: quote.status,
+        configuration: quote.product.configuration,
         timeToLiveInHours: quote.timeToLiveInHours,
         addToWhatsappGroup: quote.addToWhatsappGroup,
         addToEmailList: quote.addToEmailList,
@@ -386,11 +368,11 @@ function Quotations(props) {
       <Grid container spacing={1} direction="column">
         <Grid item xs>
           <Grid container spacing={2}>
-            <Grid item xs={9.5}>
+            <Grid item xs={9.4}>
               {/* <Item>xs=8</Item> */}
               <Typography variant="h5">Pending Quotations List</Typography>
             </Grid>
-            <Grid item xs={2.5}>
+            <Grid item xs={2.6}>
               <div>
                 <Stack direction="row" spacing={1.5}>
                   {/* <Button variant="contained" onClick={handleAddOpen}>
@@ -407,6 +389,7 @@ function Quotations(props) {
                       <RequestedQuoteForm
                         token={token}
                         userId={userId}
+                        params={selectedRows}
                         handleDialogOpenStatus={handleDialogOpenStatus}
                         handleSuccessfulCreateSnackbar={
                           handleSuccessfulCreateSnackbar
