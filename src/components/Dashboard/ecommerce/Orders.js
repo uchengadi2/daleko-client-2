@@ -442,6 +442,7 @@ function Orders(props) {
         recipientStateName: transaction.recipientStateName,
         recipientCityName: transaction.recipientCityName,
         currency: transaction.currency,
+        currencyName: transaction.currency.name,
       };
       rows.push(row);
     });
@@ -498,6 +499,7 @@ function Orders(props) {
                       <TransactionForm
                         token={token}
                         userId={userId}
+                        params={selectedRows}
                         handleDialogOpenStatus={handleDialogOpenStatus}
                         handleSuccessfulCreateSnackbar={
                           handleSuccessfulCreateSnackbar

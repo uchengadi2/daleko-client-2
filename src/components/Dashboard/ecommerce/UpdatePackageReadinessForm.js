@@ -755,52 +755,6 @@ function UpdatePackageReadinessForm(props) {
             </Grid>
           </Grid>
 
-          {/* <Grid item container style={{ marginTop: 20, marginBottom: 20 }}>
-            <FormLabel style={{ color: "blue" }} component="legend">
-              Stock Availability Verification
-            </FormLabel>
-          </Grid>
-          <Field
-            label=""
-            id="location"
-            name="location"
-            helperText="Locations"
-            type="text"
-            component={renderLocationField}
-            style={{ marginTop: 10 }}
-          />
-
-          <Field
-            label=""
-            id="inventory"
-            name="inventory"
-            helperText="Inventory"
-            type="text"
-            component={renderInventoryField}
-            style={{ marginTop: 10 }}
-          />
-          <Field
-            label=""
-            id="quantityInStock"
-            name="quantityInStock"
-            defaultValue={quantityInStock}
-            helperText="Quantity In Stock"
-            type="text"
-            component={renderSingleLineField}
-            style={{ marginTop: 10 }}
-          />
-
-         
-
-          <Field
-            label=""
-            id="availabilityComment"
-            name="availabilityComment"
-            helperText="Stock Availability Comment"
-            type="text"
-            component={renderEditableMultilineField}
-            style={{ marginTop: 10 }}
-          /> */}
           <Grid item container style={{ marginTop: 20, marginBottom: 20 }}>
             <FormLabel style={{ color: "blue" }} component="legend">
               Stock Availability Status
