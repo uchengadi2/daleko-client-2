@@ -24,6 +24,7 @@ import api from "./../../../apis/local";
 import ProductForm from "./ProductForm";
 import ProductDeleteForm from "./ProductDeleteForm";
 import ProductEditForm from "./ProductEditForm";
+import OnboardProductBatchForm from "./OnboardProductBatchForm";
 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#fff",
@@ -54,7 +55,7 @@ function Products(props) {
   const [open, setOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const [onboardOpen, setOnboardOpen] = useState(false);
+  const [onBoardOpen, setOnBoardOpen] = useState(false);
   const [selectedRows, setSelectedRows] = useState([]);
   const [selectedRowId, setSelectedRowId] = useState();
   const [rowNumber, setRowNumber] = useState(0);
@@ -63,7 +64,10 @@ function Products(props) {
     useState(false);
   const [updateDeletedProductCounter, setUpdateDeletedProductCounter] =
     useState(false);
+  const [updateOnBoardProductCounter, setUpdateOnBoardProductCounter] =
+    useState(false);
   const [productsList, setProductsList] = useState([]);
+  const [rowSelected, setRowSelected] = useState(false);
   const [loading, setLoading] = useState(false);
   const [alert, setAlert] = useState({
     open: false,
@@ -135,6 +139,7 @@ function Products(props) {
     updateProductCounter,
     updateEdittedProductCounter,
     updateDeletedProductCounter,
+    updateOnBoardProductCounter,
   ]);
 
   useEffect(() => {
@@ -152,6 +157,10 @@ function Products(props) {
 
   const renderProductDeletedUpdateCounter = () => {
     setUpdateDeletedProductCounter((prevState) => !prevState);
+  };
+
+  const renderProductOnBoardUpdateCounter = () => {
+    setUpdateOnBoardProductCounter((prevState) => !prevState);
   };
 
   const handleSuccessfulCreateSnackbar = (message) => {
@@ -174,6 +183,16 @@ function Products(props) {
   };
 
   const handleSuccessfulDeletedItemSnackbar = (message) => {
+    //setBecomePartnerOpen(false);
+    setAlert({
+      open: true,
+      message: message,
+      //backgroundColor: "#4BB543",
+      backgroundColor: "#FF731D",
+    });
+  };
+
+  const handleSuccessfulOnBoardItemSnackbar = (message) => {
     //setBecomePartnerOpen(false);
     setAlert({
       open: true,
@@ -207,6 +226,10 @@ function Products(props) {
     setEditOpen(false);
   };
 
+  const handleOnBoardDialogOpenStatus = () => {
+    setOnBoardOpen(false);
+  };
+
   const handleDeleteDialogOpenStatus = () => {
     setDeleteOpen(false);
   };
@@ -219,8 +242,8 @@ function Products(props) {
     setDeleteOpen(true);
   };
 
-  const handleOnboardOpen = () => {
-    setOnboardOpen(true);
+  const handleOnBoardOpen = () => {
+    setOnBoardOpen(true);
   };
 
   const onRowsSelectionHandler = (ids, rows) => {
@@ -231,6 +254,11 @@ function Products(props) {
     selectedIDs.forEach(function (value) {
       setSelectedRowId(value);
     });
+    if (selectedIDs.size === 1) {
+      setRowSelected(true);
+    } else {
+      setRowSelected(false);
+    }
   };
 
   const renderDataGrid = () => {
@@ -427,7 +455,11 @@ function Products(props) {
                       />
                     </DialogContent>
                   </Dialog>
-                  <Button variant="contained" onClick={handleEditOpen}>
+                  <Button
+                    variant="contained"
+                    onClick={handleEditOpen}
+                    disabled={rowSelected ? false : true}
+                  >
                     Edit
                   </Button>
                   <Dialog
@@ -453,10 +485,43 @@ function Products(props) {
                       />
                     </DialogContent>
                   </Dialog>
-                  <Button variant="contained" onClick={handleOnboardOpen}>
+                  <Button
+                    variant="contained"
+                    onClick={handleOnBoardOpen}
+                    disabled={rowSelected ? false : true}
+                  >
                     Onboard
                   </Button>
-                  <Button variant="contained" onClick={handleDeleteOpen}>
+                  <Dialog
+                    //style={{ zIndex: 1302 }}
+                    fullScreen={matchesXS}
+                    open={onBoardOpen}
+                    // onClose={() => [setOpen(false), history.push("/utilities/countries")]}
+                    onClose={() => [setOnBoardOpen(false)]}
+                  >
+                    <DialogContent>
+                      <OnboardProductBatchForm
+                        token={token}
+                        userId={userId}
+                        params={selectedRows}
+                        handleOnBoardDialogOpenStatus={
+                          handleOnBoardDialogOpenStatus
+                        }
+                        handleSuccessfulOnBoardItemSnackbar={
+                          handleSuccessfulOnBoardItemSnackbar
+                        }
+                        handleFailedSnackbar={handleFailedSnackbar}
+                        renderProductOnBoardUpdateCounter={
+                          renderProductOnBoardUpdateCounter
+                        }
+                      />
+                    </DialogContent>
+                  </Dialog>
+                  <Button
+                    variant="contained"
+                    onClick={handleDeleteOpen}
+                    disabled={rowSelected ? false : true}
+                  >
                     Delete
                   </Button>
                   <Dialog

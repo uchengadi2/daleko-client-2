@@ -52,6 +52,7 @@ function Quotations(props) {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [selectedRows, setSelectedRows] = useState([]);
   const [selectedRowId, setSelectedRowId] = useState();
+  const [rowSelected, setRowSelected] = useState(false);
   const [rowNumber, setRowNumber] = useState(0);
   const [
     updateRequestedQuoteStatusCounter,
@@ -197,6 +198,12 @@ function Quotations(props) {
     selectedIDs.forEach(function (value) {
       setSelectedRowId(value);
     });
+
+    if (selectedIDs.size === 1) {
+      setRowSelected(true);
+    } else {
+      setRowSelected(false);
+    }
   };
 
   const getCurrencyCode = () => {
@@ -401,7 +408,11 @@ function Quotations(props) {
                       />
                     </DialogContent>
                   </Dialog>
-                  <Button variant="contained" onClick={handleOpen}>
+                  <Button
+                    variant="contained"
+                    onClick={handleOpen}
+                    disabled={rowSelected ? false : true}
+                  >
                     Update Quotation Status
                   </Button>
                   <Dialog

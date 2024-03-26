@@ -126,6 +126,11 @@ import {
   FETCH_FREEZE,
   DELETE_FREEZE,
   EDIT_FREEZE,
+  CREATE_INVENTORY,
+  FETCH_INVENTORIES,
+  FETCH_INVENTORY,
+  DELETE_INVENTORY,
+  EDIT_INVENTORY,
 } from "./types";
 
 //authentication and authorization  operations
@@ -1326,6 +1331,53 @@ export const deleteFreeze = (id) => {
   return async (dispatch) => {
     await data.delete(`/freezes/${id}`);
     dispatch({ type: DELETE_FREEZE, payload: id });
+    //history.push("/");
+  };
+};
+
+////////////////////////////////////////Inventories///////////////////////////////
+//inventory resources crud operations
+
+export const createInventory = (formValues) => {
+  return async (dispatch, getState) => {
+    const { userId } = getState().auth;
+    const response = await data.post("/inventories", {
+      ...formValues,
+      userId,
+    });
+
+    //console.log(response);
+    dispatch({ type: CREATE_INVENTORY, payload: response.data });
+    // history.push("/");
+  };
+};
+
+export const fetchInventories = () => {
+  return async (dispatch) => {
+    const response = await data.get("/inventories");
+    dispatch({ type: FETCH_INVENTORIES, payload: response.data.data.data });
+  };
+};
+
+export const fetchInventory = (id) => {
+  return async (dispatch) => {
+    const response = await data.get(`/inventories/${id}`);
+    dispatch({ type: FETCH_INVENTORY, payload: response.data.data });
+  };
+};
+
+export const editInventory = (id, formValues) => {
+  return async (dispatch) => {
+    const response = await data.patch(`/inventories/${id}`, formValues);
+    dispatch({ type: EDIT_INVENTORY, payload: response.data.data });
+    //history.push("/");
+  };
+};
+
+export const deleteInventory = (id) => {
+  return async (dispatch) => {
+    await data.delete(`/inventories/${id}`);
+    dispatch({ type: DELETE_INVENTORY, payload: id });
     //history.push("/");
   };
 };

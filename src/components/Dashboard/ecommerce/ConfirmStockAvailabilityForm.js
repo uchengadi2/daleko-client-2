@@ -21,7 +21,7 @@ import InputLabel from "@material-ui/core/InputLabel";
 import MenuItem from "@material-ui/core/MenuItem";
 import FormHelperText from "@material-ui/core/FormHelperText";
 import api from "./../../../apis/local";
-import { CREATE_PRODUCT } from "../../../actions/types";
+import { EDIT_ORDER, EDIT_TRANSACTION } from "../../../actions/types";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -48,6 +48,38 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+const renderEditableMultilineField = ({
+  input,
+  label,
+  meta: { touched, error, invalid },
+  type,
+  helperText,
+  defaultValue,
+  id,
+  rows,
+  ...custom
+}) => {
+  return (
+    <TextField
+      error={touched && invalid}
+      //placeholder="category description"
+      variant="outlined"
+      helperText={helperText}
+      label={label}
+      id={input.name}
+      defaultValue={defaultValue}
+      // value={formInput.description}
+      fullWidth
+      type={type}
+      style={{ marginTop: 20 }}
+      multiline={true}
+      minRows={rows}
+      {...custom}
+      onChange={input.onChange}
+    />
+  );
+};
+
 const MAX_COUNT = 12;
 
 function ConfirmStockAvailabilityForm(props) {
@@ -65,7 +97,7 @@ function ConfirmStockAvailabilityForm(props) {
   const [transactionNumber, setTransactionNumber] = useState(
     params[0].transactionNumber
   );
-  const [transactionId, setTransactionId] = useState(params[0].transactionId);
+  const [orderId, setOrderId] = useState(params[0].id);
   const [product, setProduct] = useState(params[0].product);
   const [productName, setProductName] = useState(params[0].productName);
   const [sku, setSku] = useState(params[0].sku);
@@ -304,7 +336,6 @@ function ConfirmStockAvailabilityForm(props) {
         allData.push({
           id: inventory._id,
           name: inventory.batchNumber,
-          remainingQuantity: inventory.remainingQuantity,
         });
       });
       setInventoryList(allData);
@@ -319,22 +350,26 @@ function ConfirmStockAvailabilityForm(props) {
     const fetchData = async () => {
       let allData = [];
       api.defaults.headers.common["Authorization"] = `Bearer ${props.token}`;
-      const response = await api.get(`/inventories/${inventory}`);
-      const workingData = response.data.data.data;
-      workingData.map((inventory) => {
-        allData.push({
-          id: inventory._id,
-          name: inventory.batchNumber,
-          remainingQuantity: inventory.remainingQuantity,
-        });
+      const response = await api.get(`/inventories/${inventory}`, {
+        params: {
+          location: location,
+        },
       });
+      const inventoryBatch = response.data.data.data;
+
+      allData.push({
+        id: inventoryBatch._id,
+        name: inventoryBatch.batchNumber,
+        remainingQuantity: inventoryBatch.remainingQuantity,
+      });
+
       setQuantityInStock(allData[0].remainingQuantity);
     };
 
     //call the function
 
     fetchData().catch(console.error);
-  }, [inventory]);
+  }, [inventory, location]);
 
   //get the location list
   const renderLocationList = () => {
@@ -346,6 +381,8 @@ function ConfirmStockAvailabilityForm(props) {
       );
     });
   };
+
+  console.log("quantity in stock:", quantityInStock);
 
   //get the inventory list
   const renderInventoryList = () => {
@@ -532,38 +569,6 @@ function ConfirmStockAvailabilityForm(props) {
     );
   };
 
-  const renderEditableMultilineField = ({
-    input,
-    label,
-    meta: { touched, error, invalid },
-    type,
-    helperText,
-    defaultValue,
-    id,
-    rows,
-    ...custom
-  }) => {
-    return (
-      <TextField
-        error={touched && invalid}
-        //placeholder="category description"
-        variant="outlined"
-        helperText={helperText}
-        label={label}
-        id={input.name}
-        defaultValue={defaultValue}
-        // value={formInput.description}
-        fullWidth
-        type={type}
-        style={{ marginTop: 20 }}
-        multiline={true}
-        minRows={rows}
-        {...custom}
-        onChange={input.onChange}
-      />
-    );
-  };
-
   const getCurrencyCode = () => {
     if (currencyName) {
       if (currencyName.toLowerCase() === "naira") {
@@ -581,22 +586,23 @@ function ConfirmStockAvailabilityForm(props) {
   const onSubmit = (formValues) => {
     setLoading(true);
 
-    const data = {};
+    const data = { stockAvailabilityStatus: "in-stock" };
+
     if (data) {
       const createForm = async () => {
         api.defaults.headers.common["Authorization"] = `Bearer ${props.token}`;
-        const response = await api.post(`/products`, data);
+        const response = await api.patch(`/orders/${orderId}`, data);
 
         if (response.data.status === "success") {
           dispatch({
-            type: CREATE_PRODUCT,
+            type: EDIT_ORDER,
             payload: response.data.data.data,
           });
 
           props.handleSuccessfulCreateSnackbar(
-            `${response.data.data.data.name} Product is added successfully!!!`
+            `Order Number: ${response.data.data.data.orderNumber} stock availability is updated successfully!!!`
           );
-          props.renderProductUpdateCounter();
+          props.renderOrderListUpdateCounter();
           props.handleDialogOpenStatus();
           setLoading(false);
         } else {
@@ -814,6 +820,9 @@ function ConfirmStockAvailabilityForm(props) {
             variant="contained"
             className={classes.submitButton}
             onClick={props.handleSubmit(onSubmit)}
+            disabled={
+              stockAvailabilityStatus === "not-processed" ? true : false
+            }
           >
             {loading ? (
               <CircularProgress size={30} color="inherit" />

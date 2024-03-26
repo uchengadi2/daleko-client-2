@@ -21,7 +21,7 @@ import InputLabel from "@material-ui/core/InputLabel";
 import MenuItem from "@material-ui/core/MenuItem";
 import FormHelperText from "@material-ui/core/FormHelperText";
 import api from "./../../../apis/local";
-import { CREATE_PRODUCT } from "../../../actions/types";
+import { EDIT_TRANSACTION } from "../../../actions/types";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -47,6 +47,38 @@ const useStyles = makeStyles((theme) => ({
     width: 300,
   },
 }));
+
+const renderEditableMultilineField = ({
+  input,
+  label,
+  meta: { touched, error, invalid },
+  type,
+  helperText,
+  defaultValue,
+  id,
+  rows,
+  ...custom
+}) => {
+  return (
+    <TextField
+      error={touched && invalid}
+      //placeholder="category description"
+      variant="outlined"
+      helperText={helperText}
+      label={label}
+      id={input.name}
+      defaultValue={defaultValue}
+      // value={formInput.description}
+      fullWidth
+      type={type}
+      style={{ marginTop: 10 }}
+      multiline={true}
+      minRows={rows}
+      {...custom}
+      onChange={input.onChange}
+    />
+  );
+};
 
 const MAX_COUNT = 12;
 
@@ -222,38 +254,6 @@ function RejectTransactionForm(props) {
     );
   };
 
-  const renderEditableMultilineField = ({
-    input,
-    label,
-    meta: { touched, error, invalid },
-    type,
-    helperText,
-    defaultValue,
-    id,
-    rows,
-    ...custom
-  }) => {
-    return (
-      <TextField
-        error={touched && invalid}
-        //placeholder="category description"
-        variant="outlined"
-        helperText={helperText}
-        label={label}
-        id={input.name}
-        defaultValue={defaultValue}
-        // value={formInput.description}
-        fullWidth
-        type={type}
-        style={{ marginTop: 10 }}
-        multiline={true}
-        minRows={rows}
-        {...custom}
-        onChange={input.onChange}
-      />
-    );
-  };
-
   const getCurrencyCode = () => {
     if (currencyName) {
       if (currencyName.toLowerCase() === "naira") {
@@ -271,24 +271,31 @@ function RejectTransactionForm(props) {
   const onSubmit = (formValues) => {
     setLoading(true);
 
-    const data = {};
+    const data = {
+      status: "rejected",
+      rejectedBy: props.userId,
+      reasonForRejection: formValues.reasonForRejection,
+    };
 
     if (data) {
       const createForm = async () => {
         api.defaults.headers.common["Authorization"] = `Bearer ${props.token}`;
-        const response = await api.post(`/products`, data);
+        const response = await api.patch(
+          `/transactions/${transactionId}`,
+          data
+        );
 
         if (response.data.status === "success") {
           dispatch({
-            type: CREATE_PRODUCT,
+            type: EDIT_TRANSACTION,
             payload: response.data.data.data,
           });
 
-          props.handleSuccessfulCreateSnackbar(
-            `${response.data.data.data.name} Product is added successfully!!!`
+          props.handleSuccessfulRejectedItemSnackbar(
+            `Transaction Number: ${response.data.data.data.orderNumber} is rejected!!!`
           );
-          props.renderProductUpdateCounter();
-          props.handleDialogOpenStatus();
+          props.renderTransactionRejectedUpdateCounter();
+          props.handleEditRejectDialogOpenStatus();
           setLoading(false);
         } else {
           props.handleFailedSnackbar(

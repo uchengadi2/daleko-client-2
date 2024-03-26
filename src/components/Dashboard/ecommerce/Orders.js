@@ -61,14 +61,18 @@ function Orders(props) {
     useState(false);
   const [updateEdittedTransactionCounter, setUpdateEdittedTransactionCounter] =
     useState(false);
-  const [updateDeletedTransactionCounter, setUpdateDeletedTransactionCounter] =
-    useState(false);
+  const [
+    updateRejectedTransactionCounter,
+    setUpdateRejectedTransactionCounter,
+  ] = useState(false);
   const [
     updatePlaceOrderTransactionCounter,
     setUpdatePlaceOrderTransactionCounter,
   ] = useState(false);
+
   const [transactionList, setTransactionList] = useState([]);
   const [currencyName, setCurrencyName] = useState();
+  const [rowSelected, setRowSelected] = useState(false);
   const [loading, setLoading] = useState(false);
   const [alert, setAlert] = useState({
     open: false,
@@ -82,7 +86,7 @@ function Orders(props) {
       let allData = [];
       api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
       const response = await api.get(`/transactions`, {
-        params: { shopType: "online" },
+        params: { shopType: "online", status: "unprocessed" },
       });
       const workingData = response.data.data.data;
       workingData.map((transaction) => {
@@ -142,7 +146,7 @@ function Orders(props) {
   }, [
     updateTransactionCounter,
     updateEdittedTransactionCounter,
-    updateDeletedTransactionCounter,
+    updateRejectedTransactionCounter,
     updatePlaceOrderTransactionCounter,
   ]);
 
@@ -194,8 +198,8 @@ function Orders(props) {
     setUpdateEdittedTransactionCounter((prevState) => !prevState);
   };
 
-  const renderTransactionDeletedUpdateCounter = () => {
-    setUpdateDeletedTransactionCounter((prevState) => !prevState);
+  const renderTransactionRejectedUpdateCounter = () => {
+    setUpdateRejectedTransactionCounter((prevState) => !prevState);
   };
 
   const renderPlaceOrderTransactionUpdateCounter = () => {
@@ -221,7 +225,7 @@ function Orders(props) {
     });
   };
 
-  const handleSuccessfulDeletedItemSnackbar = (message) => {
+  const handleSuccessfulRejectedItemSnackbar = (message) => {
     //setBecomePartnerOpen(false);
     setAlert({
       open: true,
@@ -258,6 +262,11 @@ function Orders(props) {
     selectedIDs.forEach(function (value) {
       setSelectedRowId(value);
     });
+    if (selectedIDs.size === 1) {
+      setRowSelected(true);
+    } else {
+      setRowSelected(false);
+    }
   };
 
   const getCurrencyCode = () => {
@@ -485,7 +494,11 @@ function Orders(props) {
             <Grid item xs={7.8}>
               <div>
                 <Stack direction="row" spacing={1.5}>
-                  <Button variant="contained" onClick={handleConfirmOpen}>
+                  <Button
+                    variant="contained"
+                    onClick={handleConfirmOpen}
+                    disabled={rowSelected ? false : true}
+                  >
                     Confirm Payment
                   </Button>
                   <Dialog
@@ -505,13 +518,17 @@ function Orders(props) {
                           handleSuccessfulCreateSnackbar
                         }
                         handleFailedSnackbar={handleFailedSnackbar}
-                        renderProductUpdateCounter={
+                        renderTransactionUpdateCounter={
                           renderTransactionUpdateCounter
                         }
                       />
                     </DialogContent>
                   </Dialog>
-                  <Button variant="contained" onClick={handleEditDeliveryOpen}>
+                  <Button
+                    variant="contained"
+                    onClick={handleEditDeliveryOpen}
+                    disabled={rowSelected ? false : true}
+                  >
                     Update Delivery Status
                   </Button>
                   <Dialog
@@ -538,7 +555,11 @@ function Orders(props) {
                     </DialogContent>
                   </Dialog>
 
-                  <Button variant="contained" onClick={handleEditRejectOpen}>
+                  <Button
+                    variant="contained"
+                    onClick={handleEditRejectOpen}
+                    disabled={rowSelected ? false : true}
+                  >
                     Reject Transaction
                   </Button>
                   <Dialog
@@ -556,12 +577,12 @@ function Orders(props) {
                         handleEditRejectDialogOpenStatus={
                           handleEditRejectDialogOpenStatus
                         }
-                        handleSuccessfulDeletedItemSnackbar={
-                          handleSuccessfulDeletedItemSnackbar
+                        handleSuccessfulRejectedItemSnackbar={
+                          handleSuccessfulRejectedItemSnackbar
                         }
                         handleFailedSnackbar={handleFailedSnackbar}
-                        renderTransactionDeletedUpdateCounter={
-                          renderTransactionDeletedUpdateCounter
+                        renderTransactionRejectedUpdateCounter={
+                          renderTransactionRejectedUpdateCounter
                         }
                       />
                     </DialogContent>

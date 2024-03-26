@@ -168,3 +168,10 @@ export const FETCH_FREEZES = "FETCH_FREEZES";
 export const FETCH_FREEZE = "FETCH_FREEZE";
 export const DELETE_FREEZE = "DELETE_FREEZE";
 export const EDIT_FREEZE = "EDIT_FREEZE";
+
+// for inventory resources
+export const CREATE_INVENTORY = "CREATE_INVENTORY";
+export const FETCH_INVENTORIES = "FETCH_INVENTORIES";
+export const FETCH_INVENTORY = "FETCH_INVENTORY";
+export const DELETE_INVENTORY = "DELETE_INVENTORY";
+export const EDIT_INVENTORY = "EDIT_INVENTORY";

@@ -21,7 +21,7 @@ import InputLabel from "@material-ui/core/InputLabel";
 import MenuItem from "@material-ui/core/MenuItem";
 import FormHelperText from "@material-ui/core/FormHelperText";
 import api from "./../../../apis/local";
-import { CREATE_PRODUCT } from "../../../actions/types";
+import { CREATE_PRODUCT, EDIT_ORDER } from "../../../actions/types";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -35,6 +35,19 @@ const useStyles = makeStyles((theme) => ({
     height: 40,
     width: 200,
     marginLeft: 170,
+    marginTop: 20,
+    marginBottom: 20,
+    color: "white",
+    backgroundColor: theme.palette.common.blue,
+    "&:hover": {
+      backgroundColor: theme.palette.common.blue,
+    },
+  },
+  submitReadyButton: {
+    borderRadius: 10,
+    height: 40,
+    width: 300,
+    marginLeft: 130,
     marginTop: 20,
     marginBottom: 20,
     color: "white",
@@ -65,7 +78,7 @@ function UpdatePackageReadinessForm(props) {
   const [transactionNumber, setTransactionNumber] = useState(
     params[0].transactionNumber
   );
-  const [transactionId, setTransactionId] = useState(params[0].transactionId);
+  const [orderId, setOrderId] = useState(params[0].id);
   const [product, setProduct] = useState(params[0].product);
   const [productName, setProductName] = useState(params[0].productName);
   const [sku, setSku] = useState(params[0].sku);
@@ -574,29 +587,46 @@ function UpdatePackageReadinessForm(props) {
     }
   };
 
+  console.log("payment status:", paymentStatus);
+
   const buttonContent = () => {
     return <React.Fragment>Ready For Packaging</React.Fragment>;
+  };
+
+  const buttonReadyContent = () => {
+    return <React.Fragment>Packaging Status is Already Set</React.Fragment>;
   };
 
   const onSubmit = (formValues) => {
     setLoading(true);
 
-    const data = {};
+    if (
+      paymentStatus === "to-be-confirmed" ||
+      paymentStatus === "not-processed"
+    ) {
+      props.handleFailedSnackbar(
+        "Please you need to confirm payment before updating the Packaging status of this order"
+      );
+      setLoading(false);
+      return;
+    }
+
+    const data = { packagingReadinessStatus: "ready" };
     if (data) {
       const createForm = async () => {
         api.defaults.headers.common["Authorization"] = `Bearer ${props.token}`;
-        const response = await api.post(`/products`, data);
+        const response = await api.patch(`/orders/${orderId}`, data);
 
         if (response.data.status === "success") {
           dispatch({
-            type: CREATE_PRODUCT,
+            type: EDIT_ORDER,
             payload: response.data.data.data,
           });
 
-          props.handleSuccessfulCreateSnackbar(
-            `${response.data.data.data.name} Product is added successfully!!!`
+          props.handleSuccessfulEditSnackbar(
+            `Order Number: ${response.data.data.data.orderNumber} is ready for Packaging!!!`
           );
-          props.renderProductUpdateCounter();
+          props.renderOrderListUpdateUpdateCounter();
           props.handleEditDialogOpenStatus();
           setLoading(false);
         } else {
@@ -766,23 +796,40 @@ function UpdatePackageReadinessForm(props) {
             id="stockAvailabilityStatus"
             name="stockAvailabilityStatus"
             helperText="Stock Availability Status"
+            defaultValue={stockAvailabilityStatus}
             type="text"
             component={renderSingleLineField}
             style={{ marginTop: 10 }}
           />
 
-          <Button
-            variant="contained"
-            className={classes.submitButton}
-            onClick={props.handleSubmit(onSubmit)}
-            disabled={stockAvailabilityStatus === "in-stock" ? false : true}
-          >
-            {loading ? (
-              <CircularProgress size={30} color="inherit" />
-            ) : (
-              buttonContent()
-            )}
-          </Button>
+          {packagingReadinessStatus !== "ready" && (
+            <Button
+              variant="contained"
+              className={classes.submitButton}
+              onClick={props.handleSubmit(onSubmit)}
+              disabled={stockAvailabilityStatus === "in-stock" ? false : true}
+            >
+              {loading ? (
+                <CircularProgress size={30} color="inherit" />
+              ) : (
+                buttonContent()
+              )}
+            </Button>
+          )}
+          {packagingReadinessStatus === "ready" && (
+            <Button
+              variant="contained"
+              className={classes.submitReadyButton}
+              //onClick={props.handleSubmit(onSubmit)}
+              disabled={packagingReadinessStatus === "ready" ? true : false}
+            >
+              {loading ? (
+                <CircularProgress size={30} color="inherit" />
+              ) : (
+                buttonReadyContent()
+              )}
+            </Button>
+          )}
         </Box>
       </form>
     </div>

@@ -41,6 +41,7 @@ function Inventories(props) {
 
   const [open, setOpen] = useState(false);
   const [inventoryList, setInventoryList] = useState([]);
+  const [inventory, setInventory] = useState();
   const [selectedRows, setSelectedRows] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -55,26 +56,30 @@ function Inventories(props) {
         allData.push({
           id: inventory._id,
           product: inventory.product,
-          onboardProduct: inventory.onboardProduct,
           location: inventory.location,
           batchNumber: inventory.batchNumber,
-          totalQuantity: inventory.totalQuantity,
+          quantity: inventory.quantity,
           remainingQuantity: inventory.remainingQuantity,
-          totalCost: inventory.totalCost,
+          costPerUnit: inventory.costPerUnit,
           sku: inventory.sku,
           barcode: inventory.barcode,
-          costPerItem: inventory.costPerItem,
-          deliveryCost: inventory.deliveryCost,
           source: inventory.source,
-          hasVariant: inventory.hasVariant,
-          hasSizeVariant: inventory.hasSizeVariant,
-          hasColourVariant: inventory.hasColourVariant,
-          hasMaterialVariant: inventory.hasMaterialVariant,
-          hasStyleVariant: inventory.hasStyleVariant,
-          variant: inventory.variant,
           dateOnBoarded: inventory.dateOnBoarded,
-          dateCreated: inventory.dateCreated,
-          createdBy: inventory.createdBy,
+          onBoardedBy: inventory.onBoardedBy,
+          batchStatus: inventory.batchStatus,
+          comment: inventory.comment,
+          dateWhenFirstItemWasOffBoarded:
+            inventory.dateWhenFirstItemWasOffBoarded,
+          dateWhenLastItemWasOffBoarded:
+            inventory.dateWhenLastItemWasOffBoarded,
+          weightPerUnit: inventory.weightPerUnit,
+          configuration: inventory.configuration,
+          slug: inventory.slug,
+          thisPriceLabel: inventory.thisPriceLabel,
+          currentProductPricePerUnit: inventory.currentProductPricePerUnit,
+          unit: inventory.unit,
+          supplier: inventory.supplier,
+          batchNumber: inventory.batchNumber,
         });
       });
       setInventoryList(allData);
@@ -116,28 +121,35 @@ function Inventories(props) {
       {
         field: "batchNumber",
         headerName: "Batch Number",
+        width: 200,
+
+        //editable: true,
+      },
+      {
+        field: "batchStatus",
+        headerName: "Batch Status",
         width: 150,
 
         //editable: true,
       },
       {
-        field: "location",
+        field: "locationName",
         headerName: "Location",
         width: 250,
 
         //editable: true,
       },
       {
-        field: "product",
+        field: "productName",
         headerName: "Product",
-        width: 350,
+        width: 250,
 
         //editable: true,
       },
       {
-        field: "totalQuantity",
-        headerName: "Total Quantity Supplied",
-        width: 200,
+        field: "quantity",
+        headerName: "Quantity OnBoarded",
+        width: 150,
 
         //editable: true,
       },
@@ -151,68 +163,38 @@ function Inventories(props) {
       {
         field: "sku",
         headerName: "Sku",
-        width: 100,
+        width: 150,
 
         //editable: true,
       },
       {
         field: "barcode",
         headerName: "Barcode",
-        width: 100,
+        width: 150,
 
         //editable: true,
       },
-      // {
-      //   field: "redeemaction",
-      //   headerName: "",
-      //   width: 30,
-      //   description: "Redeem Product",
-      //   renderCell: (params) => (
-      //     <strong>
+      {
+        field: "supplierName",
+        headerName: "Supplier Name",
+        width: 150,
 
-      //       <RedeemIcon
-      //         style={{ cursor: "pointer" }}
-      //         onClick={() => [
-      //           // this.setState({
-      //           //   editOpen: true,
-      //           //   id: params.id,
-      //           //   params: params.row,
-      //           // }),
-      //           // history.push(`/products/onboard/${params.id}`),
-      //         ]}
-      //       />
-      //     </strong>
-      //   ),
-      // },
-      // {
-      //   field: "delistaction",
-      //   headerName: "",
-      //   width: 30,
-      //   description: "Delist Product",
-      //   renderCell: (params) => (
-      //     <strong>
+        //editable: true,
+      },
+      {
+        field: "dateOnBoarded",
+        headerName: "Date Onboarded",
+        width: 150,
 
-      //       <PlaylistRemoveIcon
-      //         style={{ cursor: "pointer" }}
-      //         onClick={() => [
-      //           // this.setState({
-      //           //   editOpen: true,
-      //           //   id: params.id,
-      //           //   params: params.row,
-      //           // }),
-      //           // history.push(`/products/onboard/${params.id}`),
-      //         ]}
-      //       />
-      //     </strong>
-      //   ),
-      // },
+        //editable: true,
+      },
     ];
 
     inventoryList.map((inventory, index) => {
       let row = {
         numbering: ++counter,
         id: inventory.id,
-        product: inventory.onboardProduct[0].product[0].name.replace(
+        productName: inventory.product.name.replace(
           /(^\w|\s\w)(\S*)/g,
           (_, m1, m2) => m1.toUpperCase() + m2.toLowerCase()
         ),
@@ -222,9 +204,35 @@ function Inventories(props) {
         ),
         sku: inventory.sku.toUpperCase(),
         barcode: inventory.barcode.toUpperCase(),
-        location: inventory.location[0].name,
-        totalQuantity: inventory.totalQuantity,
+        locationName: inventory.location.name.replace(
+          /(^\w|\s\w)(\S*)/g,
+          (_, m1, m2) => m1.toUpperCase() + m2.toLowerCase()
+        ),
+        product: inventory.product,
+        location: inventory.location,
+        supplier: inventory.supplier,
+        quantity: inventory.quantity,
         remainingQuantity: inventory.remainingQuantity,
+        costPerUnit: inventory.costPerUnit,
+        source: inventory.source,
+        dateOnBoarded: inventory.dateOnBoarded
+          ? new Date(inventory.dateOnBoarded).toLocaleDateString()
+          : "",
+        onBoardedBy: inventory.onBoardedBy,
+        batchStatus: inventory.batchStatus,
+        comment: inventory.comment,
+        dateWhenFirstItemWasOffBoarded:
+          inventory.dateWhenFirstItemWasOffBoarded,
+        dateWhenLastItemWasOffBoarded: inventory.dateWhenLastItemWasOffBoarded,
+        weightPerUnit: inventory.weightPerUnit,
+        configuration: inventory.configuration,
+        slug: inventory.slug,
+        thisPriceLabel: inventory.thisPriceLabel,
+        currentProductPricePerUnit: inventory.currentProductPricePerUnit,
+        unit: inventory.unit,
+        supplier: inventory.supplier,
+        supplierName: inventory.supplier.name,
+        batchNumber: inventory.batchNumber,
       };
       rows.push(row);
     });

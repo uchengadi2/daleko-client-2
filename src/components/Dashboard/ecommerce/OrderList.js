@@ -63,6 +63,7 @@ function OrderList(props) {
   ] = useState(false);
   const [orderList, setOrderList] = useState([]);
   const [currencyName, setCurrencyName] = useState();
+  const [rowSelected, setRowSelected] = useState(false);
   const [loading, setLoading] = useState(false);
   const [alert, setAlert] = useState({
     open: false,
@@ -75,9 +76,7 @@ function OrderList(props) {
     const fetchData = async () => {
       let allData = [];
       api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-      const response = await api.get(`/orders`, {
-        // params: { shopType: "online" },
-      });
+      const response = await api.get(`/orders`);
       const workingData = response.data.data.data;
       workingData.map((order) => {
         allData.push({
@@ -234,6 +233,11 @@ function OrderList(props) {
     selectedIDs.forEach(function (value) {
       setSelectedRowId(value);
     });
+    if (selectedIDs.size === 1) {
+      setRowSelected(true);
+    } else {
+      setRowSelected(false);
+    }
   };
 
   const getCurrencyCode = () => {
@@ -271,12 +275,20 @@ function OrderList(props) {
         //editable: true,
       },
       {
-        field: "transactionNumber",
-        headerName: "Transaction Number",
-        width: 150,
+        field: "stockAvailabilityStatus",
+        headerName: "Stock Availability Status",
+        width: 250,
 
         //editable: true,
       },
+      {
+        field: "packagingReadinessStatus",
+        headerName: "Packaging Readiness Status",
+        width: 200,
+
+        //editable: true,
+      },
+
       {
         field: "shopType",
         headerName: "Transaction Platform",
@@ -463,7 +475,11 @@ function OrderList(props) {
             <Grid item xs={6.5}>
               <div>
                 <Stack direction="row" spacing={1.5}>
-                  <Button variant="contained" onClick={handleOpen}>
+                  <Button
+                    variant="contained"
+                    onClick={handleOpen}
+                    disabled={rowSelected ? false : true}
+                  >
                     Confirm Stock Availability Status
                   </Button>
                   <Dialog
@@ -489,7 +505,11 @@ function OrderList(props) {
                       />
                     </DialogContent>
                   </Dialog>
-                  <Button variant="contained" onClick={handleEditOpen}>
+                  <Button
+                    variant="contained"
+                    onClick={handleEditOpen}
+                    disabled={rowSelected ? false : true}
+                  >
                     Update Packaging Readiness Status
                   </Button>
                   <Dialog

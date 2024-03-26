@@ -21,7 +21,7 @@ import InputLabel from "@material-ui/core/InputLabel";
 import MenuItem from "@material-ui/core/MenuItem";
 import FormHelperText from "@material-ui/core/FormHelperText";
 import api from "./../../../apis/local";
-import { CREATE_PRODUCT } from "../../../actions/types";
+import { EDIT_TRANSACTION, EDIT_ORDER } from "../../../actions/types";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -132,9 +132,34 @@ function TransactionForm(props) {
   const [currencyList, setCurrencyList] = useState([]);
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [fileLimit, setFileLimit] = useState(false);
+  const [ordersList, setOrdersList] = useState([]);
+  const [order, setOrder] = useState();
   const [loading, setLoading] = useState(false);
 
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      let allData = [];
+      api.defaults.headers.common["Authorization"] = `Bearer ${props.token}`;
+      const response = await api.get(`/orders`, {
+        params: {
+          transactionId: transactionId,
+        },
+      });
+      const workingData = response.data.data.data;
+      workingData.map((order) => {
+        allData.push({ id: order._id, name: order.orderNumber });
+      });
+      setOrdersList(allData);
+    };
+
+    //call the function
+
+    fetchData().catch(console.error);
+  }, [transactionId]);
+
+  console.log("orderlist is:", ordersList);
 
   const handlePaymentStatusChange = (event) => {
     setPaymentStatus(event.target.value);
@@ -294,25 +319,66 @@ function TransactionForm(props) {
   const onSubmit = (formValues) => {
     setLoading(true);
 
-    const data = {};
+    const data = { paymentStatus: paymentStatus };
 
     if (data) {
       const createForm = async () => {
         api.defaults.headers.common["Authorization"] = `Bearer ${props.token}`;
-        const response = await api.post(`/products`, data);
+        const response = await api.patch(
+          `/transactions/${transactionId}`,
+          data
+        );
 
         if (response.data.status === "success") {
           dispatch({
-            type: CREATE_PRODUCT,
+            type: EDIT_TRANSACTION,
             payload: response.data.data.data,
           });
 
           props.handleSuccessfulCreateSnackbar(
-            `${response.data.data.data.name} Product is added successfully!!!`
+            `Transaction Number: ${response.data.data.data.orderNumber}  payment is confirmed successfully!!!`
           );
-          props.renderProductUpdateCounter();
+          props.renderTransactionUpdateCounter();
           props.handleDialogOpenStatus();
           setLoading(false);
+
+          ordersList.map((order, index) => {
+            console.log("order data:", data);
+            const dataOrder = {
+              paymentStatus: paymentStatus,
+            };
+
+            if (dataOrder) {
+              const createForm = async () => {
+                api.defaults.headers.common[
+                  "Authorization"
+                ] = `Bearer ${props.token}`;
+                const response2 = await api.patch(
+                  `/orders/${order.id}`,
+                  dataOrder
+                );
+
+                if (response2.data.status === "success") {
+                  dispatch({
+                    type: EDIT_ORDER,
+                    payload: response2.data.data.data,
+                  });
+
+                  setLoading(false);
+                } else {
+                  props.handleFailedSnackbar(
+                    "Something went wrong, please try again!!!"
+                  );
+                }
+              };
+              createForm().catch((err) => {
+                //props.handleFailedSnackbar();
+                console.log("err:", err.message);
+              });
+            } else {
+              //props.handleFailedSnackbar("Something went wrong, please try again!!!");
+            }
+          }); //end
         } else {
           props.handleFailedSnackbar(
             "Something went wrong, please try again!!!"

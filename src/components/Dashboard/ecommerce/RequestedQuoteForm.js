@@ -21,7 +21,7 @@ import InputLabel from "@material-ui/core/InputLabel";
 import MenuItem from "@material-ui/core/MenuItem";
 import FormHelperText from "@material-ui/core/FormHelperText";
 import api from "./../../../apis/local";
-import { CREATE_PRODUCT } from "../../../actions/types";
+import { EDIT_QUOTE } from "../../../actions/types";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -53,6 +53,8 @@ const MAX_COUNT = 12;
 function RequestedQuoteForm(props) {
   const { params, token, userId } = props;
   const classes = useStyles();
+
+  const [quoteId, setQuoteId] = useState(params[0].id);
 
   const [quoteRequestNumber, setQuoteRequestNumber] = useState(
     params[0].quoteRequestNumber
@@ -95,8 +97,6 @@ function RequestedQuoteForm(props) {
   const [comment, setComment] = useState(params[0].comment);
   const [sku, setSku] = useState(params[0].sku);
   const [configuration, setConfiguration] = useState(params[0].configuration);
-
-  const [quoteId, setQuoteId] = useState(params[0].id);
 
   const [loading, setLoading] = useState(false);
 
@@ -213,61 +213,23 @@ function RequestedQuoteForm(props) {
   const onSubmit = (formValues) => {
     setLoading(true);
 
-    if (!formValues["name"]) {
-      props.handleFailedSnackbar("Please enter the name of the product");
-      setLoading(false);
-      return;
-    }
-
-    if (!formValues["configuration"]) {
-      props.handleFailedSnackbar(
-        "Please enter the product configuration and try again"
-      );
-      setLoading(false);
-      return;
-    }
-
-    if (!formValues["pricePerUnit"]) {
-      props.handleFailedSnackbar(
-        "Please enter the product price per unit and try again"
-      );
-      setLoading(false);
-      return;
-    }
-
-    if (!formValues["minimumQuantity"]) {
-      props.handleFailedSnackbar(
-        "Please enter the product's required minimum quantity and try again"
-      );
-      setLoading(false);
-      return;
-    }
-
-    if (!formValues["weightPerUnit"]) {
-      props.handleFailedSnackbar(
-        "Please enter the product's weight  and try again"
-      );
-      setLoading(false);
-      return;
-    }
-
-    const data = {};
+    const data = { status: status };
 
     if (data) {
       const createForm = async () => {
         api.defaults.headers.common["Authorization"] = `Bearer ${props.token}`;
-        const response = await api.post(`/products`, data);
+        const response = await api.patch(`/quotes/${quoteId}`, data);
 
         if (response.data.status === "success") {
           dispatch({
-            type: CREATE_PRODUCT,
+            type: EDIT_QUOTE,
             payload: response.data.data.data,
           });
 
           props.handleSuccessfulCreateSnackbar(
-            `${response.data.data.data.name} Product is added successfully!!!`
+            `Quotation number: ${response.data.data.data.quoteRequestNumber} is successfully treated!!!`
           );
-          props.renderProductUpdateCounter();
+          props.renderRequestedQuoteStatusUpdateCounter();
           props.handleDialogOpenStatus();
           setLoading(false);
         } else {
@@ -544,6 +506,7 @@ function RequestedQuoteForm(props) {
             variant="contained"
             className={classes.submitButton}
             onClick={props.handleSubmit(onSubmit)}
+            disabled={status === "pending" ? true : false}
           >
             {loading ? (
               <CircularProgress size={30} color="inherit" />

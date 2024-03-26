@@ -21,7 +21,7 @@ import InputLabel from "@material-ui/core/InputLabel";
 import MenuItem from "@material-ui/core/MenuItem";
 import FormHelperText from "@material-ui/core/FormHelperText";
 import api from "./../../../apis/local";
-import { CREATE_PRODUCT } from "../../../actions/types";
+import { EDIT_TRANSACTION } from "../../../actions/types";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -264,27 +264,42 @@ function UpdateDeliveryStatusForm(props) {
     return <React.Fragment> Update Delivery Status</React.Fragment>;
   };
 
+  console.log("token:", props.token);
   const onSubmit = (formValues) => {
     setLoading(true);
 
-    const data = {};
+    if (deliveryStatus === "pending") {
+      props.handleFailedSnackbar(
+        "The Delivery status cannot be pending. Please change to another option and try again"
+      );
+      setLoading(false);
+      return;
+    }
+
+    const data = {
+      deliveryStatus: deliveryStatus,
+      status: "ready-for-delivery",
+    };
 
     if (data) {
       const createForm = async () => {
         api.defaults.headers.common["Authorization"] = `Bearer ${props.token}`;
-        const response = await api.post(`/products`, data);
+        const response = await api.patch(
+          `/transactions/${transactionId}`,
+          data
+        );
 
         if (response.data.status === "success") {
           dispatch({
-            type: CREATE_PRODUCT,
+            type: EDIT_TRANSACTION,
             payload: response.data.data.data,
           });
 
-          props.handleSuccessfulCreateSnackbar(
-            `${response.data.data.data.name} Product is added successfully!!!`
+          props.handleSuccessfulEditSnackbar(
+            `Transaction Number: ${response.data.data.data.name} delivery status us updated successfully!!!`
           );
-          props.renderProductUpdateCounter();
-          props.handleDialogOpenStatus();
+          props.renderTransactionEdittedUpdateCounter();
+          props.handleEditDialogOpenStatus();
           setLoading(false);
         } else {
           props.handleFailedSnackbar(
@@ -581,7 +596,12 @@ function UpdateDeliveryStatusForm(props) {
             variant="contained"
             className={classes.submitButton}
             onClick={props.handleSubmit(onSubmit)}
-            // disabled={stockAvailabilityStatus === "in-stock" ? false : true}
+            disabled={
+              paymentStatus === "paid" ||
+              paymentStatus === "collect-payment-on-delivery"
+                ? false
+                : true
+            }
           >
             {loading ? (
               <CircularProgress size={30} color="inherit" />
