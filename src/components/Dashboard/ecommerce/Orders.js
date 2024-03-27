@@ -299,7 +299,7 @@ function Orders(props) {
       {
         field: "orderNumber",
         headerName: "Order Number",
-        width: 150,
+        width: 200,
 
         //editable: true,
       },
@@ -366,28 +366,28 @@ function Orders(props) {
 
         //editable: true,
       },
-      {
-        field: "orderaction",
-        headerName: "",
-        width: 30,
-        description: "transaction row",
-        renderCell: (params) => (
-          <strong>
-            {/* {params.value.getFullYear()} */}
-            <ViewListIcon
-              style={{ cursor: "pointer" }}
-              onClick={() => [
-                // this.setState({
-                //   editOpen: true,
-                //   id: params.id,
-                //   params: params.row,
-                // }),
-                // history.push(`/products/onboard/${params.id}`),
-              ]}
-            />
-          </strong>
-        ),
-      },
+      // {
+      //   field: "orderaction",
+      //   headerName: "",
+      //   width: 30,
+      //   description: "transaction row",
+      //   renderCell: (params) => (
+      //     <strong>
+      //       {/* {params.value.getFullYear()} */}
+      //       <ViewListIcon
+      //         style={{ cursor: "pointer" }}
+      //         onClick={() => [
+      //           // this.setState({
+      //           //   editOpen: true,
+      //           //   id: params.id,
+      //           //   params: params.row,
+      //           // }),
+      //           // history.push(`/products/onboard/${params.id}`),
+      //         ]}
+      //       />
+      //     </strong>
+      //   ),
+      // },
     ];
 
     transactionList.map((transaction, index) => {

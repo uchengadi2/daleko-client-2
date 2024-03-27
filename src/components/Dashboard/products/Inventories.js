@@ -43,6 +43,9 @@ function Inventories(props) {
   const [inventoryList, setInventoryList] = useState([]);
   const [inventory, setInventory] = useState();
   const [selectedRows, setSelectedRows] = useState([]);
+  const [selectedRowId, setSelectedRowId] = useState();
+  const [rowNumber, setRowNumber] = useState(0);
+  const [rowSelected, setRowSelected] = useState(false);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -104,10 +107,19 @@ function Inventories(props) {
   };
 
   const onRowsSelectionHandler = (ids, rows) => {
+    const selectedIDs = new Set(ids);
     const selectedRowsData = ids.map((id) => rows.find((row) => row.id === id));
     setSelectedRows(selectedRowsData);
+    setRowNumber(selectedIDs.size);
+    selectedIDs.forEach(function (value) {
+      setSelectedRowId(value);
+    });
+    if (selectedIDs.size === 1) {
+      setRowSelected(true);
+    } else {
+      setRowSelected(false);
+    }
   };
-
   const renderDataGrid = () => {
     let rows = [];
     let counter = 0;
@@ -276,15 +288,27 @@ function Inventories(props) {
             <Grid item xs={3.5}>
               <div>
                 <Stack direction="row" spacing={1.5}>
-                  <Button variant="contained" onClick={handleOpen}>
+                  <Button
+                    variant="contained"
+                    onClick={handleOpen}
+                    disabled={rowSelected ? false : true}
+                  >
                     Adjustment
                   </Button>
 
-                  <Button variant="contained" onClick={handleOpen}>
+                  <Button
+                    variant="contained"
+                    onClick={handleOpen}
+                    disabled={rowSelected ? false : true}
+                  >
                     Remediate
                   </Button>
 
-                  <Button variant="contained" onClick={handleOpen}>
+                  <Button
+                    variant="contained"
+                    onClick={handleOpen}
+                    disabled={rowSelected ? false : true}
+                  >
                     Delist
                   </Button>
                 </Stack>

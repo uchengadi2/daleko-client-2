@@ -21,7 +21,7 @@ import InputLabel from "@material-ui/core/InputLabel";
 import MenuItem from "@material-ui/core/MenuItem";
 import FormHelperText from "@material-ui/core/FormHelperText";
 import api from "./../../../apis/local";
-import { CREATE_PRODUCT } from "../../../actions/types";
+import { CREATE_TRANSACTION, CREATE_ORDER } from "../../../actions/types";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -117,21 +117,12 @@ const MAX_COUNT = 12;
 
 function PlaceOrderForm(props) {
   const classes = useStyles();
-  const [transactionId, setTransactionId] = useState();
-  const [orderNumber, setOrderNumber] = useState();
-  const [totalProductCost, setTotalProductCost] = useState();
-  const [totalDeliveryCost, setTotalDeliveryCost] = useState();
-  const [expectedAmount, setExpectedAmount] = useState();
-  const [transactionDate, setTransactionDate] = useState();
-  const [status, setStatus] = useState();
-  const [shopType, setShopType] = useState();
-  const [deliveryStatus, setDeliveryStatus] = useState();
+
   const [deliveryMode, setDeliveryMode] = useState();
 
-  const [daysToDelivery, setDaysToDelivery] = useState();
   const [paymentMethod, setPaymentMethod] = useState();
   const [paymentStatus, setPaymentStatus] = useState();
-  const [rejectionReason, setRejectionReason] = useState();
+
   const [customerName, setCustomerName] = useState();
   const [customerPhoneNumber, setCustomerPhoneNumber] = useState();
   const [customerEmailAddress, setCustomerEmailAddress] = useState();
@@ -185,7 +176,10 @@ function PlaceOrderForm(props) {
   const [product, setProduct] = useState({});
   const [configuration, setConfiguration] = useState();
   const [loading, setLoading] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  //const [isLoading, setIsLoading] = useState(false);
+  const [orderNumber, setOrderNumber] = useState(
+    "OR-" + Math.floor(Math.random() * 10000000000000) + "-" + "DASH"
+  );
 
   const dispatch = useDispatch();
 
@@ -300,8 +294,6 @@ function PlaceOrderForm(props) {
 
     fetchData().catch(console.error);
   }, [productId]);
-
-  console.log("product currency is:", product.currency);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -906,27 +898,156 @@ function PlaceOrderForm(props) {
   };
 
   const onSubmit = (formValues) => {
-    setIsLoading(true);
+    setLoading(true);
 
-    const data = {};
+    let transWeight = 0;
+    if (product.unit === "kg") {
+      transWeight = product.weightPerUnit * formValues.quantityRequired;
+    } else if (product.unit === "g") {
+      transWeight =
+        (product.weightPerUnit / 1000) * formValues.quantityRequired;
+    } else if (product.unit === "ibs") {
+      transWeight = product.weightPerUnit * 0.45 * formValues.quantityRequired;
+    } else if (product.unit === "ibs") {
+      transWeight = product.weightPerUnit * 1000 * formValues.quantityRequired;
+    }
 
-    if (data) {
+    const transData = {
+      orderNumber: orderNumber,
+      customerName: formValues.customerName,
+      customerPhoneNumber: formValues.customerPhoneNumber,
+      customerEmailAddress: formValues.customerEmailAddress,
+      recipientName: formValues.recipientName,
+      recipientPhoneNumber: formValues.recipientPhoneNumber,
+      recipientAddress: formValues.recipientAddress,
+      recipientCountry: country,
+      recipientState: state,
+      recipientCity: city,
+      deliveryMode: deliveryMode,
+      currency: currency,
+      totalWeight: transWeight,
+      recipientEmailAddress: formValues.recipientEmailAddress,
+      totalDeliveryCost: +formValues.totalDeliveryCost
+        ? +formValues.totalDeliveryCost
+        : 0,
+      totalProductCost:
+        formValues.currentProductPricePerUnit * formValues.quantityRequired,
+      paymentMethod: paymentMethod,
+      paymentStatus: paymentStatus,
+      orderedBy: props.userId,
+      //   recipientCountryName: countryName,
+      //   recipientStateName: stateName,
+      //   recipientCityName: cityName,
+      deliveryStatus:
+        deliveryMode === "pickup"
+          ? "ready-for-picked-up"
+          : "ready-for-delivery",
+      shopType: "online",
+    };
+
+    if (transData) {
       const createForm = async () => {
         api.defaults.headers.common["Authorization"] = `Bearer ${props.token}`;
-        const response = await api.post(`/products`, data);
-
+        const response = await api.post(`/transactions`, transData);
         if (response.data.status === "success") {
+          const transId = response.data.data.data.id;
+
           dispatch({
-            type: CREATE_PRODUCT,
+            type: CREATE_TRANSACTION,
             payload: response.data.data.data,
           });
-
-          props.handleSuccessfulCreateSnackbar(
-            `${response.data.data.data.name} Product is added successfully!!!`
+          props.handleSuccessfulPlaceOrderItemSnackbar(
+            `Placement of Order, Number: ${response.data.data.data.orderNumber} is done successfully!!!`
           );
-          props.renderProductUpdateCounter();
-          props.handleDialogOpenStatus();
-          setIsLoading(false);
+          props.renderPlaceOrderTransactionUpdateCounter();
+          props.handlePlaceOrderDialogOpenStatus();
+          setLoading(false);
+
+          //post the order entry here
+
+          const dataOrder = {
+            orderNumber: orderNumber,
+            transactionId: transId,
+            product: product.id,
+            productCategory: product.category[0].id,
+            orderedPrice: +formValues.currentProductPricePerUnit,
+            customerName: formValues.customerName,
+            customerPhoneNumber: formValues.customerPhoneNumber,
+            customerEmailAddress: formValues.customerEmailAddress,
+            recipientName: formValues.recipientName,
+            recipientPhoneNumber: formValues.recipientPhoneNumber,
+            recipientEmailAddress: formValues.recipientEmailAddress,
+            recipientAddress: formValues.recipientAddress,
+            recipientCountry: country,
+            recipientState: state,
+            recipientCity: city,
+            deliveryMode: deliveryMode,
+
+            currency: currency,
+            totalWeight: transWeight,
+
+            totalProductCost:
+              formValues.currentProductPricePerUnit *
+              formValues.quantityRequired,
+            paymentMethod: paymentMethod,
+            paymentStatus: paymentStatus,
+            orderedBy: props.userId,
+            totalDeliveryCost: +formValues.totalDeliveryCost
+              ? +formValues.totalDeliveryCost
+              : 0,
+
+            orderedQuantity: +formValues.quantityRequired,
+
+            deliveryStatus:
+              deliveryMode === "pickup"
+                ? "ready-for-picked-up"
+                : "ready-for-delivery",
+            shopType: "online",
+            cartId: null,
+            productVendor: null,
+            quantityAdddedToCart: null,
+            nearestBusstop: null,
+            postalCode: null,
+            dateAddedToCart: null,
+            salesTax: null,
+            revenue: null,
+            vatRate: null,
+            vat: null,
+            origin: null,
+            daysToDelivery: null,
+          };
+
+          // },
+
+          //};
+
+          if (dataOrder) {
+            const createForm = async () => {
+              api.defaults.headers.common[
+                "Authorization"
+              ] = `Bearer ${props.token}`;
+              const response2 = await api.post(`/orders`, dataOrder);
+
+              if (response2.data.status === "success") {
+                dispatch({
+                  type: CREATE_ORDER,
+                  payload: response2.data.data.data,
+                });
+
+                //setLoading(false);
+              } else {
+                props.handleFailedSnackbar(
+                  "Something went wrong, please try again!!!"
+                );
+              }
+            };
+            createForm().catch((err) => {
+              //props.handleFailedSnackbar();
+              console.log("err:", err.message);
+            });
+          } else {
+            //props.handleFailedSnackbar("Something went wrong, please try again!!!");
+          } //end
         } else {
           props.handleFailedSnackbar(
             "Something went wrong, please try again!!!"
@@ -940,7 +1061,7 @@ function PlaceOrderForm(props) {
     } else {
       props.handleFailedSnackbar("Something went wrong, please try again!!!");
     }
-    setIsLoading(false);
+    setLoading(false);
   };
 
   const minQuantity =
@@ -1318,7 +1439,7 @@ function PlaceOrderForm(props) {
             onClick={props.handleSubmit(onSubmit)}
             // disabled={stockAvailabilityStatus === "in-stock" ? false : true}
           >
-            {isLoading ? (
+            {loading ? (
               <CircularProgress size={30} color="inherit" />
             ) : (
               buttonContent()

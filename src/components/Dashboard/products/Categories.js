@@ -55,6 +55,7 @@ function Categories(props) {
   const [selectedRows, setSelectedRows] = useState([]);
   const [selectedRowId, setSelectedRowId] = useState();
   const [rowNumber, setRowNumber] = useState(0);
+  const [rowSelected, setRowSelected] = useState(false);
   const [updateCategoryCounter, setUpdateCategoryCounter] = useState(false);
   const [updateEdittedCategoryCounter, setUpdateEdittedCategoryCounter] =
     useState(false);
@@ -186,6 +187,11 @@ function Categories(props) {
     selectedIDs.forEach(function (value) {
       setSelectedRowId(value);
     });
+    if (selectedIDs.size === 1) {
+      setRowSelected(true);
+    } else {
+      setRowSelected(false);
+    }
   };
 
   const renderDataGrid = () => {
@@ -297,7 +303,11 @@ function Categories(props) {
                       />
                     </DialogContent>
                   </Dialog>
-                  <Button variant="contained" onClick={handleEditOpen}>
+                  <Button
+                    variant="contained"
+                    onClick={handleEditOpen}
+                    disabled={rowSelected ? false : true}
+                  >
                     Edit
                   </Button>
                   <Dialog
@@ -323,7 +333,11 @@ function Categories(props) {
                       />
                     </DialogContent>
                   </Dialog>
-                  <Button variant="contained" onClick={handleDeleteOpen}>
+                  <Button
+                    variant="contained"
+                    onClick={handleDeleteOpen}
+                    disabled={rowSelected ? false : true}
+                  >
                     Delete
                   </Button>
                   <Dialog

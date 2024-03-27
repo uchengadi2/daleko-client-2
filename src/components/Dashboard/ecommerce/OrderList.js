@@ -270,7 +270,7 @@ function OrderList(props) {
       {
         field: "orderNumber",
         headerName: "Order Number",
-        width: 150,
+        width: 200,
 
         //editable: true,
       },
