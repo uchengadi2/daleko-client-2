@@ -35,8 +35,13 @@ import OrderPage from "./orders/OrderPage";
 import SearchPage from "./search/SearchPage";
 import RequestQuote from "./quote/RequestQuote";
 import FreezePrice from "./freeze/FreezePrice";
+import DericaHome from "./DericaHome";
+import PaintHome from "./PaintHome";
 
 import api from "./../apis/local";
+import WholesaleHome from "./WholesaleHome";
+import CommunityHome from "./CommunityHome";
+import RetailHome from "./RetailHome";
 
 function App() {
   const { token, setToken } = useToken();
@@ -299,14 +304,46 @@ function App() {
                 setUserId={setUserId ? setUserId : {}}
               />
             </Route>
-            {/* <Route path="/dashboard/categories">
-              <ProductCategories
+            <Route path="/derica">
+              <DericaHome
                 token={token}
                 setToken={setToken ? setToken : {}}
                 userId={userId}
                 setUserId={setUserId ? setUserId : {}}
               />
-            </Route> */}
+            </Route>
+            <Route path="/paint">
+              <PaintHome
+                token={token}
+                setToken={setToken ? setToken : {}}
+                userId={userId}
+                setUserId={setUserId ? setUserId : {}}
+              />
+            </Route>
+            <Route path="/wholesale">
+              <WholesaleHome
+                token={token}
+                setToken={setToken ? setToken : {}}
+                userId={userId}
+                setUserId={setUserId ? setUserId : {}}
+              />
+            </Route>
+            <Route path="/community">
+              <CommunityHome
+                token={token}
+                setToken={setToken ? setToken : {}}
+                userId={userId}
+                setUserId={setUserId ? setUserId : {}}
+              />
+            </Route>
+            <Route path="/retail">
+              <RetailHome
+                token={token}
+                setToken={setToken ? setToken : {}}
+                userId={userId}
+                setUserId={setUserId ? setUserId : {}}
+              />
+            </Route>
           </Switch>
         </Router>
       </ThemeProvider>

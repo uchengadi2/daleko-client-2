@@ -218,7 +218,8 @@ const useStyles = makeStyles((theme) => ({
     backgroundSize: "cover",
     //backgroundAttachment: "fixed",
     backgroundRepeat: "no-repeat",
-    height: "28em",
+    //height: "28em",
+    height: "17em",
     width: "100%",
     [theme.breakpoints.down("md")]: {
       // backgroundImage: `url(${mobileBackground})`,

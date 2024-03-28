@@ -15,10 +15,16 @@ import DialogContent from "@material-ui/core/DialogContent";
 import useMediaQuery from "@material-ui/core/useMediaQuery";
 import Snackbar from "@material-ui/core/Snackbar";
 import background from "./../../assets/images/covers/derica-ad.png";
+import DericaHome from "../DericaHome";
+import PaintHome from "../PaintHome";
+import WholesaleHome from "../WholesaleHome";
+import CommunityHome from "../CommunityHome";
+import RetailHome from "../RetailHome";
 
 import { baseURL } from "./../../apis/util";
 
 import theme from "./../ui/Theme";
+import { PropaneSharp } from "@mui/icons-material";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -74,6 +80,7 @@ const useStyles = makeStyles((theme) => ({
     padding: 5,
     marginTop: "55px",
     marginLeft: "160px",
+
     border: `2px solid ${theme.palette.common.blue}`,
     [theme.breakpoints.down("sm")]: {
       marginBottom: "2em",
@@ -99,6 +106,32 @@ const useStyles = makeStyles((theme) => ({
   expandOpen: {
     transform: "rotate(180deg)",
   },
+  actionButton: {
+    borderRadius: 10,
+    height: 40,
+    width: 180,
+    marginLeft: 80,
+    marginTop: 10,
+    marginBottom: 20,
+    color: "white",
+    backgroundColor: theme.palette.common.orange,
+    "&:hover": {
+      backgroundColor: theme.palette.common.white,
+    },
+  },
+  actionWholesaleButton: {
+    borderRadius: 10,
+    height: 40,
+    width: 220,
+    marginLeft: 60,
+    marginTop: 10,
+    marginBottom: 20,
+    color: "white",
+    backgroundColor: theme.palette.common.orange,
+    "&:hover": {
+      backgroundColor: theme.palette.common.white,
+    },
+  },
   background: {
     backgroundImage: `url(${background})`,
     backgroundPosition: "center",
@@ -116,7 +149,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function TopCover() {
+export default function TopCover(props) {
   const classes = useStyles();
   const [open, setOpen] = useState(false);
   const [openLoginForm, setOpenLoginForm] = useState(false);
@@ -156,7 +189,7 @@ export default function TopCover() {
       {matchesMDUp ? (
         <Card className={classes.root} disableRipple={true}>
           {/* <CardActionArea disableRipple> */}
-          <Grid
+          {/* <Grid
             container
             //direction="row"
             alignItems="center"
@@ -165,7 +198,7 @@ export default function TopCover() {
             direction={matchesSM ? "column" : "row"}
             style={{ marginTop: 5 }}
           >
-            {/* <Grid item style={{ width: "48%", border: "1px dotted grey" }}>
+            <Grid item style={{ width: "48%", border: "1px dotted grey" }}>
               <CardContent disableRipple>
                 <Typography variant="h5" color="textSecondary" component="p">
                   At the heart of eHealt Plus lies a passion for innovation and
@@ -199,7 +232,137 @@ export default function TopCover() {
                   a world where excellence meets elegance
                 </Typography>
               </CardContent>
-            </Grid> */}
+            </Grid>
+          </Grid> */}
+
+          {/** place the grid here */}
+
+          <Grid
+            container
+            direction="row"
+            style={{ marginTop: 20, height: 300 }}
+          >
+            <Grid
+              container
+              direction="column"
+              style={{ marginLeft: 0, width: "22%", marginTop: 0 }}
+            >
+              <Grid
+                container
+                //direction="row"
+                alignItems="center"
+                className={classes.background}
+                justifyContent={matchesSM ? "center" : "space-between"}
+                direction={matchesSM ? "column" : "row"}
+                item
+                style={{ height: "80%", marginTop: 0, marginLeft: 50 }}
+              ></Grid>
+              <Grid item alignItems="center" style={{ height: "20%" }}>
+                <Button
+                  variant="contained"
+                  component={Link}
+                  to="/derica"
+                  onClick={() => <DericaHome />}
+                  className={classes.actionButton}
+                >
+                  Buy Rice In Derica
+                </Button>
+
+                {/* {props.preference === "derica" && (
+                  <Button
+                    variant="contained"
+                    component={Link}
+                    to="/retail"
+                    onClick={() => <RetailHome />}
+                    className={classes.actionButton}
+                  >
+                    Buy Retail
+                  </Button>
+                )} */}
+              </Grid>
+            </Grid>
+            <Grid
+              container
+              direction="column"
+              style={{ marginLeft: 0, width: "22%", marginTop: 0 }}
+            >
+              <Grid
+                container
+                //direction="row"
+                alignItems="center"
+                className={classes.background}
+                justifyContent={matchesSM ? "center" : "space-between"}
+                direction={matchesSM ? "column" : "row"}
+                item
+                style={{ height: "80%", marginTop: 0, marginLeft: 50 }}
+              ></Grid>
+              <Grid item alignItems="center" style={{ height: "20%" }}>
+                <Button
+                  variant="contained"
+                  component={Link}
+                  to="/paint"
+                  onClick={() => <PaintHome />}
+                  className={classes.actionButton}
+                >
+                  Buy Rice In Paint
+                </Button>
+              </Grid>
+            </Grid>
+
+            <Grid
+              container
+              direction="column"
+              style={{ marginLeft: 0, width: "22%", marginTop: 0 }}
+            >
+              <Grid
+                container
+                //direction="row"
+                alignItems="center"
+                className={classes.background}
+                justifyContent={matchesSM ? "center" : "space-between"}
+                direction={matchesSM ? "column" : "row"}
+                item
+                style={{ height: "80%", marginTop: 0, marginLeft: 50 }}
+              ></Grid>
+              <Grid item alignItems="center" style={{ height: "20%" }}>
+                <Button
+                  variant="contained"
+                  component={Link}
+                  to="/wholesale"
+                  onClick={() => <WholesaleHome />}
+                  className={classes.actionWholesaleButton}
+                >
+                  Buy WholeSale & In Bulk
+                </Button>
+              </Grid>
+            </Grid>
+            <Grid
+              container
+              direction="column"
+              style={{ marginLeft: 0, width: "22%", marginTop: 0 }}
+            >
+              <Grid
+                container
+                //direction="row"
+                alignItems="center"
+                className={classes.background}
+                justifyContent={matchesSM ? "center" : "space-between"}
+                direction={matchesSM ? "column" : "row"}
+                item
+                style={{ height: "80%", marginTop: 0, marginLeft: 50 }}
+              ></Grid>
+              <Grid item alignItems="center" style={{ height: "20%" }}>
+                <Button
+                  variant="contained"
+                  component={Link}
+                  to="/community"
+                  onClick={() => <CommunityHome />}
+                  className={classes.actionWholesaleButton}
+                >
+                  Buy In Community
+                </Button>
+              </Grid>
+            </Grid>
           </Grid>
           {/* </CardActionArea> */}
         </Card>
