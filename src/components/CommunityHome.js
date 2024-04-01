@@ -659,11 +659,11 @@ const CommunityHome = (props) => {
         {/* </section> */}
 
         <TopCoverCommunity preference={preference} />
-        <ShoppingPreferences
+        {/* <ShoppingPreferences
           updatePathHandler={updatePathHandler}
           updateBuyingPathInfoInfo={updateBuyingPathInfoInfo}
           preference={preference}
-        />
+        /> */}
         {isLoading && (
           <CircularProgress
             size={100}

@@ -14,7 +14,10 @@ import Dialog from "@material-ui/core/Dialog";
 import DialogContent from "@material-ui/core/DialogContent";
 import useMediaQuery from "@material-ui/core/useMediaQuery";
 import Snackbar from "@material-ui/core/Snackbar";
-import background from "./../../assets/images/covers/derica-ad.png";
+import backgroundDerica from "./../../assets/images/covers/derica-cover.png";
+import backgroundPaint from "./../../assets/images/covers/paint-cover.png";
+import backgroundBulk from "./../../assets/images/covers/bulk-cover.png";
+import backgroundRetail from "./../../assets/images/covers/retail-cover.png";
 import DericaHome from "../DericaHome";
 import PaintHome from "../PaintHome";
 import WholesaleHome from "../WholesaleHome";
@@ -113,6 +116,7 @@ const useStyles = makeStyles((theme) => ({
     marginLeft: 80,
     marginTop: 10,
     marginBottom: 20,
+    borderRadius: 100,
     color: "white",
     backgroundColor: theme.palette.common.orange,
     "&:hover": {
@@ -126,14 +130,15 @@ const useStyles = makeStyles((theme) => ({
     marginLeft: 60,
     marginTop: 10,
     marginBottom: 20,
+    borderRadius: 100,
     color: "white",
     backgroundColor: theme.palette.common.orange,
     "&:hover": {
       backgroundColor: theme.palette.common.white,
     },
   },
-  background: {
-    backgroundImage: `url(${background})`,
+  backgroundDerica: {
+    backgroundImage: `url(${backgroundDerica})`,
     backgroundPosition: "center",
     backgroundSize: "cover",
     //backgroundAttachment: "fixed",
@@ -142,6 +147,55 @@ const useStyles = makeStyles((theme) => ({
     width: "83%",
     marginLeft: "8em",
     marginRight: 0,
+    borderRadius: 25,
+    [theme.breakpoints.down("md")]: {
+      // backgroundImage: `url(${mobileBackground})`,
+      backgroundAttachment: "inherit",
+    },
+  },
+  backgroundPaint: {
+    backgroundImage: `url(${backgroundPaint})`,
+    backgroundPosition: "center",
+    backgroundSize: "cover",
+    //backgroundAttachment: "fixed",
+    backgroundRepeat: "no-repeat",
+    height: "25em",
+    width: "83%",
+    marginLeft: "8em",
+    marginRight: 0,
+    borderRadius: 25,
+    [theme.breakpoints.down("md")]: {
+      // backgroundImage: `url(${mobileBackground})`,
+      backgroundAttachment: "inherit",
+    },
+  },
+  backgroundBulk: {
+    backgroundImage: `url(${backgroundBulk})`,
+    backgroundPosition: "center",
+    backgroundSize: "cover",
+    //backgroundAttachment: "fixed",
+    backgroundRepeat: "no-repeat",
+    height: "25em",
+    width: "83%",
+    marginLeft: "8em",
+    marginRight: 0,
+    borderRadius: 25,
+    [theme.breakpoints.down("md")]: {
+      // backgroundImage: `url(${mobileBackground})`,
+      backgroundAttachment: "inherit",
+    },
+  },
+  backgroundRetail: {
+    backgroundImage: `url(${backgroundRetail})`,
+    backgroundPosition: "center",
+    backgroundSize: "cover",
+    //backgroundAttachment: "fixed",
+    backgroundRepeat: "no-repeat",
+    height: "25em",
+    width: "83%",
+    marginLeft: "8em",
+    marginRight: 0,
+    borderRadius: 25,
     [theme.breakpoints.down("md")]: {
       // backgroundImage: `url(${mobileBackground})`,
       backgroundAttachment: "inherit",
@@ -251,7 +305,7 @@ export default function TopCoverCommunity(props) {
                 container
                 //direction="row"
                 alignItems="center"
-                className={classes.background}
+                className={classes.backgroundDerica}
                 justifyContent={matchesSM ? "center" : "space-between"}
                 direction={matchesSM ? "column" : "row"}
                 item
@@ -278,7 +332,7 @@ export default function TopCoverCommunity(props) {
                 container
                 //direction="row"
                 alignItems="center"
-                className={classes.background}
+                className={classes.backgroundPaint}
                 justifyContent={matchesSM ? "center" : "space-between"}
                 direction={matchesSM ? "column" : "row"}
                 item
@@ -306,7 +360,7 @@ export default function TopCoverCommunity(props) {
                 container
                 //direction="row"
                 alignItems="center"
-                className={classes.background}
+                className={classes.backgroundBulk}
                 justifyContent={matchesSM ? "center" : "space-between"}
                 direction={matchesSM ? "column" : "row"}
                 item
@@ -333,7 +387,7 @@ export default function TopCoverCommunity(props) {
                 container
                 //direction="row"
                 alignItems="center"
-                className={classes.background}
+                className={classes.backgroundRetail}
                 justifyContent={matchesSM ? "center" : "space-between"}
                 direction={matchesSM ? "column" : "row"}
                 item

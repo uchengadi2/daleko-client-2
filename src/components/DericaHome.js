@@ -659,11 +659,11 @@ const DericaHome = (props) => {
         {/* </section> */}
 
         <TopCoverDerica preference={preference} />
-        <ShoppingPreferences
+        {/* <ShoppingPreferences
           updatePathHandler={updatePathHandler}
           updateBuyingPathInfoInfo={updateBuyingPathInfoInfo}
           preference={preference}
-        />
+        /> */}
         {isLoading && (
           <CircularProgress
             size={100}

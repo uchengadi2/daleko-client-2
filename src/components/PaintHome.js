@@ -659,11 +659,11 @@ const PaintHome = (props) => {
         {/* </section> */}
 
         <TopCoverPaint preference={preference} />
-        <ShoppingPreferences
+        {/* <ShoppingPreferences
           updatePathHandler={updatePathHandler}
           updateBuyingPathInfoInfo={updateBuyingPathInfoInfo}
           preference={preference}
-        />
+        /> */}
         {isLoading && (
           <CircularProgress
             size={100}

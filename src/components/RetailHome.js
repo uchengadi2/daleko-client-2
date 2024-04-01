@@ -658,11 +658,11 @@ const RetailHome = (props) => {
         {/* </section> */}
 
         <TopCover />
-        <ShoppingPreferences
+        {/* <ShoppingPreferences
           updatePathHandler={updatePathHandler}
           updateBuyingPathInfoInfo={updateBuyingPathInfoInfo}
           preference={preference}
-        />
+        /> */}
         {isLoading && (
           <CircularProgress
             size={100}
