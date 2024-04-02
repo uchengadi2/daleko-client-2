@@ -87,7 +87,7 @@ function ContactUsForm(props) {
           <Typography variant="h5" style={{ marginTop: 50 }}>
             <span style={{ color: "orange" }}>Address:</span>{" "}
             <span style={{ marginLeft: 10 }}>
-              Shop 96, Daleko, Isolo, Lagos,
+              Shop 96, Daleko Market, Isolo, Lagos,
               <span style={{ marginLeft: 100 }}></span>{" "}
               {/* <span style={{ marginLeft: 100 }}>
                 Estate, Ilasa, Lagos, Nigeria
@@ -99,7 +99,7 @@ function ContactUsForm(props) {
             <span style={{ color: "orange" }}>Email:</span>{" "}
             <span style={{ marginLeft: 30 }}>sales@daleko.com.ng </span>
             <br /> <br /> <span style={{ color: "orange" }}>Tel:</span>{" "}
-            <span style={{ marginLeft: 50 }}>+234 0803 200 5819</span>
+            <span style={{ marginLeft: 50 }}>+234 0812 610 4035</span>
             <br /> <br />
             <span style={{ marginLeft: 100 }}>+234 0803 201 5819</span>
           </Typography>

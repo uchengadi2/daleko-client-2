@@ -36,6 +36,8 @@ import AllCourses from "./homePageCards/AllCourses";
 import AllProducts from "./homePageCards/AllProducts";
 
 import { baseURL } from "./../apis/util";
+import FreezingPriceAdMainHome from "./homePageCards/FreezingPriceAdMainHome";
+import FreezePriceAdRetailPage from "./homePageCards/FreezePriceAdRetailPage";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -656,7 +658,7 @@ const RetailHome = (props) => {
           </Grid>
         </Grid>
         {/* </section> */}
-
+        <FreezePriceAdRetailPage />
         <TopCover />
         {/* <ShoppingPreferences
           updatePathHandler={updatePathHandler}

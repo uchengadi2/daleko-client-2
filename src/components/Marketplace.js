@@ -34,6 +34,7 @@ import ShoppingPreferences from "./homePageCards/ShoppingPreferences";
 
 import AllCourses from "./homePageCards/AllCourses";
 import AllProducts from "./homePageCards/AllProducts";
+import FreezingPriceAdMainHome from "./homePageCards/FreezingPriceAdMainHome";
 
 import { baseURL } from "./../apis/util";
 
@@ -893,7 +894,7 @@ const Marketplace = (props) => {
           </Grid>
         </Grid>
         {/* </section> */}
-
+        <FreezingPriceAdMainHome />
         <TopCover />
         <ShoppingPreferences
           updatePathHandler={updatePathHandler}

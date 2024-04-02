@@ -158,13 +158,14 @@ function AboutUsForm(props) {
         // onSubmit={onSubmit}
         sx={{
           width: 800,
-          height: 350,
+          height: 500,
         }}
         noValidate
         autoComplete="off"
         // style={{ marginTop: 20 }}
         // className={classes.background}
-        style={{ height: "25em", marginTop: "-300" }}
+        // style={{ height: "25em", marginTop: "-300" }}
+        style={{ height: "39em", marginTop: "-300" }}
       >
         <Grid
           container
@@ -184,18 +185,34 @@ function AboutUsForm(props) {
             <Typography
               //variant="h4"
               style={{
-                marginTop: 70,
+                marginTop: 50,
                 marginLeft: 100,
                 color: "white",
                 fontSize: 20,
               }}
             >
               <strong>
-                Your health is your greatest asset, and at eHealt Plus,we are
-                committed to helping you protect and enhance it naturally
+                WholeRoof Limited is a renowned retail and trading company
+                headquartered in Nigeria, dedicated to supplying high-quality,
+                affordable foodstuff items to customers throughout Nigeria and
+                Sub-Saharan Africa
                 <br />
-                <br /> Explore our wide range of SOS Food Supplements & Skin
-                Tonics and take the first step towards a healthier, happier you.
+                <br />
+                Specializing in rice, edible oil, and other essential food
+                products, we prioritize stringent quality standards and
+                efficient delivery logistics to ensure customer satisfaction
+                <br />
+                <br />
+                With a focus on transparency, reliability, and integrity, we
+                foster long-term relationships with our customers while actively
+                supporting sustainable agricultural practices and community
+                development initiatives
+                <br />
+                <br />
+                At WholeRoof, our mission is to provide accessible, nutritious,
+                and delicious food options for all households and businesses
+                across the region. Thank you for choosing Us as your trusted
+                food supply partner.
                 <br />
                 <br />
               </strong>

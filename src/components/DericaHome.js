@@ -37,6 +37,9 @@ import AllProducts from "./homePageCards/AllProducts";
 
 import { baseURL } from "./../apis/util";
 import TopCoverDerica from "./homePageCards/TopCoverDerica";
+import FreezingPriceAdMainHome from "./homePageCards/FreezingPriceAdMainHome";
+import FreezePriceDericaPageAd from "./freeze/FreezePriceDericaPageAd";
+import FreezePriceAdDericaPage from "./homePageCards/FreezePriceAdDericaPage";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -657,7 +660,7 @@ const DericaHome = (props) => {
           </Grid>
         </Grid>
         {/* </section> */}
-
+        <FreezePriceAdDericaPage />
         <TopCoverDerica preference={preference} />
         {/* <ShoppingPreferences
           updatePathHandler={updatePathHandler}
