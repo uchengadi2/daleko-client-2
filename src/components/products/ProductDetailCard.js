@@ -752,6 +752,22 @@ export default function ProductDetailCard(props) {
                     </span>
                   </Typography>
                 )}
+                {props.product.salesPreference === "deal" && (
+                  <Typography>
+                    <span style={{ fontSize: 14, marginLeft: 10 }}>
+                      <strong> Deal Code:</strong>
+                      <span>{props.product.dealCode}</span>
+                    </span>
+                  </Typography>
+                )}
+                {props.product.salesPreference === "deal" && (
+                  <Typography>
+                    <span style={{ fontSize: 14, marginLeft: 10 }}>
+                      <strong> Deal Expiry Date:</strong>
+                      <span>{props.product.dealExpiryDate}</span>
+                    </span>
+                  </Typography>
+                )}
               </Box>
             </Grid>
 
@@ -772,6 +788,9 @@ export default function ProductDetailCard(props) {
                   pricingMechanism={props.product.pricingMechanism}
                   allowSubscription={props.product.allowSubscription}
                   presentWeightUnitIn={props.product.presentWeightUnitIn}
+                  salesPreference={props.product.salesPreference}
+                  dealCode={props.product.dealCode}
+                  dealExpiryDate={props.product.dealExpiryDate}
                   isVatable={props.product.isVatable}
                   revenueMargin={props.product.revenueMargin}
                   revenueMarginShouldPrevail={
@@ -1626,6 +1645,9 @@ export default function ProductDetailCard(props) {
                   pricingMechanism={props.product.pricingMechanism}
                   allowSubscription={props.product.allowSubscription}
                   presentWeightUnitIn={props.product.presentWeightUnitIn}
+                  salesPreference={props.product.salesPreference}
+                  dealCode={props.product.dealCode}
+                  dealExpiryDate={props.product.dealExpiryDate}
                   isVatable={props.product.isVatable}
                   revenueMargin={props.product.revenueMargin}
                   revenueMarginShouldPrevail={

@@ -23,6 +23,7 @@ import PaintHome from "../PaintHome";
 import WholesaleHome from "../WholesaleHome";
 import CommunityHome from "../CommunityHome";
 import RetailHome from "../RetailHome";
+import DealHome from "../DealHome";
 
 import { baseURL } from "./../../apis/util";
 
@@ -409,11 +410,11 @@ export default function TopCover(props) {
                 <Button
                   variant="contained"
                   component={Link}
-                  to="/community"
-                  onClick={() => <CommunityHome />}
+                  to="/dealscentral"
+                  onClick={() => <DealHome />}
                   className={classes.actionButton}
                 >
-                  Buy In Community
+                  Deals Central
                 </Button>
               </Grid>
             </Grid>

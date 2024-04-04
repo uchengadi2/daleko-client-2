@@ -338,6 +338,26 @@ function ProductDetails(props) {
           barcode: product[0].barcode,
           deliverability: product[0].deliverability,
           pickupInfo: product[0].pickupInfo,
+          allowPriceFreezing: product[0].allowPriceFreezing,
+          allowFreezedPriceLowBound: product[0].allowFreezedPriceLowBound,
+          freezedPriceLowBound: product[0].freezedPriceLowBound,
+          chargesPerWeekOnFreezedPriceServiceWithoutPriceLowBound:
+            product[0].chargesPerWeekOnFreezedPriceServiceWithoutPriceLowBound,
+          chargesPerWeekOnFreezedPriceServiceWithPriceLowBound:
+            product[0].chargesPerWeekOnFreezedPriceServiceWithPriceLowBound,
+          freezedPriceMaximumDurationInWeeks:
+            product[0].freezedPriceMaximumDurationInWeeks,
+          minimumFreezableQuantity: product[0].minimumFreezableQuantity,
+          datePriceWasSet: product[0].datePriceWasSet,
+          requiredMaximumNumberOfCommunityMembers:
+            product[0].requiredMaximumNumberOfCommunityMembers,
+          communityTotalPurchaseableUnit:
+            product[0].communityTotalPurchaseableUnit,
+          communityDeliveryPeriod: product[0].communityDeliveryPeriod,
+          communityDeliveryType: product[0].communityDeliveryType,
+          communityInstruction: product[0].communityInstruction,
+          dealCode: product[0].dealCode,
+          dealExpiryDate: product[0].dealExpiryDate,
         });
 
         setProduct({
@@ -376,6 +396,26 @@ function ProductDetails(props) {
           barcode: allData[0].barcode,
           deliverability: allData[0].deliverability,
           pickupInfo: allData[0].pickupInfo,
+          allowPriceFreezing: allData[0].allowPriceFreezing,
+          allowFreezedPriceLowBound: allData[0].allowFreezedPriceLowBound,
+          freezedPriceLowBound: allData[0].freezedPriceLowBound,
+          chargesPerWeekOnFreezedPriceServiceWithoutPriceLowBound:
+            allData[0].chargesPerWeekOnFreezedPriceServiceWithoutPriceLowBound,
+          chargesPerWeekOnFreezedPriceServiceWithPriceLowBound:
+            allData[0].chargesPerWeekOnFreezedPriceServiceWithPriceLowBound,
+          freezedPriceMaximumDurationInWeeks:
+            allData[0].freezedPriceMaximumDurationInWeeks,
+          minimumFreezableQuantity: allData[0].minimumFreezableQuantity,
+          datePriceWasSet: allData[0].datePriceWasSet,
+          requiredMaximumNumberOfCommunityMembers:
+            allData[0].requiredMaximumNumberOfCommunityMembers,
+          communityTotalPurchaseableUnit:
+            allData[0].communityTotalPurchaseableUnit,
+          communityDeliveryPeriod: allData[0].communityDeliveryPeriod,
+          communityDeliveryType: allData[0].communityDeliveryType,
+          communityInstruction: allData[0].communityInstruction,
+          dealCode: allData[0].dealCode,
+          dealExpiryDate: allData[0].dealExpiryDate,
         });
 
         setIsLoading(false);
@@ -424,6 +464,31 @@ function ProductDetails(props) {
             barcode={product.barcode}
             deliverability={product.deliverability}
             pickupInfo={product.pickupInfo}
+            allowPriceFreezing={product.allowPriceFreezing}
+            allowFreezedPriceLowBound={product.allowFreezedPriceLowBound}
+            freezedPriceLowBound={product.freezedPriceLowBound}
+            chargesPerWeekOnFreezedPriceServiceWithoutPriceLowBound={
+              product.chargesPerWeekOnFreezedPriceServiceWithoutPriceLowBound
+            }
+            chargesPerWeekOnFreezedPriceServiceWithPriceLowBound={
+              product.chargesPerWeekOnFreezedPriceServiceWithPriceLowBound
+            }
+            freezedPriceMaximumDurationInWeeks={
+              product.freezedPriceMaximumDurationInWeeks
+            }
+            minimumFreezableQuantity={product.minimumFreezableQuantity}
+            datePriceWasSet={product.datePriceWasSet}
+            requiredMaximumNumberOfCommunityMembers={
+              product.requiredMaximumNumberOfCommunityMembers
+            }
+            communityTotalPurchaseableUnit={
+              product.communityTotalPurchaseableUnit
+            }
+            communityDeliveryPeriod={product.communityDeliveryPeriod}
+            communityDeliveryType={product.communityDeliveryType}
+            communityInstruction={product.communityInstruction}
+            dealCode={product.dealCode}
+            dealExpiryDate={product.dealExpiryDate}
             key={product.id}
             token={props.token}
             userId={props.userId}
@@ -478,6 +543,31 @@ function ProductDetails(props) {
             barcode={product.barcode}
             deliverability={product.deliverability}
             pickupInfo={product.pickupInfo}
+            allowPriceFreezing={product.allowPriceFreezing}
+            allowFreezedPriceLowBound={product.allowFreezedPriceLowBound}
+            freezedPriceLowBound={product.freezedPriceLowBound}
+            chargesPerWeekOnFreezedPriceServiceWithoutPriceLowBound={
+              product.chargesPerWeekOnFreezedPriceServiceWithoutPriceLowBound
+            }
+            chargesPerWeekOnFreezedPriceServiceWithPriceLowBound={
+              product.chargesPerWeekOnFreezedPriceServiceWithPriceLowBound
+            }
+            freezedPriceMaximumDurationInWeeks={
+              product.freezedPriceMaximumDurationInWeeks
+            }
+            minimumFreezableQuantity={product.minimumFreezableQuantity}
+            datePriceWasSet={product.datePriceWasSet}
+            requiredMaximumNumberOfCommunityMembers={
+              product.requiredMaximumNumberOfCommunityMembers
+            }
+            communityTotalPurchaseableUnit={
+              product.communityTotalPurchaseableUnit
+            }
+            communityDeliveryPeriod={product.communityDeliveryPeriod}
+            communityDeliveryType={product.communityDeliveryType}
+            communityInstruction={product.communityInstruction}
+            dealCode={product.dealCode}
+            dealExpiryDate={product.dealExpiryDate}
             key={product.id}
             token={props.token}
             userId={props.userId}

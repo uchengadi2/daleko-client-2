@@ -205,7 +205,7 @@ function PlaceOrderForm(props) {
 
   useEffect(() => {
     const fetchData = async () => {
-      setLoading(true);
+      //setLoading(true);
       let allData = [];
       api.defaults.headers.common["Authorization"] = `Bearer ${props.token}`;
       const response = await api.get(`/products/${productId}`);

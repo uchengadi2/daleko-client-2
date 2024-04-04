@@ -793,6 +793,72 @@ const renderMinimumFreezableQuantityField = ({
   );
 };
 
+const renderEditableMultilineField = ({
+  input,
+  label,
+  meta: { touched, error, invalid },
+  type,
+  helperText,
+  defaultValue,
+  id,
+  ...custom
+}) => {
+  return (
+    <TextField
+      error={touched && invalid}
+      //placeholder="category description"
+      variant="outlined"
+      helperText={helperText}
+      defaultValue={defaultValue}
+      label={label}
+      id={input.name}
+      // value={formInput.description}
+      fullWidth
+      type={type}
+      style={{ marginTop: 20 }}
+      multiline={true}
+      minRows={5}
+      {...custom}
+      onChange={input.onChange}
+
+      // onChange={handleInput}
+    />
+  );
+};
+
+const renderEditableSingleLineField = ({
+  input,
+  label,
+  meta: { touched, error, invalid },
+  type,
+  helperText,
+  defaultValue,
+  id,
+  ...custom
+}) => {
+  return (
+    <TextField
+      //error={touched && invalid}
+      helperText={helperText}
+      variant="outlined"
+      label={label}
+      id={input.name}
+      //value={formInput.name}
+      fullWidth
+      //required
+      type={type}
+      defaultValue={defaultValue}
+      {...custom}
+      onChange={input.onChange}
+      inputProps={{
+        style: {
+          height: 1,
+        },
+      }}
+    />
+  );
+};
+
 const MAX_COUNT = 12;
 
 function ProductForm(props) {
@@ -826,6 +892,8 @@ function ProductForm(props) {
     useState(false);
 
   const [loading, setLoading] = useState(false);
+  const [communityDeliveryType, setCommunityDeliveryType] =
+    useState("same-locatiion");
   const [willTreat, setWillTreat] = useState(false);
 
   const dispatch = useDispatch();
@@ -1077,6 +1145,10 @@ function ProductForm(props) {
     setAllowFreezedPriceLowBound(event.target.value);
   };
 
+  const handleCommunityDeliveryTypeChange = (event) => {
+    setCommunityDeliveryType(event.target.value);
+  };
+
   const handleUploadFiles = (files) => {
     const uploaded = [...uploadedFiles];
     let limitExceeded = false;
@@ -1186,6 +1258,7 @@ function ProductForm(props) {
             <MenuItem value={"paint"}>Paint</MenuItem>
             <MenuItem value={"wholesale"}>Wholesale(Bulk Sales)</MenuItem>
             <MenuItem value={"community"}>Community Purchase</MenuItem>
+            <MenuItem value={"deal"}>Setup a Deal</MenuItem>
           </Select>
           <FormHelperText>Product Sales Preference</FormHelperText>
         </FormControl>
@@ -1495,6 +1568,37 @@ function ProductForm(props) {
     );
   };
 
+  const renderCommunityDeliveryTypeField = ({
+    input,
+    label,
+    meta: { touched, error, invalid },
+    type,
+    id,
+    ...custom
+  }) => {
+    return (
+      <Box>
+        <FormControl variant="outlined">
+          {/* <InputLabel id="vendor_city">City</InputLabel> */}
+          <Select
+            labelId="communityDeliveryType"
+            id="communityDeliveryType"
+            value={communityDeliveryType}
+            onChange={handleCommunityDeliveryTypeChange}
+            //label="Price Mechanism"
+            style={{ width: 500, marginTop: 20, height: 38 }}
+            //{...input}
+          >
+            <MenuItem value={"same-locatiion"}>Same Location</MenuItem>
+            <MenuItem value={"diverse-location"}>Diverse Location</MenuItem>
+            <MenuItem value={"hybrid"}>Hybrid </MenuItem>
+          </Select>
+          <FormHelperText>Community Delivery Type</FormHelperText>
+        </FormControl>
+      </Box>
+    );
+  };
+
   const buttonContent = () => {
     return <React.Fragment> Submit</React.Fragment>;
   };
@@ -1565,16 +1669,19 @@ function ProductForm(props) {
     }
 
     const form = new FormData();
-    form.append("name", formValues.name);
-    form.append("configuration", formValues.configuration);
+    form.append("name", formValues.name ? formValues.name : null);
+    form.append(
+      "configuration",
+      formValues.configuration ? formValues.configuration : null
+    );
     form.append("isFeaturedProduct", isFeaturedProduct);
     form.append(
       "shortDescription",
-      formValues.shortDescription ? formValues.shortDescription : ""
+      formValues.shortDescription ? formValues.shortDescription : null
     );
     form.append(
       "fullDescription",
-      formValues.fullDescription ? formValues.fullDescription : ""
+      formValues.fullDescription ? formValues.fullDescription : null
     );
 
     form.append("category", category);
@@ -1590,40 +1697,106 @@ function ProductForm(props) {
     form.append("unit", unit);
     form.append("createdBy", props.userId);
 
-    form.append("pricePerUnit", formValues.pricePerUnit);
-    form.append("keyword1", formValues.keyword1 ? formValues.keyword1 : "");
-    form.append("keyword2", formValues.keyword2 ? formValues.keyword2 : "");
-    form.append("keyword3", formValues.keyword3 ? formValues.keyword3 : "");
-    form.append("minimumQuantity", formValues.minimumQuantity);
+    form.append(
+      "pricePerUnit",
+      formValues.pricePerUnit ? formValues.pricePerUnit : 0
+    );
+    form.append("keyword1", formValues.keyword1 ? formValues.keyword1 : null);
+    form.append("keyword2", formValues.keyword2 ? formValues.keyword2 : null);
+    form.append("keyword3", formValues.keyword3 ? formValues.keyword3 : null);
+    form.append(
+      "minimumQuantity",
+      formValues.minimumQuantity ? formValues.minimumQuantity : 0
+    );
 
-    form.append("priceLabel", formValues.priceLabel);
-    form.append("slug", formValues.slug);
-    form.append("brand", formValues.brand);
-    form.append("sku", formValues.sku);
-    form.append("barcode", formValues.barcode);
-    form.append("weightPerUnit", formValues.weightPerUnit);
-    form.append("marketPricingCondition", formValues.marketPricingCondition);
-    form.append("deliverability", formValues.deliverability);
-    form.append("pickupInfo", formValues.pickupInfo);
+    form.append(
+      "priceLabel",
+      formValues.priceLabel ? formValues.priceLabel : null
+    );
+    form.append("slug", formValues.slug ? formValues.slug : null);
+    form.append("brand", formValues.brand ? formValues.brand : null);
+    form.append("sku", formValues.sku ? formValues.sku : null);
+    form.append("barcode", formValues.barcode ? formValues.barcode : null);
+    form.append(
+      "weightPerUnit",
+      formValues.weightPerUnit ? formValues.weightPerUnit : 0
+    );
+    form.append(
+      "marketPricingCondition",
+      formValues.marketPricingCondition
+        ? formValues.marketPricingCondition
+        : null
+    );
+    form.append(
+      "deliverability",
+      formValues.deliverability ? formValues.deliverability : null
+    );
+    form.append(
+      "pickupInfo",
+      formValues.pickupInfo ? formValues.pickupInfo : null
+    );
 
     form.append("allowPriceFreezing", allowPriceFreezing);
     form.append("allowFreezedPriceLowBound", allowFreezedPriceLowBound);
-    form.append("freezedPriceLowBound", formValues.freezedPriceLowBound);
+    form.append(
+      "freezedPriceLowBound",
+      formValues.freezedPriceLowBound ? formValues.freezedPriceLowBound : 0
+    );
     form.append(
       "chargesPerWeekOnFreezedPriceServiceWithoutPriceLowBound",
       formValues.chargesPerWeekOnFreezedPriceServiceWithoutPriceLowBound
+        ? formValues.chargesPerWeekOnFreezedPriceServiceWithoutPriceLowBound
+        : 0
     );
     form.append(
       "chargesPerWeekOnFreezedPriceServiceWithPriceLowBound",
       formValues.chargesPerWeekOnFreezedPriceServiceWithPriceLowBound
+        ? formValues.chargesPerWeekOnFreezedPriceServiceWithPriceLowBound
+        : 0
     );
     form.append(
       "freezedPriceMaximumDurationInWeeks",
       formValues.freezedPriceMaximumDurationInWeeks
+        ? formValues.freezedPriceMaximumDurationInWeeks
+        : 0
     );
     form.append(
       "minimumFreezableQuantity",
       formValues.minimumFreezableQuantity
+        ? formValues.minimumFreezableQuantity
+        : 0
+    );
+    form.append(
+      "requiredMaximumNumberOfCommunityMembers",
+      formValues.requiredMaximumNumberOfCommunityMembers
+        ? formValues.requiredMaximumNumberOfCommunityMembers
+        : 0
+    );
+
+    form.append(
+      "communityTotalPurchaseableUnit",
+      formValues.communityTotalPurchaseableUnit
+        ? formValues.communityTotalPurchaseableUnit
+        : 0
+    );
+    form.append(
+      "communityDeliveryPeriod",
+      formValues.communityDeliveryPeriod
+        ? formValues.communityDeliveryPeriod
+        : null
+    );
+    form.append(
+      "communityDeliveryType",
+      communityDeliveryType ? communityDeliveryType : null
+    );
+    form.append(
+      "communityInstruction",
+      formValues.communityInstruction ? formValues.communityInstruction : null
+    );
+    form.append("dealCode", formValues.dealCode ? formValues.dealCode : null);
+    form.append(
+      "dealExpiryDate",
+      formValues.dealExpiryDate ? formValues.dealExpiryDate : null
     );
 
     // if (!formValues["sku"]) {
@@ -2094,6 +2267,117 @@ function ProductForm(props) {
             }
             style={{ marginTop: 15 }}
           />
+
+          {salesPreference === "community" && (
+            <Grid item container style={{ marginTop: 20, marginBottom: 20 }}>
+              <FormLabel style={{ color: "blue" }} component="legend">
+                Community Sale Parameters
+              </FormLabel>
+            </Grid>
+          )}
+          {salesPreference === "community" && (
+            <Grid container direction="row" style={{ marginTop: 20 }}>
+              <Grid item style={{ width: "50%" }}>
+                <Field
+                  label=""
+                  id="requiredMaximumNumberOfCommunityMembers"
+                  name="requiredMaximumNumberOfCommunityMembers"
+                  helperText="Maximum Number of Community Members"
+                  type="number"
+                  component={renderEditableSingleLineField}
+                />
+              </Grid>
+              <Grid item style={{ marginLeft: 15, width: "47%" }}>
+                <Field
+                  label=""
+                  id="communityTotalPurchaseableUnit"
+                  name="communityTotalPurchaseableUnit"
+                  type="number"
+                  helperText="Community Total Purchaseable Unit"
+                  component={renderEditableSingleLineField}
+                />
+              </Grid>
+            </Grid>
+          )}
+          {salesPreference === "community" && (
+            <Grid container direction="row" style={{ marginTop: 20 }}>
+              <Grid item style={{ marginLeft: 0, width: "100%" }}>
+                <Field
+                  label=""
+                  id="communityDeliveryPeriod"
+                  name="communityDeliveryPeriod"
+                  type="text"
+                  helperText="Community Delivery Period"
+                  component={renderEditableSingleLineField}
+                />
+              </Grid>
+            </Grid>
+          )}
+          {salesPreference === "community" && (
+            <Field
+              label=""
+              id="communityDeliveryType"
+              name="communityDeliveryType"
+              type="text"
+              helperText="Community Delivery Type"
+              component={renderCommunityDeliveryTypeField}
+            />
+          )}
+          {salesPreference === "community" && (
+            <Field
+              label=""
+              id="communityInstruction"
+              name="communityInstruction"
+              type="text"
+              helperText="Instruction"
+              component={renderEditableMultilineField}
+            />
+          )}
+          {salesPreference === "community" && (
+            <Grid container direction="row" style={{ marginTop: 20 }}>
+              <Grid item style={{ marginLeft: 0, width: "100%" }}>
+                <Field
+                  label=""
+                  id="communityDeliveryPeriod"
+                  name="communityDeliveryPeriod"
+                  type="text"
+                  helperText="Community Delivery Period"
+                  component={renderEditableSingleLineField}
+                />
+              </Grid>
+            </Grid>
+          )}
+          {salesPreference === "deal" && (
+            <Grid item container style={{ marginTop: 20, marginBottom: 20 }}>
+              <FormLabel style={{ color: "blue" }} component="legend">
+                Deal Parameters
+              </FormLabel>
+            </Grid>
+          )}
+          {salesPreference === "deal" && (
+            <Grid container direction="row" style={{ marginTop: 20 }}>
+              <Grid item style={{ width: "50%" }}>
+                <Field
+                  label=""
+                  id="dealCode"
+                  name="dealCode"
+                  helperText="Enter the Deal Code"
+                  type="text"
+                  component={renderEditableSingleLineField}
+                />
+              </Grid>
+              <Grid item style={{ marginLeft: 15, width: "47%" }}>
+                <Field
+                  label=""
+                  id="dealExpiryDate"
+                  name="dealExpiryDate"
+                  type="text"
+                  helperText="Enter the Deal Expiry Date"
+                  component={renderEditableSingleLineField}
+                />
+              </Grid>
+            </Grid>
+          )}
 
           <Grid item container style={{ marginTop: 20 }}>
             <FormLabel style={{ color: "blue" }} component="legend">

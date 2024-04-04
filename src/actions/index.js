@@ -131,6 +131,11 @@ import {
   FETCH_INVENTORY,
   DELETE_INVENTORY,
   EDIT_INVENTORY,
+  CREATE_DEAL,
+  FETCH_DEALS,
+  FETCH_DEAL,
+  EDIT_DEAL,
+  DELETE_DEAL,
 } from "./types";
 
 //authentication and authorization  operations
@@ -1378,6 +1383,53 @@ export const deleteInventory = (id) => {
   return async (dispatch) => {
     await data.delete(`/inventories/${id}`);
     dispatch({ type: DELETE_INVENTORY, payload: id });
+    //history.push("/");
+  };
+};
+
+////////////////////////////////////////Deals///////////////////////////////
+//Deal resources crud operations
+
+export const createDeal = (formValues) => {
+  return async (dispatch, getState) => {
+    const { userId } = getState().auth;
+    const response = await data.post("/deals", {
+      ...formValues,
+      userId,
+    });
+
+    //console.log(response);
+    dispatch({ type: CREATE_DEAL, payload: response.data });
+    // history.push("/");
+  };
+};
+
+export const fetchDeals = () => {
+  return async (dispatch) => {
+    const response = await data.get("/deals");
+    dispatch({ type: FETCH_DEALS, payload: response.data.data.data });
+  };
+};
+
+export const fetchDeal = (id) => {
+  return async (dispatch) => {
+    const response = await data.get(`/deals/${id}`);
+    dispatch({ type: FETCH_DEAL, payload: response.data.data });
+  };
+};
+
+export const editDeal = (id, formValues) => {
+  return async (dispatch) => {
+    const response = await data.patch(`/deals/${id}`, formValues);
+    dispatch({ type: EDIT_DEAL, payload: response.data.data });
+    //history.push("/");
+  };
+};
+
+export const deleteDeal = (id) => {
+  return async (dispatch) => {
+    await data.delete(`/deals/${id}`);
+    dispatch({ type: DELETE_DEAL, payload: id });
     //history.push("/");
   };
 };

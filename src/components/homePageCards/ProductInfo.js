@@ -27,7 +27,7 @@ import ButtonArrow from "../ui/ButtonArrow";
 import theme from "./../ui/Theme";
 import api from "./../../apis/local";
 import { CREATE_RATE, EDIT_RATE } from "../../actions/types";
-import FreezePrice from "../freeze/FreezePrice";
+import FreezePrice from "../freeze/FreezePriceDealPageAdPage";
 
 //import CheckoutPage from "./CheckoutPage";
 

@@ -175,3 +175,10 @@ export const FETCH_INVENTORIES = "FETCH_INVENTORIES";
 export const FETCH_INVENTORY = "FETCH_INVENTORY";
 export const DELETE_INVENTORY = "DELETE_INVENTORY";
 export const EDIT_INVENTORY = "EDIT_INVENTORY";
+
+// for deal resources
+export const CREATE_DEAL = "CREATE_DEAL";
+export const FETCH_DEALS = "FETCH_DEALS";
+export const FETCH_DEAL = "FETCH_DEAL";
+export const DELETE_DEAL = "DELETE_DEAL";
+export const EDIT_DEAL = "EDIT_DEAL";

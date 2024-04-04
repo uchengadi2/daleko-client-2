@@ -30,7 +30,7 @@ import FormLabel from "@material-ui/core/FormLabel";
 import FormHelperText from "@material-ui/core/FormHelperText";
 import InputLabel from "@material-ui/core/InputLabel";
 
-import logo from "./../../assets/logo/logo.jpg";
+import logo from "./../../assets/logo/logo.png";
 import { RouterRounded, Search } from "@material-ui/icons";
 import Select from "@material-ui/core/Select";
 import history from "../../history";

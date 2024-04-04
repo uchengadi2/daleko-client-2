@@ -198,7 +198,23 @@ export default function ThankYou() {
                   </span>
                 </CardContent>
               )}
-              {action !== "quotes" && (
+              {action === "deals" && (
+                <CardContent>
+                  <Typography
+                    variant="h4"
+                    color="textSecondary"
+                    component="p"
+                    style={{ marginLeft: "20rem", marginBottom: 15 }}
+                  >
+                    Your Deal Proposal is Received. We will get back to you as
+                    soon as possible.
+                  </Typography>
+                  <span style={{ marginLeft: 280, fontSize: 14 }}>
+                    Your Proposed Deal Number is {placementNumber}
+                  </span>
+                </CardContent>
+              )}
+              {(action !== "deals" || action !== "quotes") && (
                 <CardContent>
                   <Typography
                     variant="h4"
@@ -208,6 +224,9 @@ export default function ThankYou() {
                   >
                     Thank You
                   </Typography>
+                  {/* <span style={{ marginLeft: 280, fontSize: 14 }}>
+                    Your Proposed Deal Number is {placementNumber}
+                  </span> */}
                 </CardContent>
               )}
             </Grid>

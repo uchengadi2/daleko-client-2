@@ -793,6 +793,72 @@ const renderMinimumFreezableQuantityField = ({
   );
 };
 
+const renderEditableMultilineField = ({
+  input,
+  label,
+  meta: { touched, error, invalid },
+  type,
+  helperText,
+  defaultValue,
+  id,
+  ...custom
+}) => {
+  return (
+    <TextField
+      error={touched && invalid}
+      //placeholder="category description"
+      variant="outlined"
+      helperText={helperText}
+      defaultValue={defaultValue}
+      label={label}
+      id={input.name}
+      // value={formInput.description}
+      fullWidth
+      type={type}
+      style={{ marginTop: 20 }}
+      multiline={true}
+      minRows={5}
+      {...custom}
+      onChange={input.onChange}
+
+      // onChange={handleInput}
+    />
+  );
+};
+
+const renderEditableSingleLineField = ({
+  input,
+  label,
+  meta: { touched, error, invalid },
+  type,
+  helperText,
+  defaultValue,
+  id,
+  ...custom
+}) => {
+  return (
+    <TextField
+      //error={touched && invalid}
+      helperText={helperText}
+      variant="outlined"
+      label={label}
+      id={input.name}
+      //value={formInput.name}
+      fullWidth
+      //required
+      type={type}
+      defaultValue={defaultValue}
+      {...custom}
+      onChange={input.onChange}
+      inputProps={{
+        style: {
+          height: 1,
+        },
+      }}
+    />
+  );
+};
+
 const MAX_COUNT = 12;
 
 function ProductEditForm(props) {
@@ -835,6 +901,9 @@ function ProductEditForm(props) {
   );
   const [allowFreezedPriceLowBound, setAllowFreezedPriceLowBound] = useState(
     params[0].allowFreezedPriceLowBound
+  );
+  const [communityDeliveryType, setCommunityDeliveryType] = useState(
+    params[0].communityDeliveryType
   );
 
   const [loading, setLoading] = useState(false);
@@ -1067,6 +1136,10 @@ function ProductEditForm(props) {
     setAllowFreezedPriceLowBound(event.target.value);
   };
 
+  const handleCommunityDeliveryTypeChange = (event) => {
+    setCommunityDeliveryType(event.target.value);
+  };
+
   const handleUploadFiles = (files) => {
     const uploaded = [...uploadedFiles];
     let limitExceeded = false;
@@ -1208,6 +1281,7 @@ function ProductEditForm(props) {
             <MenuItem value={"paint"}>Paint</MenuItem>
             <MenuItem value={"wholesale"}>Wholesale(Bulk Sales)</MenuItem>
             <MenuItem value={"community"}>Community Purchase</MenuItem>
+            <MenuItem value={"deal"}>Setup a Deal</MenuItem>
           </Select>
           <FormHelperText>Product Sales Preference</FormHelperText>
         </FormControl>
@@ -1484,6 +1558,37 @@ function ProductEditForm(props) {
     );
   };
 
+  const renderCommunityDeliveryTypeField = ({
+    input,
+    label,
+    meta: { touched, error, invalid },
+    type,
+    id,
+    ...custom
+  }) => {
+    return (
+      <Box>
+        <FormControl variant="outlined">
+          {/* <InputLabel id="vendor_city">City</InputLabel> */}
+          <Select
+            labelId="communityDeliveryType"
+            id="communityDeliveryType"
+            value={communityDeliveryType}
+            onChange={handleCommunityDeliveryTypeChange}
+            //label="Price Mechanism"
+            style={{ width: 500, marginTop: 20, height: 38 }}
+            //{...input}
+          >
+            <MenuItem value={"same-locatiion"}>Same Location</MenuItem>
+            <MenuItem value={"diverse-location"}>Diverse Location</MenuItem>
+            <MenuItem value={"hybrid"}>Hybrid </MenuItem>
+          </Select>
+          <FormHelperText>Community Delivery Type</FormHelperText>
+        </FormControl>
+      </Box>
+    );
+  };
+
   const buttonContent = () => {
     return <React.Fragment> Submit</React.Fragment>;
   };
@@ -1705,6 +1810,46 @@ function ProductEditForm(props) {
       formValues.minimumFreezableQuantity
         ? formValues.minimumFreezableQuantity
         : params[0].minimumFreezableQuantity
+    );
+    form.append(
+      "requiredMaximumNumberOfCommunityMembers",
+      formValues.requiredMaximumNumberOfCommunityMembers
+        ? formValues.requiredMaximumNumberOfCommunityMembers
+        : params[0].requiredMaximumNumberOfCommunityMembers
+    );
+    form.append(
+      "communityTotalPurchaseableUnit",
+      formValues.communityTotalPurchaseableUnit
+        ? formValues.communityTotalPurchaseableUnit
+        : params[0].communityTotalPurchaseableUnit
+    );
+    form.append(
+      "communityDeliveryPeriod",
+      formValues.communityDeliveryPeriod
+        ? formValues.communityDeliveryPeriod
+        : params[0].communityDeliveryPeriod
+    );
+    form.append(
+      "communityDeliveryType",
+      communityDeliveryType
+        ? communityDeliveryType
+        : params[0].communityDeliveryType
+    );
+    form.append(
+      "communityInstruction",
+      formValues.communityInstruction
+        ? formValues.communityInstruction
+        : params[0].communityInstruction
+    );
+    form.append(
+      "dealCode",
+      formValues.dealCode ? formValues.dealCode : params[0].dealCode
+    );
+    form.append(
+      "dealExpiryDate",
+      formValues.dealExpiryDate
+        ? formValues.dealExpiryDate
+        : params[0].dealExpiryDate
     );
 
     if (formValues.imageCover) {
@@ -2198,6 +2343,112 @@ function ProductEditForm(props) {
             }
             style={{ marginTop: 15 }}
           />
+
+          {salesPreference === "community" && (
+            <Grid item container style={{ marginTop: 20, marginBottom: 20 }}>
+              <FormLabel style={{ color: "blue" }} component="legend">
+                Community Sales Extra Parameters
+              </FormLabel>
+            </Grid>
+          )}
+          {salesPreference === "community" && (
+            <Grid container direction="row" style={{ marginTop: 20 }}>
+              <Grid item style={{ width: "50%" }}>
+                <Field
+                  label=""
+                  id="requiredMaximumNumberOfCommunityMembers"
+                  name="requiredMaximumNumberOfCommunityMembers"
+                  helperText="Maximum Number of Community Members"
+                  defaultValue={
+                    params[0].requiredMaximumNumberOfCommunityMembers
+                  }
+                  type="number"
+                  component={renderEditableSingleLineField}
+                />
+              </Grid>
+              <Grid item style={{ marginLeft: 15, width: "47%" }}>
+                <Field
+                  label=""
+                  id="communityTotalPurchaseableUnit"
+                  name="communityTotalPurchaseableUnit"
+                  defaultValue={params[0].communityTotalPurchaseableUnit}
+                  type="number"
+                  helperText="Community Total Purchaseable Unit"
+                  component={renderEditableSingleLineField}
+                />
+              </Grid>
+            </Grid>
+          )}
+          {salesPreference === "community" && (
+            <Grid container direction="row" style={{ marginTop: 20 }}>
+              <Grid item style={{ marginLeft: 0, width: "100%" }}>
+                <Field
+                  label=""
+                  id="communityDeliveryPeriod"
+                  name="communityDeliveryPeriod"
+                  defaultValue={params[0].communityDeliveryPeriod}
+                  type="text"
+                  helperText="Community Delivery Period"
+                  component={renderEditableSingleLineField}
+                />
+              </Grid>
+            </Grid>
+          )}
+          {salesPreference === "community" && (
+            <Field
+              label=""
+              id="communityDeliveryType"
+              name="communityDeliveryType"
+              defaultValue={params[0].communityDeliveryType}
+              type="text"
+              helperText="Community Delivery Type"
+              component={renderCommunityDeliveryTypeField}
+            />
+          )}
+          {salesPreference === "community" && (
+            <Field
+              label=""
+              id="communityInstruction"
+              name="communityInstruction"
+              defaultValue={params[0].communityInstruction}
+              type="text"
+              helperText="Instruction"
+              component={renderEditableMultilineField}
+            />
+          )}
+          {salesPreference === "deal" && (
+            <Grid item container style={{ marginTop: 20, marginBottom: 20 }}>
+              <FormLabel style={{ color: "blue" }} component="legend">
+                Deal Parameters
+              </FormLabel>
+            </Grid>
+          )}
+          {salesPreference === "deal" && (
+            <Grid container direction="row" style={{ marginTop: 20 }}>
+              <Grid item style={{ width: "50%" }}>
+                <Field
+                  label=""
+                  id="dealCode"
+                  name="dealCode"
+                  defaultValue={params[0].dealCode}
+                  helperText="Enter the Deal Code"
+                  type="text"
+                  component={renderEditableSingleLineField}
+                />
+              </Grid>
+              <Grid item style={{ marginLeft: 15, width: "47%" }}>
+                <Field
+                  label=""
+                  id="dealExpiryDate"
+                  name="dealExpiryDate"
+                  defaultValue={params[0].dealExpiryDate}
+                  type="text"
+                  helperText="Enter the Deal Expiry Date"
+                  component={renderEditableSingleLineField}
+                />
+              </Grid>
+            </Grid>
+          )}
           <Grid item container style={{ marginTop: 20 }}>
             <FormLabel style={{ color: "blue" }} component="legend">
               Product images

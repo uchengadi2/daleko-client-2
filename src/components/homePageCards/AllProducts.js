@@ -627,6 +627,22 @@ export default function AllProducts(props) {
                     </span>
                   </Typography>
                 )}
+                {props.salesPreference === "deal" && (
+                  <Typography>
+                    <span style={{ fontSize: 14, marginLeft: 10 }}>
+                      <strong> Deal Code:</strong>
+                      <span>{props.dealCode}</span>
+                    </span>
+                  </Typography>
+                )}
+                {props.salesPreference === "deal" && (
+                  <Typography>
+                    <span style={{ fontSize: 14, marginLeft: 10 }}>
+                      <strong> Deal Expiry Date:</strong>
+                      <span>{props.dealExpiryDate}</span>
+                    </span>
+                  </Typography>
+                )}
                 <br /> <br />
               </CardContent>
             </Grid>

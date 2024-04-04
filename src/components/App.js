@@ -34,9 +34,10 @@ import ProductCategories from "./Dashboard/products/Categories";
 import OrderPage from "./orders/OrderPage";
 import SearchPage from "./search/SearchPage";
 import RequestQuote from "./quote/RequestQuote";
-import FreezePrice from "./freeze/FreezePrice";
+import FreezePriceForm from "./freeze/FreezePriceForm";
 import DericaHome from "./DericaHome";
 import PaintHome from "./PaintHome";
+import DealHome from "./DealHome";
 
 import api from "./../apis/local";
 import WholesaleHome from "./WholesaleHome";
@@ -48,6 +49,8 @@ import FreezePricePaintPageAd from "./freeze/FreezePricePaintPageAd";
 import FreezePriceRetailPageAd from "./freeze/FreezePriceRetailPageAd";
 import FreezePriceWholesalePageAd from "./freeze/FreezePriceWholesalePageAd";
 import FreezePriceCommunityPageAd from "./freeze/FreezePriceCommunityPageAd";
+import FreezePriceDealPageAd from "./freeze/FreezePriceDealPageAdPage";
+import DealPropositionAdPage from "./deals/DealPropositionAdPage";
 
 function App() {
   const { token, setToken } = useToken();
@@ -213,7 +216,7 @@ function App() {
               />
             </Route>
             <Route path="/freezeprice/:catSlug/:slug">
-              <FreezePrice
+              <FreezePriceForm
                 token={token}
                 userId={userId}
                 setToken={setToken ? setToken : {}}
@@ -334,8 +337,8 @@ function App() {
                 setUserId={setUserId ? setUserId : {}}
               />
             </Route>
-            <Route path="/community">
-              <CommunityHome
+            <Route path="/dealscentral">
+              <DealHome
                 token={token}
                 setToken={setToken ? setToken : {}}
                 userId={userId}
@@ -393,6 +396,22 @@ function App() {
             </Route>
             <Route path="/freezecommunitypagead">
               <FreezePriceCommunityPageAd
+                token={token}
+                setToken={setToken ? setToken : {}}
+                userId={userId}
+                setUserId={setUserId ? setUserId : {}}
+              />
+            </Route>
+            <Route path="/freezedealpagead">
+              <FreezePriceDealPageAd
+                token={token}
+                setToken={setToken ? setToken : {}}
+                userId={userId}
+                setUserId={setUserId ? setUserId : {}}
+              />
+            </Route>
+            <Route path="/dealproposition">
+              <DealPropositionAdPage
                 token={token}
                 setToken={setToken ? setToken : {}}
                 userId={userId}

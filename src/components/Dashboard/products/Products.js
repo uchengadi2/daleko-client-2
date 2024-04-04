@@ -56,6 +56,7 @@ function Products(props) {
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [onBoardOpen, setOnBoardOpen] = useState(false);
+  const [communitySalesOpen, setCommunitySalesOpen] = useState(false);
   const [selectedRows, setSelectedRows] = useState([]);
   const [selectedRowId, setSelectedRowId] = useState();
   const [rowNumber, setRowNumber] = useState(0);
@@ -66,6 +67,10 @@ function Products(props) {
     useState(false);
   const [updateOnBoardProductCounter, setUpdateOnBoardProductCounter] =
     useState(false);
+  const [
+    updateCommunitySalesProductCounter,
+    setUpdateCommunitySalesProductCounter,
+  ] = useState(false);
   const [productsList, setProductsList] = useState([]);
   const [rowSelected, setRowSelected] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -126,6 +131,15 @@ function Products(props) {
           freezedPriceMaximumDurationInWeeks:
             product.freezedPriceMaximumDurationInWeeks,
           minimumFreezableQuantity: product.minimumFreezableQuantity,
+          requiredMaximumNumberOfCommunityMembers:
+            product.requiredMaximumNumberOfCommunityMembers,
+          communityTotalPurchaseableUnit:
+            product.communityTotalPurchaseableUnit,
+          communityDeliveryPeriod: product.communityDeliveryPeriod,
+          communityDeliveryType: product.communityDeliveryType,
+          communityInstruction: product.communityInstruction,
+          dealCode: product.dealCode,
+          dealExpiryDate: product.dealExpiryDate,
         });
       });
       setProductsList(allData);
@@ -140,6 +154,7 @@ function Products(props) {
     updateEdittedProductCounter,
     updateDeletedProductCounter,
     updateOnBoardProductCounter,
+    updateCommunitySalesProductCounter,
   ]);
 
   useEffect(() => {
@@ -157,6 +172,10 @@ function Products(props) {
 
   const renderProductDeletedUpdateCounter = () => {
     setUpdateDeletedProductCounter((prevState) => !prevState);
+  };
+
+  const renderProductCommunitySalesUpdateCounter = () => {
+    setUpdateCommunitySalesProductCounter((prevState) => !prevState);
   };
 
   const renderProductOnBoardUpdateCounter = () => {
@@ -202,6 +221,16 @@ function Products(props) {
     });
   };
 
+  const handleSuccessfulCommunitySalesItemSnackbar = (message) => {
+    //setBecomePartnerOpen(false);
+    setAlert({
+      open: true,
+      message: message,
+      //backgroundColor: "#4BB543",
+      backgroundColor: "#FF731D",
+    });
+  };
+
   const handleFailedSnackbar = (message) => {
     setAlert({
       open: true,
@@ -232,6 +261,10 @@ function Products(props) {
 
   const handleDeleteDialogOpenStatus = () => {
     setDeleteOpen(false);
+  };
+
+  const handleCommunitySalesDialogOpenStatus = () => {
+    setCommunitySalesOpen(false);
   };
 
   const handleEditOpen = () => {
@@ -390,6 +423,14 @@ function Products(props) {
         freezedPriceMaximumDurationInWeeks:
           product.freezedPriceMaximumDurationInWeeks,
         minimumFreezableQuantity: product.minimumFreezableQuantity,
+        requiredMaximumNumberOfCommunityMembers:
+          product.requiredMaximumNumberOfCommunityMembers,
+        communityTotalPurchaseableUnit: product.communityTotalPurchaseableUnit,
+        communityDeliveryPeriod: product.communityDeliveryPeriod,
+        communityDeliveryType: product.communityDeliveryType,
+        communityInstruction: product.communityInstruction,
+        dealCode: product.dealCode,
+        dealExpiryDate: product.dealExpiryDate,
       };
       rows.push(row);
     });
@@ -549,6 +590,38 @@ function Products(props) {
                       />
                     </DialogContent>
                   </Dialog>
+                  {/* <Button
+                    variant="contained"
+                    onClick={handleDeleteOpen}
+                    disabled={rowSelected ? false : true}
+                  >
+                    Create Community Deal
+                  </Button>
+                  <Dialog
+                    //style={{ zIndex: 1302 }}
+                    fullScreen={matchesXS}
+                    open={communitySalesOpen}
+                    // onClose={() => [setOpen(false), history.push("/utilities/countries")]}
+                    onClose={() => [setCommunitySalesOpen(false)]}
+                  >
+                    <DialogContent>
+                      <ProductDeleteForm
+                        token={token}
+                        userId={userId}
+                        params={selectedRows}
+                        handleCommunitySalesDialogOpenStatus={
+                          handleCommunitySalesDialogOpenStatus
+                        }
+                        handleSuccessfulCommunitySalesItemSnackbar={
+                          handleSuccessfulCommunitySalesItemSnackbar
+                        }
+                        handleFailedSnackbar={handleFailedSnackbar}
+                        renderProductCommunitySalesUpdateCounter={
+                          renderProductCommunitySalesUpdateCounter
+                        }
+                      />
+                    </DialogContent>
+                  </Dialog> */}
                 </Stack>
               </div>
             </Grid>

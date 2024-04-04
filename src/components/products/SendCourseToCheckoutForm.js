@@ -16,7 +16,7 @@ import api from "../../apis/local";
 import { CREATE_CART, EDIT_CART } from "../../actions/types";
 import history from "../../history";
 import RequestQuote from "../quote/RequestQuote";
-import FreezePrice from "../freeze/FreezePrice";
+import FreezePriceForm from "../freeze/FreezePriceForm";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -157,6 +157,42 @@ const renderRequestedQuantityField = ({
   );
 };
 
+const renderCommunityQuantityField = ({
+  input,
+  label,
+  meta: { touched, error, invalid },
+  type,
+  id,
+  ...custom
+}) => {
+  return (
+    <TextField
+      //error={touched && invalid}
+      helperText="How many quantities do you need?"
+      variant="outlined"
+      label={label}
+      id={input.name}
+      //value={input.value}
+      fullWidth
+      //required
+      type={type}
+      //defaultValue={quantity}
+      {...custom}
+      onChange={input.onChange}
+      InputProps={{
+        inputProps: {
+          min: 1,
+          style: {
+            height: 1,
+          },
+          readOnly: true,
+        },
+        //readOnly: true,
+      }}
+    />
+  );
+};
+
 const renderPreferredStartDateField = ({
   input,
   label,
@@ -193,7 +229,7 @@ const renderPreferredStartDateField = ({
 };
 
 function SendCourseToCheckoutForm(props) {
-  const { productId, token, userId } = props;
+  const { productId, token, userId, salesPreference } = props;
   const [quantity, setQuantity] = useState(props.minQuantity);
   const [newQuantity, setNewQuantity] = useState(props.minQuantity);
   const [price, setPrice] = useState();
@@ -785,7 +821,12 @@ function SendCourseToCheckoutForm(props) {
           type="number"
           defaultValue={quantity}
           onChange={onQuantityChange}
-          component={renderRequestedQuantityField}
+          // component={renderRequestedQuantityField}
+          component={
+            salesPreference !== "deal"
+              ? renderRequestedQuantityField
+              : renderCommunityQuantityField
+          }
           style={{ width: 300, marginTop: 10 }}
         />
 
@@ -860,7 +901,7 @@ function SendCourseToCheckoutForm(props) {
             to={`/freezeprice/${props.categorySlug}/${props.slug}`}
             //varaint="outlined"
             className={classes.submitFreezePricingButton}
-            onClick={() => <FreezePrice />}
+            onClick={() => <FreezePriceForm />}
           >
             {isLoading ? (
               <CircularProgress size={30} color="inherit" />
