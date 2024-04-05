@@ -606,7 +606,7 @@ function DealPropositionAdPage(props) {
       proposedQuantity: formValues.proposedQuantity,
       proposedPricePerUnit: formValues.proposedPricePerUnit,
       customerPhoneNumber: formValues.customerPhoneNumber,
-      customerEmail: formValues.customerEmailAddress,
+      customerEmailAddress: formValues.customerEmailAddress,
       proposedDeliveryPreference: deliveryPreference,
       proposedDayToDelivery: formValues.proposedDayToDelivery,
       status: "pending",

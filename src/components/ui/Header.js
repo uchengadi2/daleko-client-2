@@ -326,6 +326,7 @@ const Header = (props) => {
   const [userName, setUserName] = useState(null);
   const [userEmail, setUserEmail] = useState(null);
   const [searchText, setSearchText] = useState();
+  const [role, setRole] = useState();
   const [alert, setAlert] = useState({
     open: false,
     message: "",
@@ -360,9 +361,11 @@ const Header = (props) => {
       // });
       const name = workingData.name;
       const email = workingData.email;
+      const role = workingData.role;
 
       setUserName(name);
       setUserEmail(email);
+      setRole(role);
     };
 
     //call the function
@@ -548,15 +551,17 @@ const Header = (props) => {
     } else {
       return (
         <Fragment>
-          <Button
-            onClick={() => <MainDashboard />}
-            disableRipple
-            component={Link}
-            to={`/dashboard/maindashboard`}
-            className={classes.cart}
-          >
-            Dashboard
-          </Button>
+          {role === "admin" && (
+            <Button
+              onClick={() => <MainDashboard />}
+              disableRipple
+              component={Link}
+              to={`/dashboard/maindashboard`}
+              className={classes.cart}
+            >
+              Dashboard
+            </Button>
+          )}
           <Button
             onClick={() => <OrderPage />}
             disableRipple

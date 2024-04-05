@@ -100,6 +100,7 @@ import Accessories from "./utilities/Accessories";
 import Affiliates from "./utilities/Affiliates";
 import OrderList from "./ecommerce/OrderList";
 import RejectedTransactions from "./ecommerce/RejectedTransactions";
+import ProposedDeals from "./ecommerce/ProposedDeals";
 
 // const Item = styled(Paper)(({ theme }) => ({
 //   backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#fff",
@@ -321,6 +322,21 @@ function Dashboard(props) {
                   <LuggageIcon fontSize="small" />
                 </ListItemIcon>
                 <ListItemText>Requested Quotes</ListItemText>
+              </MenuItem>
+              <MenuItem
+                className={
+                  slug === "ecommerce-proposed-deals" ? classes.selected : null
+                }
+                selected={slug === "ecommerce-proposed-deals" ? true : false}
+                onClick={(event) => {
+                  event.preventDefault();
+                  history.push(`/dashboard/ecommerce-proposed-deals`);
+                }}
+              >
+                <ListItemIcon>
+                  <LuggageIcon fontSize="small" />
+                </ListItemIcon>
+                <ListItemText>Proposed Deals</ListItemText>
               </MenuItem>
               <MenuItem
                 className={
@@ -912,6 +928,11 @@ function Dashboard(props) {
         {slug === "ecommerce-quotes" && (
           <Grid item xs={9.5}>
             <Quotations />
+          </Grid>
+        )}
+        {slug === "ecommerce-proposed-deals" && (
+          <Grid item xs={9.5}>
+            <ProposedDeals />
           </Grid>
         )}
         {slug === "ecommerce-orderslist" && (
