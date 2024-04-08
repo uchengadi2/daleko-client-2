@@ -28,6 +28,7 @@ import FormHelperText from "@material-ui/core/FormHelperText";
 import ThankYou from "../thankyou/ThankYou";
 import history from "../../history";
 import api from "./../../apis/local";
+import Paystack from "./Paystack";
 import { CREATE_QUOTE } from "../../actions/types";
 
 const useStyles = makeStyles((theme) => ({
@@ -122,105 +123,13 @@ const renderMultilineField = ({
   );
 };
 
-const renderQuantityRequestedField = ({
+const renderEditableSingleLineField = ({
   input,
   label,
   meta: { touched, error, invalid },
   type,
   helperText,
-  id,
-  ...custom
-}) => {
-  return (
-    <TextField
-      //error={touched && invalid}
-      helperText={helperText}
-      variant="outlined"
-      label={label}
-      id={input.name}
-      //value={formInput.name}
-      fullWidth
-      //required
-      type={type}
-      {...custom}
-      onChange={input.onChange}
-      inputProps={{
-        style: {
-          height: 1,
-        },
-      }}
-    />
-  );
-};
-
-const renderCustomerNameField = ({
-  input,
-  label,
-  meta: { touched, error, invalid },
-  type,
-  helperText,
-  id,
-  ...custom
-}) => {
-  return (
-    <TextField
-      //error={touched && invalid}
-      helperText={helperText}
-      variant="outlined"
-      label={label}
-      id={input.name}
-      //value={formInput.name}
-      fullWidth
-      //required
-      type={type}
-      {...custom}
-      onChange={input.onChange}
-      inputProps={{
-        style: {
-          height: 1,
-        },
-      }}
-    />
-  );
-};
-
-const renderWhatasppNumberField = ({
-  input,
-  label,
-  meta: { touched, error, invalid },
-  type,
-  helperText,
-  id,
-  ...custom
-}) => {
-  return (
-    <TextField
-      //error={touched && invalid}
-      helperText={helperText}
-      variant="outlined"
-      label={label}
-      id={input.name}
-      //value={formInput.name}
-      fullWidth
-      //required
-      type={type}
-      {...custom}
-      onChange={input.onChange}
-      inputProps={{
-        style: {
-          height: 1,
-        },
-      }}
-    />
-  );
-};
-
-const renderCustomerEmailield = ({
-  input,
-  label,
-  meta: { touched, error, invalid },
-  type,
-  helperText,
+  defaultValue,
   id,
   ...custom
 }) => {
@@ -258,29 +167,24 @@ function FreezePriceForm(props) {
   const matchesXS = useMediaQuery(theme.breakpoints.down("xs"));
   const matchesMDUp = useMediaQuery(theme.breakpoints.up("md"));
 
-  const [city, setCity] = useState("");
-  const [state, setState] = useState("");
-  const [country, setCountry] = useState();
-
-  const [image, setImage] = useState();
-  const [cityList, setCityList] = useState([]);
-
-  const [stateList, setStateList] = useState([]);
-  const [countryList, setCountryList] = useState([]);
-
-  const [deliveryPreference, setDeliveryPreference] = useState("pickup");
   const [loading, setLoading] = useState(false);
-  const [addToWhatsappGroup, setAddToWhatsappGroup] = useState("no");
-  const [addToEmailList, setAddToEmailList] = useState("no");
-  const [quoteRequestNumber, setQuoteRequestNumber] = useState(
-    "QUOTE-" + Math.floor(Math.random() * 10000000000000) + "-" + "DALE"
+
+  const [freezePriceNumber, setFreezePriceNumber] = useState(
+    "FREEZE-" + Math.floor(Math.random() * 10000000000000) + "-" + "DALE"
   );
   const [product, setProduct] = useState({});
   const [minimumOrderQuantity, setMinimumOrderQuantity] = useState();
   const [sku, setSku] = useState();
   const [configuration, setConfiguration] = useState();
   const [productName, setProductName] = useState();
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [customerEmail, setCustomerEmail] = useState();
+  const [customerName, setCustomerName] = useState();
+  const [customerPhoneNumber, setCustomerPhoneNumber] = useState();
+  const [currencyName, setCurrencyName] = useState("naira");
+  const [allowPayment, setAllowPayment] = useState(false);
+  const [freezedQuantity, setFreezedQuantity] = useState(0);
+  const [freezeDuration, setFreezeDuration] = useState(0);
+  const [serviceCharge, setServiceCharge] = useState(0);
   const [isLoading, setIsLoading] = useState(null);
   const [alert, setAlert] = useState({
     open: false,
@@ -291,59 +195,6 @@ function FreezePriceForm(props) {
   const dispatch = useDispatch();
 
   const slug = params.slug;
-
-  useEffect(() => {
-    const fetchData = async () => {
-      let allData = [];
-      api.defaults.headers.common["Authorization"] = `Bearer ${props.token}`;
-      const response = await api.get(`/countries`);
-      const workingData = response.data.data.data;
-      workingData.map((state) => {
-        allData.push({ id: state._id, name: state.name });
-      });
-      setCountryList(allData);
-    };
-
-    //call the function
-
-    fetchData().catch(console.error);
-  }, []);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      let allData = [];
-      api.defaults.headers.common["Authorization"] = `Bearer ${props.token}`;
-      const response = await api.get(`/states`, {
-        params: { country: country },
-      });
-      const workingData = response.data.data.data;
-      workingData.map((state) => {
-        allData.push({ id: state._id, name: state.name });
-      });
-      setStateList(allData);
-    };
-
-    //call the function
-
-    fetchData().catch(console.error);
-  }, [country]);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      let allData = [];
-      api.defaults.headers.common["Authorization"] = `Bearer ${props.token}`;
-      const response = await api.get(`/cities`);
-      const workingData = response.data.data.data;
-      workingData.map((city) => {
-        allData.push({ id: city._id, name: city.name });
-      });
-      setCityList(allData);
-    };
-
-    //call the function
-
-    fetchData().catch(console.error);
-  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -392,6 +243,18 @@ function FreezePriceForm(props) {
           barcode: product[0].barcode,
           deliverability: product[0].deliverability,
           pickupInfo: product[0].pickupInfo,
+
+          allowPriceFreezing: product[0].allowPriceFreezing,
+          allowFreezedPriceLowBound: product[0].allowFreezedPriceLowBound,
+          freezedPriceLowBound: product[0].freezedPriceLowBound,
+          chargesPerWeekOnFreezedPriceServiceWithoutPriceLowBound:
+            product[0].chargesPerWeekOnFreezedPriceServiceWithoutPriceLowBound,
+          chargesPerWeekOnFreezedPriceServiceWithPriceLowBound:
+            product[0].chargesPerWeekOnFreezedPriceServiceWithPriceLowBound,
+          freezedPriceMaximumDurationInWeeks:
+            product[0].freezedPriceMaximumDurationInWeeks,
+          minimumFreezableQuantity: product[0].minimumFreezableQuantity,
+          datePriceWasSet: product[0].datePriceWasSet,
         });
 
         setProduct({
@@ -430,6 +293,17 @@ function FreezePriceForm(props) {
           barcode: allData[0].barcode,
           deliverability: allData[0].deliverability,
           pickupInfo: allData[0].pickupInfo,
+          allowPriceFreezing: allData[0].allowPriceFreezing,
+          allowFreezedPriceLowBound: allData[0].allowFreezedPriceLowBound,
+          freezedPriceLowBound: allData[0].freezedPriceLowBound,
+          chargesPerWeekOnFreezedPriceServiceWithoutPriceLowBound:
+            allData[0].chargesPerWeekOnFreezedPriceServiceWithoutPriceLowBound,
+          chargesPerWeekOnFreezedPriceServiceWithPriceLowBound:
+            allData[0].chargesPerWeekOnFreezedPriceServiceWithPriceLowBound,
+          freezedPriceMaximumDurationInWeeks:
+            allData[0].freezedPriceMaximumDurationInWeeks,
+          minimumFreezableQuantity: allData[0].minimumFreezableQuantity,
+          datePriceWasSet: allData[0].datePriceWasSet,
         });
         setProductName(allData[0].name);
         setMinimumOrderQuantity(allData[0].minimumQuantity);
@@ -444,61 +318,62 @@ function FreezePriceForm(props) {
     fetchData().catch(console.error);
   }, [slug]);
 
-  //get the city list
-  const renderCityList = () => {
-    return cityList.map((item) => {
-      return (
-        <MenuItem key={item.id} value={item.id}>
-          {item.name}
-        </MenuItem>
-      );
-    });
+  useEffect(() => {
+    const fetchData = async () => {
+      let allData = [];
+      api.defaults.headers.common["Authorization"] = `Bearer ${props.token}`;
+      const response = await api.get(`/users/${props.userId}`);
+      const user = response.data.data.data;
+      allData.push({
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        phone: user.phoneNumber,
+      });
+      setCustomerEmail(allData[0].email);
+      setCustomerName(allData[0].name);
+      setCustomerPhoneNumber(allData[0].phone);
+    };
+
+    //call the function
+
+    fetchData().catch(console.error);
+  }, [props]);
+
+  const handleFreezedDurationChange = (e) => {
+    if (product.allowFreezedPriceLowBound) {
+      let charge =
+        freezedQuantity *
+        e.target.value *
+        product.chargesPerWeekOnFreezedPriceServiceWithPriceLowBound;
+      setFreezeDuration(e.target.value);
+      setServiceCharge(charge);
+    } else {
+      let charge =
+        freezedQuantity *
+        e.target.value *
+        product.chargesPerWeekOnFreezedPriceServiceWithoutPriceLowBound;
+      setFreezeDuration(e.target.value);
+      setServiceCharge(charge);
+    }
   };
 
-  //get the state list
-  const renderStateList = () => {
-    return stateList.map((item) => {
-      return (
-        <MenuItem key={item.id} value={item.id}>
-          {item.name}
-        </MenuItem>
-      );
-    });
-  };
-
-  //get the country list
-  const renderCountryList = () => {
-    return countryList.map((item) => {
-      return (
-        <MenuItem key={item.id} value={item.id}>
-          {item.name}
-        </MenuItem>
-      );
-    });
-  };
-
-  const handleCityChange = (event) => {
-    setCity(event.target.value);
-  };
-
-  const handleStateChange = (event) => {
-    setState(event.target.value);
-  };
-
-  const handleCountryChange = (event) => {
-    setCountry(event.target.value);
-  };
-
-  const handleAddToWhatsappGroupChange = (event) => {
-    setAddToWhatsappGroup(event.target.value);
-  };
-
-  const handleAddToEmailListChange = (event) => {
-    setAddToEmailList(event.target.value);
-  };
-
-  const handleDeliveryPreferenceChange = (event) => {
-    setDeliveryPreference(event.target.value);
+  const handleFreezedQuantityChange = (e) => {
+    if (product.allowFreezedPriceLowBound) {
+      let charge =
+        freezeDuration *
+        e.target.value *
+        product.chargesPerWeekOnFreezedPriceServiceWithPriceLowBound;
+      setFreezedQuantity(e.target.value);
+      setServiceCharge(charge);
+    } else {
+      let charge =
+        freezeDuration *
+        e.target.value *
+        product.chargesPerWeekOnFreezedPriceServiceWithoutPriceLowBound;
+      setFreezedQuantity(e.target.value);
+      setServiceCharge(charge);
+    }
   };
 
   const handleSuccessfulCreateSnackbar = (message) => {
@@ -520,7 +395,7 @@ function FreezePriceForm(props) {
     //setBecomePartnerOpen(true);
   };
 
-  const renderSkuField = ({
+  const renderSinglelineField = ({
     input,
     label,
     meta: { touched, error, invalid },
@@ -528,20 +403,23 @@ function FreezePriceForm(props) {
     helperText,
     defaultValue,
     id,
+    rows,
     ...custom
   }) => {
     return (
       <TextField
-        //error={touched && invalid}
-        helperText={helperText}
+        error={touched && invalid}
+        //placeholder="category description"
         variant="outlined"
+        helperText={helperText}
         label={label}
         id={input.name}
         defaultValue={defaultValue}
-        //value={formInput.name}
         fullWidth
-        //required
         type={type}
+        style={{ marginTop: 20 }}
+        //multiline={true}
+        minRows={rows}
         {...custom}
         onChange={input.onChange}
         inputProps={{
@@ -554,367 +432,137 @@ function FreezePriceForm(props) {
     );
   };
 
-  const renderMinimumOrderQuantityField = ({
-    input,
-    label,
-    meta: { touched, error, invalid },
-    type,
-    helperText,
-    defaultValue,
-    id,
-    ...custom
-  }) => {
-    return (
-      <TextField
-        //error={touched && invalid}
-        helperText={helperText}
-        variant="outlined"
-        label={label}
-        id={input.name}
-        //value={formInput.name}
-        fullWidth
-        //required
-        type={type}
-        defaultValue={defaultValue}
-        {...custom}
-        onChange={input.onChange}
-        inputProps={{
-          style: {
-            height: 1,
-          },
-          readOnly: true,
-        }}
-      />
-    );
+  const getCurrencyCode = () => {
+    if (currencyName) {
+      if (currencyName.toLowerCase() === "naira") {
+        return <span>&#8358;</span>;
+      } else {
+        return;
+      }
+    }
   };
 
-  const renderProductNameField = ({
-    input,
-    label,
-    meta: { touched, error, invalid },
-    type,
-    helperText,
-    defaultValue,
-    id,
-    ...custom
-  }) => {
-    return (
-      <TextField
-        //error={touched && invalid}
-        helperText={helperText}
-        variant="outlined"
-        label={label}
-        id={input.name}
-        //value={formInput.name}
-        fullWidth
-        //required
-        type={type}
-        defaultValue={defaultValue}
-        {...custom}
-        onChange={input.onChange}
-        inputProps={{
-          style: {
-            height: 1,
-          },
-          readOnly: true,
-        }}
+  const productPrice = `${getCurrencyCode().props.children}${
+    product.pricePerUnit
+      ? product.pricePerUnit.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")
+      : 0
+  }`;
 
-        //onChange={handleInput}
-      />
-    );
-  };
-
-  const renderCountryField = ({
-    input,
-    label,
-    meta: { touched, error, invalid },
-    type,
-    id,
-    ...custom
-  }) => {
-    return (
-      <Box>
-        <FormControl variant="outlined">
-          {/* <InputLabel id="vendor_city">City</InputLabel> */}
-          <Select
-            labelId="country"
-            id="country"
-            value={country}
-            onChange={handleCountryChange}
-            label="Country"
-            style={{
-              marginTop: 0,
-              width: matchesMDUp ? 280 : 400,
-              height: 38,
-              marginLeft: 0,
-            }}
-            //{...input}
-          >
-            {renderCountryList()}
-          </Select>
-          <FormHelperText>Country</FormHelperText>
-        </FormControl>
-      </Box>
-    );
-  };
-
-  const renderStateField = ({
-    input,
-    label,
-    meta: { touched, error, invalid },
-    type,
-    id,
-    ...custom
-  }) => {
-    return (
-      <Box>
-        <FormControl variant="outlined">
-          {/* <InputLabel id="vendor_city">City</InputLabel> */}
-          <Select
-            labelId="state"
-            id="state"
-            value={state}
-            onChange={handleStateChange}
-            label="State"
-            style={{
-              marginTop: 0,
-              width: matchesMDUp ? 250 : 400,
-              height: 38,
-              marginLeft: matchesMDUp ? 15 : 0,
-            }}
-            //{...input}
-          >
-            {renderStateList()}
-          </Select>
-          <FormHelperText>State</FormHelperText>
-        </FormControl>
-      </Box>
-    );
-  };
-
-  const renderCityField = ({
-    input,
-    label,
-    meta: { touched, error, invalid },
-    type,
-    id,
-    ...custom
-  }) => {
-    return (
-      <Box>
-        <FormControl variant="outlined">
-          {/* <InputLabel id="vendor_city">City</InputLabel> */}
-          <Select
-            labelId="city"
-            id="city"
-            value={city}
-            onChange={handleCityChange}
-            label="City"
-            style={{
-              marginTop: 0,
-              width: matchesMDUp ? 220 : 400,
-              height: 38,
-              marginLeft: matchesMDUp ? 15 : 0,
-            }}
-            //{...input}
-          >
-            {renderCityList()}
-          </Select>
-          <FormHelperText>City</FormHelperText>
-        </FormControl>
-      </Box>
-    );
-  };
-
-  const renderDeliveryPreferenceField = ({
-    input,
-    label,
-    meta: { touched, error, invalid },
-    type,
-    id,
-    ...custom
-  }) => {
-    return (
-      <Box>
-        <FormControl variant="outlined">
-          {/* <InputLabel id="vendor_city">City</InputLabel> */}
-          <Select
-            labelId="deliveryPreference"
-            id="deliveryPreference"
-            value={deliveryPreference}
-            onChange={handleDeliveryPreferenceChange}
-            //label="Add me To The Email Address for Notifications"
-            style={{
-              width: matchesMDUp ? 800 : 400,
-              marginTop: 15,
-              height: 38,
-              marginLeft: 0,
-            }}
-            //{...input}
-          >
-            <MenuItem value={"pickup"}>Do Not Include Delivery Cost</MenuItem>
-            <MenuItem value={"deliver"}>Include Delivery Cost</MenuItem>
-          </Select>
-          <FormHelperText>Please Select Delivery Preference</FormHelperText>
-        </FormControl>
-      </Box>
-    );
-  };
-
-  const renderWhatsappGroupField = ({
-    input,
-    label,
-    meta: { touched, error, invalid },
-    type,
-    id,
-    ...custom
-  }) => {
-    return (
-      <Box>
-        <FormControl variant="outlined">
-          {/* <InputLabel id="vendor_city">City</InputLabel> */}
-          <Select
-            labelId="addToWhatsappGroup"
-            id="addToWhatsappGroup"
-            value={addToWhatsappGroup}
-            onChange={handleAddToWhatsappGroupChange}
-            //label="Add me To Whatsapp group for Notifications?"
-            style={{ width: 400, marginTop: 0, height: 38 }}
-            //{...input}
-          >
-            <MenuItem value={"no"}>No</MenuItem>
-            <MenuItem value={"yes"}>Yes</MenuItem>
-          </Select>
-          <FormHelperText>
-            Add Me To The WhatsApp Group To Receive Market Notifications
-          </FormHelperText>
-        </FormControl>
-      </Box>
-    );
-  };
-
-  const renderEmailListField = ({
-    input,
-    label,
-    meta: { touched, error, invalid },
-    type,
-    id,
-    ...custom
-  }) => {
-    return (
-      <Box>
-        <FormControl variant="outlined">
-          {/* <InputLabel id="vendor_city">City</InputLabel> */}
-          <Select
-            labelId="addToEmailList"
-            id="addToEmailList"
-            value={addToEmailList}
-            onChange={handleAddToEmailListChange}
-            //label="Add me To The Email Address for Notifications"
-            style={{
-              width: matchesMDUp ? 370 : 400,
-              marginTop: 0,
-              height: 38,
-              marginLeft: matchesMDUp ? 15 : 0,
-            }}
-            //{...input}
-          >
-            <MenuItem value={"no"}>No</MenuItem>
-            <MenuItem value={"yes"}>Yes</MenuItem>
-          </Select>
-          <FormHelperText>
-            Add Me To The Email List To Receive Market Notifications
-          </FormHelperText>
-        </FormControl>
-      </Box>
-    );
-  };
+  const charge = `${getCurrencyCode().props.children}${
+    serviceCharge
+      ? serviceCharge.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")
+      : 0
+  }`;
 
   const buttonContent = () => {
-    return <React.Fragment> Send Quote</React.Fragment>;
+    return <React.Fragment> Freeze Price</React.Fragment>;
   };
+
+  const buttonMakePaymentContent = () => {
+    return <React.Fragment> Make Payment</React.Fragment>;
+  };
+
+  const amountForPayment = +serviceCharge.toFixed(2) * 100;
 
   const onSubmit = (formValues) => {
     setLoading(true);
 
-    if (!formValues.quantityRequested) {
+    if (!freezedQuantity) {
       handleFailedSnackbar(
-        "Please Enter The Quantity You Need on The Appropriate Field"
+        "Please Enter The Quantity Of The Product You Want To Freeze The Price"
       );
       setLoading(false);
       return;
     }
 
-    if (!quoteRequestNumber) {
-      props.handleFailedSnackbar("Please Enter The Quantity You Need");
-      setLoading(false);
-      return;
-    }
-
-    if (formValues.quantityRequested < minimumOrderQuantity) {
+    if (freezedQuantity < product.minimumFreezableQuantity) {
       handleFailedSnackbar(
-        "The Quantity Requested Should Not Be Lower Than The Minimum Order Quantity"
+        `The Freezed Quantity You Entered Cannot Be Less Than ${product.minimumFreezableQuantity}`
       );
       setLoading(false);
       return;
     }
 
-    if (!formValues.customerName) {
-      handleFailedSnackbar("Please Complete The Customer Name Field");
+    if (!freezeDuration) {
+      props.handleFailedSnackbar("Please Enter Your Desired Freezed Duration ");
       setLoading(false);
       return;
     }
 
-    if (!formValues.whatsappNumber) {
-      handleFailedSnackbar("Please Enter Your WhatsApp Number");
+    if (freezeDuration > product.freezedPriceMaximumDurationInWeeks) {
+      props.handleFailedSnackbar(
+        `The Duration You Entered Cannot be Greater Than ${product.freezedPriceMaximumDurationInWeeks}`
+      );
       setLoading(false);
       return;
     }
 
+    setAllowPayment(true);
+  };
+
+  const renderOnlinePayment = (
+    email,
+    amount,
+    orderNumber,
+    phoneNumber,
+    name
+  ) => {
     const data = {
-      customerName: formValues.customerName,
-      quantityRequested: formValues.quantityRequested,
-      whatsappNumber: formValues.whatsappNumber,
-      customerEmail: formValues.customerEmail,
-      deliveryPreference: deliveryPreference,
-      country: deliveryPreference === "deliver" ? country : null,
-      state: deliveryPreference === "deliver" ? state : null,
-      city: deliveryPreference === "deliver" ? city : null,
-      address: deliveryPreference === "deliver" ? formValues.address : null,
-      addToWhatsappGroup: addToWhatsappGroup,
-      addToEmailList: addToEmailList,
-      status: "pending",
-      quoteRequestNumber: quoteRequestNumber,
-      productName: productName,
-      sku: sku,
-      minimumOrderQuantity: minimumOrderQuantity,
-      product: product.id,
+      orderNumber: orderNumber,
+      customerName: name,
+      customerPhoneNumber: phoneNumber,
+      // customerEmailAddress: customerEmail,
+      // recipientName: recipientName,
+      // recipientPhoneNumber: recipientPhoneNumber,
+      // recipientAddress: recipientAddress,
+      // nearestBusstop: nearestBusstop,
+      // postalCode: postalCode,
+      // recipientCountry: country,
+      // recipientState: state,
+      // recipientCity: city,
+      // deliveryMode: deliveryMode,
+      // vatRate: vatRate,
+      // vat: vat,
+      // currency: currency,
+      // totalWeight: totalWeight,
+      // payOnDeliveryMaxWeightInKg: payOnDeliveryMaxWeightInKg,
+      // implementVatCollection: implementVatCollection,
+      // recipientEmailAddress: customerEmail,
+      // totalDeliveryCost: deliveryCost ? deliveryCost : 0,
+      // totalProductCost: totalProductCost,
+      // paymentMethod: paymentMethod,
+      // paymentStatus: "to-be-confirmed",
+      // orderedBy: userId,
+      // salesTax: transactionSalesTax,
+      // origin: policy.onlineOrigin,
+      // implementSalesTaxCollection: policy.implementSalesTaxCollection,
+      // allowOriginSalesTax: policy.allowOriginSalesTax,
+      // revenue: totalRevenue,
+      // commissionRate: policy.commissionRate,
+      // prevailingSalesTax: originSalesTaxRate,
+      // destinationSalesTax: destSalesTaxRate,
+      // allowCentralCommission: policy.allowCentralCommission,
+
+      // recipientCountryName: countryName,
+      // recipientStateName: stateName,
+      // recipientCityName: cityName,
+      // deliveryStatus: "pending",
+      // deliveryMode: deliveryMode,
+      // daysToDelivery: daysToDelivery,
     };
-    console.log("data:", data);
-
-    if (data) {
-      const createForm = async () => {
-        api.defaults.headers.common["Authorization"] = `Bearer ${props.token}`;
-        const response = await api.post(`/quotes`, data);
-
-        if (response.data.status === "success") {
-          dispatch({
-            type: CREATE_QUOTE,
-            payload: response.data.data.data,
-          });
-
-          history.push(`/thankyou/quotes/${quoteRequestNumber}`);
-        } else {
-          handleFailedSnackbar("Something went wrong, please try again!!!");
-        }
-      };
-      createForm().catch((err) => {
-        handleFailedSnackbar("Something went wrong, please try again!!!");
-        console.log("err:", err.message);
-      });
-    } else {
-      handleFailedSnackbar("Something went wrong, please try again!!!");
-    }
+    return (
+      <Paystack
+        email={email}
+        amount={parseInt(amount)}
+        text={"Make Payment"}
+        orderNumber={orderNumber}
+        data={data}
+        //productList={props.productList}
+        token={props.token}
+        handleSuccessfulCreateSnackbar={props.handleSuccessfulCreateSnackbar}
+        handleFailedSnackbar={props.handleFailedSnackbar}
+      />
+    );
   };
 
   return (
@@ -956,7 +604,7 @@ function FreezePriceForm(props) {
                   defaultValue={productName + "(" + configuration + ")"}
                   helperText="Product Name"
                   type="text"
-                  component={renderProductNameField}
+                  component={renderSinglelineField}
                 />
               </Grid>
               <Grid item style={{ width: "22.5%", marginLeft: 15 }}>
@@ -967,170 +615,127 @@ function FreezePriceForm(props) {
                   defaultValue={sku}
                   helperText="Sku"
                   type="text"
-                  component={renderSkuField}
+                  component={renderSinglelineField}
                 />
               </Grid>
             </Grid>
             <Grid container direction="row" style={{ marginTop: 10 }}>
-              <Grid item style={{ marginLeft: 0, width: "22%" }}>
+              <Grid item style={{ marginLeft: 0, width: "32%" }}>
                 <Field
                   label=""
-                  id="minimumOrderQuantity"
-                  name="minimumOrderQuantity"
+                  id="minimumFreezableQuantity"
+                  name="minimumFreezableQuantity"
                   type="number"
-                  defaultValue={minimumOrderQuantity}
-                  helperText="Minimum Order Quantity"
-                  component={renderMinimumOrderQuantityField}
+                  defaultValue={product.minimumFreezableQuantity}
+                  helperText="Minimum Freezeable Quantity"
+                  component={renderSinglelineField}
                   autoComplete="off"
                   style={{ marginTop: 10 }}
                 />
               </Grid>
-              <Grid item style={{ marginLeft: 15, width: "22%" }}>
+              <Grid item style={{ marginLeft: 15, width: "32%" }}>
                 <Field
                   label=""
-                  id="quantityRequested"
-                  name="quantityRequested"
+                  id="freezedPriceMaximumDurationInWeeks"
+                  name="freezedPriceMaximumDurationInWeeks"
                   type="number"
-                  helperText="What Quantity Do You Need?"
-                  component={renderQuantityRequestedField}
+                  helperText="Maximum Freezable Duration(in weeks)"
+                  defaultValue={product.freezedPriceMaximumDurationInWeeks}
+                  component={renderSinglelineField}
                   autoComplete="off"
                   style={{ marginTop: 10 }}
                 />
               </Grid>
-              <Grid item style={{ width: "51.5%", marginLeft: 15 }}>
+              <Grid item style={{ width: "31.5%", marginLeft: 15 }}>
                 <Field
                   label=""
-                  id="customerName"
-                  name="customerName"
+                  id="pricePerUnit"
+                  name="pricePerUnit"
+                  defaultValue={productPrice}
                   type="text"
-                  helperText="Enter Your Name"
-                  component={renderCustomerNameField}
+                  helperText="The Price to be Freezed"
+                  component={renderSinglelineField}
                   autoComplete="off"
                   style={{ marginTop: 10 }}
                 />
               </Grid>
             </Grid>
 
-            <Grid container direction="row" style={{ marginTop: 20 }}>
-              <Grid item style={{ width: "50%" }}>
+            <Grid container direction="row" style={{ marginTop: 10 }}>
+              <Grid item style={{ marginLeft: 0, width: "32%" }}>
                 <Field
                   label=""
-                  id="whatsappNumber"
-                  name="whatsappNumber"
-                  type="text"
-                  helperText=" Enter Your WhatsApp Number"
-                  component={renderWhatasppNumberField}
+                  id="freezedQuantity"
+                  name="freezedQuantity"
+                  type="number"
+                  helperText="Enter the Quantity to Freeze"
+                  onChange={handleFreezedQuantityChange}
+                  component={renderEditableSingleLineField}
+                  autoComplete="off"
+                  style={{ marginTop: 10 }}
                 />
               </Grid>
-              <Grid item style={{ width: "48%", marginLeft: 10 }}>
+              <Grid item style={{ marginLeft: 15, width: "32%" }}>
                 <Field
                   label=""
-                  id="customerEmail"
-                  name="customerEmail"
-                  helperText="Enter Your Email Address(Optional)"
-                  type="text"
-                  component={renderCustomerEmailield}
+                  id="freezeDuration"
+                  name="freezeDuration"
+                  type="number"
+                  onChange={handleFreezedDurationChange}
+                  helperText="Enter the Freezed Duration(in weeks)"
+                  component={renderEditableSingleLineField}
+                  autoComplete="off"
+                  style={{ marginTop: 10 }}
                 />
               </Grid>
-            </Grid>
-            <Grid container direction="row" style={{ marginTop: 20 }}>
-              <Grid item style={{ width: "50%" }}>
+              <Grid item style={{ width: "31.5%", marginLeft: 15 }}>
                 <Field
-                  //label=""
-                  id="addToWhatsappGroup"
-                  name="addToWhatsappGroup"
+                  label=""
+                  id="serviceCharge"
+                  name="serviceCharge"
                   type="text"
-                  component={renderWhatsappGroupField}
-                />
-              </Grid>
-              <Grid item style={{ width: "48%", marginLeft: 10 }}>
-                <Field
-                  //label=""
-                  id="addToEmailList"
-                  name="addToEmailList"
-                  type="text"
-                  component={renderEmailListField}
+                  helperText="Freeze Service Charge"
+                  defaultValue={charge}
+                  component={renderSinglelineField}
+                  autoComplete="off"
+                  style={{ marginTop: 10 }}
                 />
               </Grid>
             </Grid>
 
-            <Field
-              label=""
-              id="deliveryPreference"
-              name="deliveryPreference"
-              helperText="Delivery Preference"
-              type="text"
-              component={renderDeliveryPreferenceField}
-            />
-            {deliveryPreference === "deliver" && (
-              <Grid container direction="row" style={{ marginTop: 15 }}>
-                <Grid item style={{ marginLeft: 0, width: "33%" }}>
-                  <Field
-                    label=""
-                    id="country"
-                    name="country"
-                    type="text"
-                    component={renderCountryField}
-                    autoComplete="off"
-                    style={{ marginTop: 15 }}
-                  />
-                </Grid>
-                <Grid item style={{ width: "33%", marginLeft: 15 }}>
-                  <Field
-                    label=""
-                    id="state"
-                    name="state"
-                    type="text"
-                    component={renderStateField}
-                    autoComplete="off"
-                    style={{ marginTop: 20 }}
-                  />
-                </Grid>
-                <Grid item style={{ width: "30%", marginLeft: 15 }}>
-                  <Field
-                    label=""
-                    id="city"
-                    name="city"
-                    type="text"
-                    component={renderCityField}
-                    autoComplete="off"
-                    style={{ marginTop: 20 }}
-                  />
-                </Grid>
-              </Grid>
+            {!allowPayment && (
+              <Button
+                variant="contained"
+                className={classes.submitButton}
+                onClick={props.handleSubmit(onSubmit)}
+                disabled={true}
+              >
+                {loading ? (
+                  <CircularProgress size={30} color="inherit" />
+                ) : (
+                  buttonContent()
+                )}
+              </Button>
             )}
-            {deliveryPreference === "deliver" && (
-              <Field
-                label=""
-                id=""
-                name="address"
-                helperText="Your Address"
-                rows={3}
-                type="text"
-                component={renderMultilineField}
-              />
-            )}
-            {/* <Field
-            label=""
-            id=""
-            name="comment"
-            helperText="Any Comment?"
-            rows={3}
-            type="text"
-            component={renderMultilineField}
-          /> */}
-
-            <Button
-              variant="contained"
-              className={classes.submitButton}
-              onClick={props.handleSubmit(onSubmit)}
-            >
-              {loading ? (
-                <CircularProgress size={30} color="inherit" />
-              ) : (
-                buttonContent()
+            {allowPayment &&
+              // <Button
+              //   variant="contained"
+              //   className={classes.submitButton}
+              //   onClick={props.handleSubmit(onSubmit)}
+              // >
+              //   {loading ? (
+              //     <CircularProgress size={30} color="inherit" />
+              //   ) : (
+              //     buttonContent()
+              //   )}
+              // </Button>
+              renderOnlinePayment(
+                customerEmail,
+                amountForPayment,
+                freezePriceNumber,
+                customerPhoneNumber,
+                customerName
               )}
-            </Button>
           </Box>
         </form>
       ) : (
@@ -1170,7 +775,7 @@ function FreezePriceForm(props) {
                   defaultValue={productName + "(" + configuration + ")"}
                   helperText="Product Name"
                   type="text"
-                  component={renderProductNameField}
+                  component={renderSinglelineField}
                 />
               </Grid>
               <Grid item style={{ width: "100%", marginLeft: 0 }}>
@@ -1181,7 +786,7 @@ function FreezePriceForm(props) {
                   defaultValue={sku}
                   helperText="Sku"
                   type="text"
-                  component={renderSkuField}
+                  component={renderSinglelineField}
                 />
               </Grid>
             </Grid>
@@ -1189,12 +794,12 @@ function FreezePriceForm(props) {
               <Grid item style={{ marginLeft: 0, width: "100%" }}>
                 <Field
                   label=""
-                  id="minimumOrderQuantity"
-                  name="minimumOrderQuantity"
+                  id="minimumFreezableQuantity"
+                  name="minimumFreezableQuantity"
                   type="number"
-                  defaultValue={minimumOrderQuantity}
-                  helperText="Minimum Order Quantity"
-                  component={renderMinimumOrderQuantityField}
+                  defaultValue={product.minimumFreezableQuantity}
+                  helperText="Minimum Freezeable Quantity"
+                  component={renderSinglelineField}
                   autoComplete="off"
                   style={{ marginTop: 10 }}
                 />
@@ -1202,11 +807,12 @@ function FreezePriceForm(props) {
               <Grid item style={{ marginLeft: 0, width: "100%" }}>
                 <Field
                   label=""
-                  id="quantityRequested"
-                  name="quantityRequested"
+                  id="freezedPriceMaximumDurationInWeeks"
+                  name="freezedPriceMaximumDurationInWeeks"
                   type="number"
-                  helperText="What Quantity Do You Need?"
-                  component={renderQuantityRequestedField}
+                  helperText="Maximum Freezable Duration(in weeks)"
+                  defaultValue={product.freezedPriceMaximumDurationInWeeks}
+                  component={renderSinglelineField}
                   autoComplete="off"
                   style={{ marginTop: 10 }}
                 />
@@ -1214,11 +820,12 @@ function FreezePriceForm(props) {
               <Grid item style={{ width: "100%", marginLeft: 0 }}>
                 <Field
                   label=""
-                  id="customerName"
-                  name="customerName"
+                  id="pricePerUnit"
+                  name="pricePerUnit"
+                  defaultValue={productPrice}
                   type="text"
-                  helperText="Enter Your Name"
-                  component={renderCustomerNameField}
+                  helperText="The Price to be Freezed"
+                  component={renderSinglelineField}
                   autoComplete="off"
                   style={{ marginTop: 10 }}
                 />
@@ -1229,116 +836,51 @@ function FreezePriceForm(props) {
               <Grid item style={{ width: "100%" }}>
                 <Field
                   label=""
-                  id="whatsappNumber"
-                  name="whatsappNumber"
-                  type="text"
-                  helperText=" Enter Your WhatsApp Number"
-                  component={renderWhatasppNumberField}
+                  id="freezedQuantity"
+                  name="freezedQuantity"
+                  type="number"
+                  helperText="Enter the Quantity to Freeze"
+                  onChange={handleFreezedQuantityChange}
+                  component={renderEditableSingleLineField}
+                  autoComplete="off"
+                  style={{ marginTop: 10 }}
                 />
               </Grid>
               <Grid item style={{ width: "100%", marginLeft: 0 }}>
                 <Field
                   label=""
-                  id="customerEmail"
-                  name="customerEmail"
-                  helperText="Enter Your Email Address(Optional)"
-                  type="text"
-                  component={renderCustomerEmailield}
+                  id="freezeDuration"
+                  name="freezeDuration"
+                  type="number"
+                  onChange={handleFreezedDurationChange}
+                  helperText="Enter the Freezed Duration(in weeks)"
+                  component={renderEditableSingleLineField}
+                  autoComplete="off"
+                  style={{ marginTop: 10 }}
                 />
               </Grid>
             </Grid>
             <Grid container direction="column" style={{ marginTop: 20 }}>
               <Grid item style={{ width: "100%" }}>
                 <Field
-                  //label=""
-                  id="addToWhatsappGroup"
-                  name="addToWhatsappGroup"
+                  label=""
+                  id="serviceCharge"
+                  name="serviceCharge"
                   type="text"
-                  component={renderWhatsappGroupField}
-                />
-              </Grid>
-              <Grid item style={{ width: "100%", marginLeft: 0 }}>
-                <Field
-                  //label=""
-                  id="addToEmailList"
-                  name="addToEmailList"
-                  type="text"
-                  component={renderEmailListField}
+                  helperText="Freeze Service Charge"
+                  defaultValue={charge}
+                  component={renderSinglelineField}
+                  autoComplete="off"
+                  style={{ marginTop: 10 }}
                 />
               </Grid>
             </Grid>
-
-            <Field
-              label=""
-              id="deliveryPreference"
-              name="deliveryPreference"
-              helperText="Delivery Preference"
-              type="text"
-              component={renderDeliveryPreferenceField}
-            />
-            {deliveryPreference === "deliver" && (
-              <Grid container direction="column" style={{ marginTop: 15 }}>
-                <Grid item style={{ marginLeft: 0, width: "100%" }}>
-                  <Field
-                    label=""
-                    id="country"
-                    name="country"
-                    type="text"
-                    component={renderCountryField}
-                    autoComplete="off"
-                    style={{ marginTop: 15 }}
-                  />
-                </Grid>
-                <Grid item style={{ width: "100%", marginLeft: 0 }}>
-                  <Field
-                    label=""
-                    id="state"
-                    name="state"
-                    type="text"
-                    component={renderStateField}
-                    autoComplete="off"
-                    style={{ marginTop: 20 }}
-                  />
-                </Grid>
-                <Grid item style={{ width: "100%", marginLeft: 0 }}>
-                  <Field
-                    label=""
-                    id="city"
-                    name="city"
-                    type="text"
-                    component={renderCityField}
-                    autoComplete="off"
-                    style={{ marginTop: 20 }}
-                  />
-                </Grid>
-              </Grid>
-            )}
-            {deliveryPreference === "deliver" && (
-              <Field
-                label=""
-                id=""
-                name="address"
-                helperText="Your Address"
-                rows={3}
-                type="text"
-                component={renderMultilineField}
-                style={{ width: "100%" }}
-              />
-            )}
-            {/* <Field
-            label=""
-            id=""
-            name="comment"
-            helperText="Any Comment?"
-            rows={3}
-            type="text"
-            component={renderMultilineField}
-          /> */}
 
             <Button
               variant="contained"
               className={classes.submitButtonMobile}
               onClick={props.handleSubmit(onSubmit)}
+              disabled={true}
             >
               {loading ? (
                 <CircularProgress size={30} color="inherit" />

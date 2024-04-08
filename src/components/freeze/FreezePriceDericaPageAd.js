@@ -23,6 +23,7 @@ import PaintHome from "../PaintHome";
 import WholesaleHome from "../WholesaleHome";
 import CommunityHome from "../CommunityHome";
 import RetailHome from "../RetailHome";
+import DealHome from "../DealHome";
 
 import { baseURL } from "./../../apis/util";
 
@@ -241,9 +242,10 @@ export default function FreezePriceDericaPageAd(props) {
   return (
     <>
       {matchesMDUp ? (
-        <Card className={classes.root} disableRipple={true}>
-          {/* <CardActionArea disableRipple> */}
-          {/* <Grid
+        <>
+          <Card className={classes.root} disableRipple={true}>
+            {/* <CardActionArea disableRipple> */}
+            {/* <Grid
             container
             //direction="row"
             alignItems="center"
@@ -289,40 +291,40 @@ export default function FreezePriceDericaPageAd(props) {
             </Grid>
           </Grid> */}
 
-          {/** place the grid here */}
+            {/** place the grid here */}
 
-          <Grid
-            container
-            direction="row"
-            style={{ marginTop: 20, height: 300 }}
-          >
             <Grid
               container
-              direction="column"
-              style={{ marginLeft: 0, width: "22%", marginTop: 0 }}
+              direction="row"
+              style={{ marginTop: 55, height: 300 }}
             >
               <Grid
                 container
-                //direction="row"
-                alignItems="center"
-                className={classes.backgroundDerica}
-                justifyContent={matchesSM ? "center" : "space-between"}
-                direction={matchesSM ? "column" : "row"}
-                item
-                style={{ height: "80%", marginTop: 0, marginLeft: 50 }}
-              ></Grid>
-              <Grid item alignItems="center" style={{ height: "20%" }}>
-                <Button
-                  variant="contained"
-                  component={Link}
-                  to="/derica"
-                  onClick={() => <DericaHome />}
-                  className={classes.actionButton}
-                >
-                  Buy Rice In Derica
-                </Button>
+                direction="column"
+                style={{ marginLeft: 0, width: "22%", marginTop: 0 }}
+              >
+                <Grid
+                  container
+                  //direction="row"
+                  alignItems="center"
+                  className={classes.backgroundDerica}
+                  justifyContent={matchesSM ? "center" : "space-between"}
+                  direction={matchesSM ? "column" : "row"}
+                  item
+                  style={{ height: "80%", marginTop: 0, marginLeft: 50 }}
+                ></Grid>
+                <Grid item alignItems="center" style={{ height: "20%" }}>
+                  <Button
+                    variant="contained"
+                    component={Link}
+                    to="/derica"
+                    onClick={() => <DericaHome />}
+                    className={classes.actionButton}
+                  >
+                    Buy Rice In Derica
+                  </Button>
 
-                {/* {props.preference === "derica" && (
+                  {/* {props.preference === "derica" && (
                   <Button
                     variant="contained"
                     component={Link}
@@ -333,93 +335,107 @@ export default function FreezePriceDericaPageAd(props) {
                     Buy Retail
                   </Button>
                 )} */}
+                </Grid>
               </Grid>
-            </Grid>
-            <Grid
-              container
-              direction="column"
-              style={{ marginLeft: 0, width: "22%", marginTop: 0 }}
-            >
               <Grid
                 container
-                //direction="row"
-                alignItems="center"
-                className={classes.backgroundPaint}
-                justifyContent={matchesSM ? "center" : "space-between"}
-                direction={matchesSM ? "column" : "row"}
-                item
-                style={{ height: "80%", marginTop: 0, marginLeft: 50 }}
-              ></Grid>
-              <Grid item alignItems="center" style={{ height: "20%" }}>
-                <Button
-                  variant="contained"
-                  component={Link}
-                  to="/paint"
-                  onClick={() => <PaintHome />}
-                  className={classes.actionButton}
-                >
-                  Buy Rice In Paint
-                </Button>
+                direction="column"
+                style={{ marginLeft: 0, width: "22%", marginTop: 0 }}
+              >
+                <Grid
+                  container
+                  //direction="row"
+                  alignItems="center"
+                  className={classes.backgroundPaint}
+                  justifyContent={matchesSM ? "center" : "space-between"}
+                  direction={matchesSM ? "column" : "row"}
+                  item
+                  style={{ height: "80%", marginTop: 0, marginLeft: 50 }}
+                ></Grid>
+                <Grid item alignItems="center" style={{ height: "20%" }}>
+                  <Button
+                    variant="contained"
+                    component={Link}
+                    to="/paint"
+                    onClick={() => <PaintHome />}
+                    className={classes.actionButton}
+                  >
+                    Buy Rice In Paint
+                  </Button>
+                </Grid>
               </Grid>
-            </Grid>
 
-            <Grid
-              container
-              direction="column"
-              style={{ marginLeft: 0, width: "22%", marginTop: 0 }}
-            >
               <Grid
                 container
-                //direction="row"
-                alignItems="center"
-                className={classes.backgroundBulk}
-                justifyContent={matchesSM ? "center" : "space-between"}
-                direction={matchesSM ? "column" : "row"}
-                item
-                style={{ height: "80%", marginTop: 0, marginLeft: 50 }}
-              ></Grid>
-              <Grid item alignItems="center" style={{ height: "20%" }}>
-                <Button
-                  variant="contained"
-                  component={Link}
-                  to="/wholesale"
-                  onClick={() => <WholesaleHome />}
-                  className={classes.actionWholesaleButton}
-                >
-                  Buy WholeSale & In Bulk
-                </Button>
+                direction="column"
+                style={{ marginLeft: 0, width: "22%", marginTop: 0 }}
+              >
+                <Grid
+                  container
+                  //direction="row"
+                  alignItems="center"
+                  className={classes.backgroundBulk}
+                  justifyContent={matchesSM ? "center" : "space-between"}
+                  direction={matchesSM ? "column" : "row"}
+                  item
+                  style={{ height: "80%", marginTop: 0, marginLeft: 50 }}
+                ></Grid>
+                <Grid item alignItems="center" style={{ height: "20%" }}>
+                  <Button
+                    variant="contained"
+                    component={Link}
+                    to="/wholesale"
+                    onClick={() => <WholesaleHome />}
+                    className={classes.actionWholesaleButton}
+                  >
+                    Buy WholeSale & In Bulk
+                  </Button>
+                </Grid>
               </Grid>
-            </Grid>
-            <Grid
-              container
-              direction="column"
-              style={{ marginLeft: 0, width: "22%", marginTop: 0 }}
-            >
               <Grid
                 container
-                //direction="row"
-                alignItems="center"
-                className={classes.backgroundCommunity}
-                justifyContent={matchesSM ? "center" : "space-between"}
-                direction={matchesSM ? "column" : "row"}
-                item
-                style={{ height: "80%", marginTop: 0, marginLeft: 50 }}
-              ></Grid>
-              <Grid item alignItems="center" style={{ height: "20%" }}>
-                <Button
-                  variant="contained"
-                  component={Link}
-                  to="/community"
-                  onClick={() => <CommunityHome />}
-                  className={classes.actionButton}
-                >
-                  Buy In Community
-                </Button>
+                direction="column"
+                style={{ marginLeft: 0, width: "22%", marginTop: 0 }}
+              >
+                <Grid
+                  container
+                  //direction="row"
+                  alignItems="center"
+                  className={classes.backgroundCommunity}
+                  justifyContent={matchesSM ? "center" : "space-between"}
+                  direction={matchesSM ? "column" : "row"}
+                  item
+                  style={{ height: "80%", marginTop: 0, marginLeft: 50 }}
+                ></Grid>
+                <Grid item alignItems="center" style={{ height: "20%" }}>
+                  <Button
+                    variant="contained"
+                    component={Link}
+                    to="/dealscentral"
+                    onClick={() => <DealHome />}
+                    className={classes.actionButton}
+                  >
+                    Deals Central
+                  </Button>
+                </Grid>
               </Grid>
             </Grid>
+            {/* </CardActionArea> */}
+          </Card>
+          <Grid>
+            {" "}
+            <Typography
+              style={{
+                marginLeft: 450,
+                marginTop: 100,
+                fontSize: 25,
+                fontWeight: 400,
+              }}
+            >
+              This Service is Coming Soon ....
+            </Typography>
           </Grid>
-          {/* </CardActionArea> */}
-        </Card>
+        </>
       ) : (
         <Card className={classes.rootMobile} disableRipple>
           {/* <CardActionArea disableRipple> */}
