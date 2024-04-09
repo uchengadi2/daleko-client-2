@@ -761,13 +761,14 @@ function FreezePriceForm(props) {
           <Box
             sx={{
               width: 400,
+              marginLeft: 10,
               // height: 420,
             }}
             noValidate
             autoComplete="off"
           >
             <Grid container direction="column" style={{ marginTop: 20 }}>
-              <Grid item style={{ marginLeft: 0, width: "100%" }}>
+              <Grid item style={{ marginLeft: 0, width: "86.5%" }}>
                 <Field
                   label=""
                   id="product"
@@ -778,7 +779,7 @@ function FreezePriceForm(props) {
                   component={renderSinglelineField}
                 />
               </Grid>
-              <Grid item style={{ width: "100%", marginLeft: 0 }}>
+              <Grid item style={{ width: "86.5%", marginLeft: 0 }}>
                 <Field
                   label=""
                   id="sku"
@@ -791,7 +792,7 @@ function FreezePriceForm(props) {
               </Grid>
             </Grid>
             <Grid container direction="column" style={{ marginTop: 10 }}>
-              <Grid item style={{ marginLeft: 0, width: "100%" }}>
+              <Grid item style={{ marginLeft: 0, width: "86.5%" }}>
                 <Field
                   label=""
                   id="minimumFreezableQuantity"
@@ -804,7 +805,7 @@ function FreezePriceForm(props) {
                   style={{ marginTop: 10 }}
                 />
               </Grid>
-              <Grid item style={{ marginLeft: 0, width: "100%" }}>
+              <Grid item style={{ marginLeft: 0, width: "86.5%" }}>
                 <Field
                   label=""
                   id="freezedPriceMaximumDurationInWeeks"
@@ -817,7 +818,7 @@ function FreezePriceForm(props) {
                   style={{ marginTop: 10 }}
                 />
               </Grid>
-              <Grid item style={{ width: "100%", marginLeft: 0 }}>
+              <Grid item style={{ width: "86.5%", marginLeft: 0 }}>
                 <Field
                   label=""
                   id="pricePerUnit"
@@ -833,7 +834,7 @@ function FreezePriceForm(props) {
             </Grid>
 
             <Grid container direction="column" style={{ marginTop: 20 }}>
-              <Grid item style={{ width: "100%" }}>
+              <Grid item style={{ width: "86.5%" }}>
                 <Field
                   label=""
                   id="freezedQuantity"
@@ -846,7 +847,7 @@ function FreezePriceForm(props) {
                   style={{ marginTop: 10 }}
                 />
               </Grid>
-              <Grid item style={{ width: "100%", marginLeft: 0 }}>
+              <Grid item style={{ width: "86.5%", marginLeft: 0 }}>
                 <Field
                   label=""
                   id="freezeDuration"
@@ -861,7 +862,7 @@ function FreezePriceForm(props) {
               </Grid>
             </Grid>
             <Grid container direction="column" style={{ marginTop: 20 }}>
-              <Grid item style={{ width: "100%" }}>
+              <Grid item style={{ width: "86.5%" }}>
                 <Field
                   label=""
                   id="serviceCharge"

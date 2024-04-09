@@ -4,6 +4,7 @@ import { useDispatch } from "react-redux";
 import Grid from "@material-ui/core/Grid";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import Snackbar from "@material-ui/core/Snackbar";
+import useMediaQuery from "@material-ui/core/useMediaQuery";
 import Card from "@material-ui/core/Card";
 import CardContent from "@material-ui/core/CardContent";
 import CancelRoundedIcon from "@material-ui/icons/CancelRounded";
@@ -24,6 +25,7 @@ import FormHelperText from "@material-ui/core/FormHelperText";
 import api from "./../../apis/local";
 import { CREATE_DEAL } from "../../actions/types";
 import history from "../../history";
+import theme from "../ui/Theme";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -33,11 +35,30 @@ const useStyles = makeStyles((theme) => ({
     width: 500,
     marginLeft: "35%",
   },
+  formStylesMobile: {
+    width: 250,
+    marginLeft: "5%",
+  },
+
   submitButton: {
     borderRadius: 10,
     height: 40,
     width: 180,
     marginLeft: 180,
+    marginTop: 20,
+    marginBottom: 20,
+    color: "white",
+    backgroundColor: theme.palette.common.blue,
+    "&:hover": {
+      backgroundColor: theme.palette.common.blue,
+    },
+  },
+
+  submitButtonMobile: {
+    borderRadius: 10,
+    height: 40,
+    width: 180,
+    marginLeft: 90,
     marginTop: 20,
     marginBottom: 20,
     color: "white",
@@ -120,6 +141,12 @@ const MAX_COUNT = 12;
 
 function DealPropositionAdPage(props) {
   const classes = useStyles();
+
+  const theme = useTheme();
+  const matchesMD = useMediaQuery(theme.breakpoints.down("md"));
+  const matchesSM = useMediaQuery(theme.breakpoints.down("sm"));
+  const matchesXS = useMediaQuery(theme.breakpoints.down("xs"));
+  const matchesMDUp = useMediaQuery(theme.breakpoints.up("md"));
 
   const [deliveryPreference, setDeliveryPreference] = useState("pickup");
 
@@ -463,7 +490,11 @@ function DealPropositionAdPage(props) {
             onChange={handleProductChange}
             //label="Allow Price Freezing"
 
-            style={{ width: 500, marginTop: 20, height: 38 }}
+            style={{
+              width: matchesMDUp ? 500 : 350,
+              marginTop: 20,
+              height: 38,
+            }}
             //{...input}
           >
             {renderProductList()}
@@ -493,7 +524,11 @@ function DealPropositionAdPage(props) {
             onChange={handleDeliveryPreferenceChange}
             //label="Allow Price Freezing"
 
-            style={{ width: 500, marginTop: 20, height: 38 }}
+            style={{
+              width: matchesMDUp ? 500 : 350,
+              marginTop: 20,
+              height: 38,
+            }}
             //{...input}
           >
             <MenuItem value={"pickup"}>
@@ -622,7 +657,6 @@ function DealPropositionAdPage(props) {
       productUnit: product.unit,
       product: product.id,
     };
-    console.log("data:", data);
 
     if (data) {
       const createForm = async () => {
@@ -668,245 +702,497 @@ function DealPropositionAdPage(props) {
 
   return (
     <div>
-      <form id="dealPropositionAdPage" className={classes.formStyles}>
-        <Grid
-          item
-          container
-          style={{ marginTop: 1, marginBottom: 2 }}
-          justifyContent="center"
-        >
-          <CancelRoundedIcon
-            style={{
-              marginLeft: 520,
-              fontSize: 30,
-              marginTop: "-20px",
-              cursor: "pointer",
-            }}
-            onClick={() => [props.handlePlaceOrderDialogOpenStatus()]}
-          />
-        </Grid>
-        <Grid item container style={{ marginTop: 65 }} justifyContent="center">
-          <FormLabel
-            style={{
-              color: "blue",
-              marginLeft: 50,
-              fontWeight: 700,
-              fontSize: 20,
-            }}
-            component="legend"
-          >
-            PROPOSE A DEAL
-            {/* <Typography variant="h5">Propose A Deal</Typography> */}
-          </FormLabel>
-        </Grid>
-        <Box
-          sx={{
-            width: 500,
-            height: 420,
-          }}
-          noValidate
-          autoComplete="off"
-        >
-          <Grid item container style={{ marginTop: 20 }}>
-            <FormLabel style={{ color: "blue" }} component="legend">
-              Product Details
-            </FormLabel>
-          </Grid>
-          <Field
-            label=""
-            id="product"
-            name="product"
-            helperText="Select a Product"
-            //defaultValue={orderNumber}
-            type="text"
-            component={renderProductField}
-            style={{ marginTop: 20 }}
-          />
-          <Grid container direction="row" style={{ marginTop: 20 }}>
-            <Grid item style={{ marginLeft: 0, width: "100%" }}>
-              <Field
-                label=""
-                id="productConfiguration"
-                name="productConfiguration"
-                helperText="Configuration"
-                defaultValue={product.configuration}
-                type="text"
-                component={renderSingleLineField}
-              />
-            </Grid>
-          </Grid>
-
-          <Grid container direction="row" style={{ marginTop: 20 }}>
-            <Grid item style={{ marginLeft: 0, width: 310 }}>
-              <Field
-                label=""
-                id="productPricePerUnit"
-                name="productPricePerUnit"
-                helperText="Price Per Unit"
-                defaultValue={productPrice}
-                type="text"
-                component={renderSingleLineField}
-              />
-            </Grid>
-            <Grid item style={{ width: 175, marginLeft: 15 }}>
-              <Field
-                label=""
-                id="productMinimumOrderQuantity"
-                name="productMinimumOrderQuantity"
-                helperText="Minimum Order Quantity"
-                defaultValue={minQuantity}
-                type="text"
-                component={renderSingleLineField}
-              />
-            </Grid>
-          </Grid>
-          <Field
-            label=""
-            id="productPriceLabel"
-            name="productPriceLabel"
-            helperText="Price label"
-            defaultValue={product.priceLabel}
-            type="text"
-            component={renderSingleLineField}
-            style={{ marginTop: 20 }}
-          />
+      {matchesMDUp ? (
+        <form id="dealPropositionAdPage" className={classes.formStyles}>
           <Grid
+            item
             container
-            direction="row"
-            style={{ marginTop: 20, marginBottom: 20 }}
+            style={{ marginTop: 1, marginBottom: 2 }}
+            justifyContent="center"
           >
-            <Grid item style={{ marginLeft: 0, width: 310 }}>
-              <Field
-                label=""
-                id="productSalesPreference"
-                name="productSalesPreference"
-                helperText="Sales Preference"
-                defaultValue={product.salesPreference}
-                type="text"
-                component={renderSingleLineField}
-              />
-            </Grid>
-            <Grid item style={{ width: 175, marginLeft: 15 }}>
-              <Field
-                label=""
-                id="productWeightPerUnit"
-                name="productWeightPerUnit"
-                helperText="Weight Per Unit"
-                defaultValue={weight}
-                type="text"
-                component={renderSingleLineField}
-              />
-            </Grid>
-          </Grid>
-
-          <Grid item container style={{ marginTop: 20, marginBotton: 20 }}>
-            <FormLabel style={{ color: "blue" }} component="legend">
-              Deals Detail
-            </FormLabel>
-          </Grid>
-          <Grid container direction="row" style={{ marginTop: 20 }}>
-            <Grid item style={{ width: "47%" }}>
-              <Field
-                label=""
-                id="proposedQuantity"
-                name="proposedQuantity"
-                helperText="Enter Your Proposed Quantity"
-                //defaultValue={totalWeight}
-                type="number"
-                component={renderEditableSingleLineField}
-              />
-            </Grid>
-            <Grid item style={{ width: "50%", marginLeft: 10 }}>
-              <Field
-                label=""
-                id="proposedPricePerUnit"
-                name="proposedPricePerUnit"
-                helperText="Propose Price Per Unit"
-                //defaultValue={deliveryMode}
-                type="number"
-                component={renderEditableSingleLineField}
-              />
-            </Grid>
-          </Grid>
-          <Field
-            label=""
-            id="proposedDayToDelivery"
-            name="proposedDayToDelivery"
-            helperText="How Soon Do You Need It(in days)?"
-            //defaultValue={customerName}
-            type="text"
-            component={renderEditableSingleLineField}
-            autoComplete="off"
-            style={{ marginTop: 20 }}
-          />
-          <Grid item style={{ width: "100%", marginTop: 10 }}>
-            <Field
-              label=""
-              id="proposedDeliveryPreference"
-              name="proposedDeliveryPreference"
-              helperText="How Will You Have It Delivered To You"
-              type="text"
-              component={renderDeliveryPreferenceField}
+            <CancelRoundedIcon
+              style={{
+                marginLeft: 520,
+                fontSize: 30,
+                marginTop: "-20px",
+                cursor: "pointer",
+              }}
+              onClick={() => [props.handlePlaceOrderDialogOpenStatus()]}
             />
           </Grid>
-
-          <Grid item container style={{ marginTop: 20 }}>
-            <FormLabel style={{ color: "blue" }} component="legend">
-              Customer Details
+          <Grid
+            item
+            container
+            style={{ marginTop: 65 }}
+            justifyContent="center"
+          >
+            <FormLabel
+              style={{
+                color: "blue",
+                marginLeft: 50,
+                fontWeight: 700,
+                fontSize: 20,
+              }}
+              component="legend"
+            >
+              PROPOSE A DEAL
+              {/* <Typography variant="h5">Propose A Deal</Typography> */}
             </FormLabel>
           </Grid>
-
-          <Field
-            label=""
-            id="customerName"
-            name="customerName"
-            helperText="Customer Name"
-            //defaultValue={customerName}
-            type="text"
-            component={renderEditableSingleLineField}
+          <Box
+            sx={{
+              width: 500,
+              height: 420,
+            }}
+            noValidate
             autoComplete="off"
-            style={{ marginTop: 20 }}
-          />
-
-          <Grid container direction="row" style={{ marginTop: 20 }}>
-            <Grid item style={{ marginLeft: 0, width: 310 }}>
-              <Field
-                label=""
-                id="customerPhoneNumber"
-                name="customerPhoneNumber"
-                helperText="Customer Phone Number"
-                //defaultValue={customerPhoneNumber}
-                type="text"
-                component={renderEditableSingleLineField}
-              />
-            </Grid>
-            <Grid item style={{ width: 175, marginLeft: 15 }}>
-              <Field
-                label=""
-                id="customerEmailAddress"
-                name="customerEmailAddress"
-                helperText="Customer Email Address"
-                //defaultValue={customerEmailAddress}
-                type="text"
-                component={renderEditableSingleLineField}
-              />
-            </Grid>
-          </Grid>
-
-          <Button
-            variant="contained"
-            className={classes.submitButton}
-            onClick={props.handleSubmit(onSubmit)}
-            // disabled={stockAvailabilityStatus === "in-stock" ? false : true}
           >
-            {loading ? (
-              <CircularProgress size={30} color="inherit" />
-            ) : (
-              buttonContent()
-            )}
-          </Button>
-        </Box>
-      </form>
+            <Grid item container style={{ marginTop: 20 }}>
+              <FormLabel style={{ color: "blue" }} component="legend">
+                Product Details
+              </FormLabel>
+            </Grid>
+            <Field
+              label=""
+              id="product"
+              name="product"
+              helperText="Select a Product"
+              //defaultValue={orderNumber}
+              type="text"
+              component={renderProductField}
+              style={{ marginTop: 20 }}
+            />
+            <Grid container direction="row" style={{ marginTop: 20 }}>
+              <Grid item style={{ marginLeft: 0, width: "100%" }}>
+                <Field
+                  label=""
+                  id="productConfiguration"
+                  name="productConfiguration"
+                  helperText="Configuration"
+                  defaultValue={product.configuration}
+                  type="text"
+                  component={renderSingleLineField}
+                />
+              </Grid>
+            </Grid>
+
+            <Grid container direction="row" style={{ marginTop: 20 }}>
+              <Grid item style={{ marginLeft: 0, width: 310 }}>
+                <Field
+                  label=""
+                  id="productPricePerUnit"
+                  name="productPricePerUnit"
+                  helperText="Price Per Unit"
+                  defaultValue={productPrice}
+                  type="text"
+                  component={renderSingleLineField}
+                />
+              </Grid>
+              <Grid item style={{ width: 175, marginLeft: 15 }}>
+                <Field
+                  label=""
+                  id="productMinimumOrderQuantity"
+                  name="productMinimumOrderQuantity"
+                  helperText="Minimum Order Quantity"
+                  defaultValue={minQuantity}
+                  type="text"
+                  component={renderSingleLineField}
+                />
+              </Grid>
+            </Grid>
+            <Field
+              label=""
+              id="productPriceLabel"
+              name="productPriceLabel"
+              helperText="Price label"
+              defaultValue={product.priceLabel}
+              type="text"
+              component={renderSingleLineField}
+              style={{ marginTop: 20 }}
+            />
+            <Grid
+              container
+              direction="row"
+              style={{ marginTop: 20, marginBottom: 20 }}
+            >
+              <Grid item style={{ marginLeft: 0, width: 310 }}>
+                <Field
+                  label=""
+                  id="productSalesPreference"
+                  name="productSalesPreference"
+                  helperText="Sales Preference"
+                  defaultValue={product.salesPreference}
+                  type="text"
+                  component={renderSingleLineField}
+                />
+              </Grid>
+              <Grid item style={{ width: 175, marginLeft: 15 }}>
+                <Field
+                  label=""
+                  id="productWeightPerUnit"
+                  name="productWeightPerUnit"
+                  helperText="Weight Per Unit"
+                  defaultValue={weight}
+                  type="text"
+                  component={renderSingleLineField}
+                />
+              </Grid>
+            </Grid>
+
+            <Grid item container style={{ marginTop: 20, marginBotton: 20 }}>
+              <FormLabel style={{ color: "blue" }} component="legend">
+                Deals Detail
+              </FormLabel>
+            </Grid>
+            <Grid container direction="row" style={{ marginTop: 20 }}>
+              <Grid item style={{ width: "47%" }}>
+                <Field
+                  label=""
+                  id="proposedQuantity"
+                  name="proposedQuantity"
+                  helperText="Enter Your Proposed Quantity"
+                  //defaultValue={totalWeight}
+                  type="number"
+                  component={renderEditableSingleLineField}
+                />
+              </Grid>
+              <Grid item style={{ width: "50%", marginLeft: 10 }}>
+                <Field
+                  label=""
+                  id="proposedPricePerUnit"
+                  name="proposedPricePerUnit"
+                  helperText="Propose Price Per Unit"
+                  //defaultValue={deliveryMode}
+                  type="number"
+                  component={renderEditableSingleLineField}
+                />
+              </Grid>
+            </Grid>
+            <Field
+              label=""
+              id="proposedDayToDelivery"
+              name="proposedDayToDelivery"
+              helperText="How Soon Do You Need It(in days)?"
+              //defaultValue={customerName}
+              type="text"
+              component={renderEditableSingleLineField}
+              autoComplete="off"
+              style={{ marginTop: 20 }}
+            />
+            <Grid item style={{ width: "100%", marginTop: 10 }}>
+              <Field
+                label=""
+                id="proposedDeliveryPreference"
+                name="proposedDeliveryPreference"
+                helperText="How Will You Have It Delivered To You"
+                type="text"
+                component={renderDeliveryPreferenceField}
+              />
+            </Grid>
+
+            <Grid item container style={{ marginTop: 20 }}>
+              <FormLabel style={{ color: "blue" }} component="legend">
+                Customer Details
+              </FormLabel>
+            </Grid>
+
+            <Field
+              label=""
+              id="customerName"
+              name="customerName"
+              helperText="Customer Name"
+              //defaultValue={customerName}
+              type="text"
+              component={renderEditableSingleLineField}
+              autoComplete="off"
+              style={{ marginTop: 20 }}
+            />
+
+            <Grid container direction="row" style={{ marginTop: 20 }}>
+              <Grid item style={{ marginLeft: 0, width: 310 }}>
+                <Field
+                  label=""
+                  id="customerPhoneNumber"
+                  name="customerPhoneNumber"
+                  helperText="Customer Phone Number"
+                  //defaultValue={customerPhoneNumber}
+                  type="text"
+                  component={renderEditableSingleLineField}
+                />
+              </Grid>
+              <Grid item style={{ width: 175, marginLeft: 15 }}>
+                <Field
+                  label=""
+                  id="customerEmailAddress"
+                  name="customerEmailAddress"
+                  helperText="Customer Email Address"
+                  //defaultValue={customerEmailAddress}
+                  type="text"
+                  component={renderEditableSingleLineField}
+                />
+              </Grid>
+            </Grid>
+
+            <Button
+              variant="contained"
+              className={classes.submitButton}
+              onClick={props.handleSubmit(onSubmit)}
+              // disabled={stockAvailabilityStatus === "in-stock" ? false : true}
+            >
+              {loading ? (
+                <CircularProgress size={30} color="inherit" />
+              ) : (
+                buttonContent()
+              )}
+            </Button>
+          </Box>
+        </form>
+      ) : (
+        <form id="dealPropositionAdPage" className={classes.formStylesMobile}>
+          <Grid
+            item
+            container
+            style={{ marginTop: 1, marginBottom: 2 }}
+            justifyContent="center"
+          >
+            <CancelRoundedIcon
+              style={{
+                marginLeft: 520,
+                fontSize: 30,
+                marginTop: "-20px",
+                cursor: "pointer",
+              }}
+              onClick={() => [props.handlePlaceOrderDialogOpenStatus()]}
+            />
+          </Grid>
+          <Grid
+            item
+            container
+            style={{ marginTop: 65 }}
+            justifyContent="center"
+          >
+            <FormLabel
+              style={{
+                color: "blue",
+                marginLeft: 50,
+                fontWeight: 700,
+                fontSize: 20,
+              }}
+              component="legend"
+            >
+              PROPOSE A DEAL
+              {/* <Typography variant="h5">Propose A Deal</Typography> */}
+            </FormLabel>
+          </Grid>
+          <Box
+            sx={{
+              width: 400,
+              height: 420,
+            }}
+            noValidate
+            autoComplete="off"
+          >
+            <Grid item container style={{ marginTop: 20 }}>
+              <FormLabel style={{ color: "blue" }} component="legend">
+                Product Details
+              </FormLabel>
+            </Grid>
+            <Field
+              label=""
+              id="product"
+              name="product"
+              helperText="Select a Product"
+              //defaultValue={orderNumber}
+              type="text"
+              component={renderProductField}
+              style={{ marginTop: 20 }}
+            />
+            <Grid container direction="row" style={{ marginTop: 20 }}>
+              <Grid item style={{ marginLeft: 0, width: "86.5%" }}>
+                <Field
+                  label=""
+                  id="productConfiguration"
+                  name="productConfiguration"
+                  helperText="Configuration"
+                  defaultValue={product.configuration}
+                  type="text"
+                  component={renderSingleLineField}
+                />
+              </Grid>
+            </Grid>
+
+            <Grid container direction="row" style={{ marginTop: 20 }}>
+              <Grid item style={{ marginLeft: 0, width: 150 }}>
+                <Field
+                  label=""
+                  id="productPricePerUnit"
+                  name="productPricePerUnit"
+                  helperText="Price Per Unit"
+                  defaultValue={productPrice}
+                  type="text"
+                  component={renderSingleLineField}
+                />
+              </Grid>
+              <Grid item style={{ width: 185, marginLeft: 15 }}>
+                <Field
+                  label=""
+                  id="productMinimumOrderQuantity"
+                  name="productMinimumOrderQuantity"
+                  helperText="Minimum Order Quantity"
+                  defaultValue={minQuantity}
+                  type="text"
+                  component={renderSingleLineField}
+                />
+              </Grid>
+            </Grid>
+            <Field
+              label=""
+              id="productPriceLabel"
+              name="productPriceLabel"
+              helperText="Price label"
+              defaultValue={product.priceLabel}
+              type="text"
+              component={renderSingleLineField}
+              style={{ marginTop: 20, width: "86.5%" }}
+            />
+            <Grid
+              container
+              direction="row"
+              style={{ marginTop: 20, marginBottom: 20 }}
+            >
+              <Grid item style={{ marginLeft: 0, width: 185 }}>
+                <Field
+                  label=""
+                  id="productSalesPreference"
+                  name="productSalesPreference"
+                  helperText="Sales Preference"
+                  defaultValue={product.salesPreference}
+                  type="text"
+                  component={renderSingleLineField}
+                />
+              </Grid>
+              <Grid item style={{ width: 150, marginLeft: 15 }}>
+                <Field
+                  label=""
+                  id="productWeightPerUnit"
+                  name="productWeightPerUnit"
+                  helperText="Weight Per Unit"
+                  defaultValue={weight}
+                  type="text"
+                  component={renderSingleLineField}
+                />
+              </Grid>
+            </Grid>
+
+            <Grid item container style={{ marginTop: 20, marginBotton: 20 }}>
+              <FormLabel style={{ color: "blue" }} component="legend">
+                Deals Detail
+              </FormLabel>
+            </Grid>
+            <Grid container direction="row" style={{ marginTop: 20 }}>
+              <Grid item style={{ width: "40%" }}>
+                <Field
+                  label=""
+                  id="proposedQuantity"
+                  name="proposedQuantity"
+                  helperText="Enter Your Proposed Quantity"
+                  //defaultValue={totalWeight}
+                  type="number"
+                  component={renderEditableSingleLineField}
+                />
+              </Grid>
+              <Grid item style={{ width: "45%", marginLeft: 10 }}>
+                <Field
+                  label=""
+                  id="proposedPricePerUnit"
+                  name="proposedPricePerUnit"
+                  helperText="Propose Price Per Unit"
+                  //defaultValue={deliveryMode}
+                  type="number"
+                  component={renderEditableSingleLineField}
+                />
+              </Grid>
+            </Grid>
+            <Field
+              label=""
+              id="proposedDayToDelivery"
+              name="proposedDayToDelivery"
+              helperText="How Soon Do You Need It(in days)?"
+              //defaultValue={customerName}
+              type="text"
+              component={renderEditableSingleLineField}
+              autoComplete="off"
+              style={{ marginTop: 20, width: "86.5%" }}
+            />
+            <Grid item style={{ width: "100%", marginTop: 10 }}>
+              <Field
+                label=""
+                id="proposedDeliveryPreference"
+                name="proposedDeliveryPreference"
+                helperText="How Will You Have It Delivered To You"
+                type="text"
+                component={renderDeliveryPreferenceField}
+              />
+            </Grid>
+
+            <Grid item container style={{ marginTop: 20 }}>
+              <FormLabel style={{ color: "blue" }} component="legend">
+                Customer Details
+              </FormLabel>
+            </Grid>
+
+            <Field
+              label=""
+              id="customerName"
+              name="customerName"
+              helperText="Customer Name"
+              //defaultValue={customerName}
+              type="text"
+              component={renderEditableSingleLineField}
+              autoComplete="off"
+              style={{ marginTop: 20, width: "86.5%" }}
+            />
+
+            <Grid container direction="row" style={{ marginTop: 20 }}>
+              <Grid item style={{ marginLeft: 0, width: 150 }}>
+                <Field
+                  label=""
+                  id="customerPhoneNumber"
+                  name="customerPhoneNumber"
+                  helperText="Customer Phone Number"
+                  //defaultValue={customerPhoneNumber}
+                  type="text"
+                  component={renderEditableSingleLineField}
+                />
+              </Grid>
+              <Grid item style={{ width: 185, marginLeft: 15 }}>
+                <Field
+                  label=""
+                  id="customerEmailAddress"
+                  name="customerEmailAddress"
+                  helperText="Customer Email Address"
+                  //defaultValue={customerEmailAddress}
+                  type="text"
+                  component={renderEditableSingleLineField}
+                />
+              </Grid>
+            </Grid>
+
+            <Button
+              variant="contained"
+              className={classes.submitButtonMobile}
+              onClick={props.handleSubmit(onSubmit)}
+              // disabled={stockAvailabilityStatus === "in-stock" ? false : true}
+            >
+              {loading ? (
+                <CircularProgress size={30} color="inherit" />
+              ) : (
+                buttonContent()
+              )}
+            </Button>
+          </Box>
+        </form>
+      )}
       <Snackbar
         open={alert.open}
         message={alert.message}

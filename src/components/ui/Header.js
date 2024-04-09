@@ -100,6 +100,7 @@ const useStyles = makeStyles((theme) => ({
   logoMobile: {
     height: "3em",
     width: "3em",
+    //width: 30,
     marginLeft: -30,
     marginRight: "1.5px",
     padding: 0,
@@ -1287,7 +1288,7 @@ const Header = (props) => {
                   <TextField
                     variant="outlined"
                     className={classes.rootMobile}
-                    style={{ width: "45%", marginLeft: "0.5%" }}
+                    style={{ width: "40%", marginLeft: "0.5%" }}
                     onChange={onChangeSearchText}
                     onKeyDown={(e) => (e.key === 13 ? <SearchPage /> : null)}
                     defaultValue={searchText}

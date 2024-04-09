@@ -644,7 +644,7 @@ function RequestQuote(props) {
             label="Country"
             style={{
               marginTop: 0,
-              width: matchesMDUp ? 280 : 400,
+              width: matchesMDUp ? 280 : 350,
               height: 38,
               marginLeft: 0,
             }}
@@ -678,7 +678,7 @@ function RequestQuote(props) {
             label="State"
             style={{
               marginTop: 0,
-              width: matchesMDUp ? 250 : 400,
+              width: matchesMDUp ? 250 : 350,
               height: 38,
               marginLeft: matchesMDUp ? 15 : 0,
             }}
@@ -712,7 +712,7 @@ function RequestQuote(props) {
             label="City"
             style={{
               marginTop: 0,
-              width: matchesMDUp ? 220 : 400,
+              width: matchesMDUp ? 220 : 350,
               height: 38,
               marginLeft: matchesMDUp ? 15 : 0,
             }}
@@ -745,7 +745,7 @@ function RequestQuote(props) {
             onChange={handleDeliveryPreferenceChange}
             //label="Add me To The Email Address for Notifications"
             style={{
-              width: matchesMDUp ? 800 : 400,
+              width: matchesMDUp ? 800 : 350,
               marginTop: 15,
               height: 38,
               marginLeft: 0,
@@ -779,7 +779,7 @@ function RequestQuote(props) {
             value={addToWhatsappGroup}
             onChange={handleAddToWhatsappGroupChange}
             //label="Add me To Whatsapp group for Notifications?"
-            style={{ width: 400, marginTop: 0, height: 38 }}
+            style={{ width: matchesMDUp ? 400 : 350, marginTop: 0, height: 38 }}
             //{...input}
           >
             <MenuItem value={"no"}>No</MenuItem>
@@ -812,7 +812,7 @@ function RequestQuote(props) {
             onChange={handleAddToEmailListChange}
             //label="Add me To The Email Address for Notifications"
             style={{
-              width: matchesMDUp ? 370 : 400,
+              width: matchesMDUp ? 370 : 350,
               marginTop: 0,
               height: 38,
               marginLeft: matchesMDUp ? 15 : 0,
@@ -1155,7 +1155,8 @@ function RequestQuote(props) {
           </Grid>
           <Box
             sx={{
-              width: 400,
+              width: 350,
+              marginLeft: 10,
               // height: 420,
             }}
             noValidate

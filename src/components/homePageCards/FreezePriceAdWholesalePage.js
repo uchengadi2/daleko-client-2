@@ -153,6 +153,23 @@ const useStyles = makeStyles((theme) => ({
       backgroundAttachment: "inherit",
     },
   },
+
+  backgroundAdMobile: {
+    backgroundImage: `url(${backgroundAd})`,
+    backgroundPosition: "center",
+    backgroundSize: "cover",
+    //backgroundAttachment: "fixed",
+    backgroundRepeat: "no-repeat",
+    height: "15em",
+    width: "100%",
+    marginLeft: 10,
+    marginRight: 0,
+    borderRadius: 25,
+    [theme.breakpoints.down("md")]: {
+      // backgroundImage: `url(${mobileBackground})`,
+      backgroundAttachment: "inherit",
+    },
+  },
 }));
 
 export default function FreezePriceAdWholesalePage(props) {
@@ -225,46 +242,34 @@ export default function FreezePriceAdWholesalePage(props) {
         </Card>
       ) : (
         <Card className={classes.rootMobile} disableRipple>
-          {/* <CardActionArea disableRipple> */}
-          <Grid container direction="column">
-            <Grid item style={{ width: "100%", border: "1px dotted grey" }}>
-              <CardContent disableRipple>
-                <Typography variant="h5" color="textSecondary" component="p">
-                  At the heart of eHealt Plus lies a passion for innovation and
-                  a commitment to excellence. Our products are the result of
-                  cutting-edge research, utilizing the finest ingredients to
-                  ensure unparalleled quality. We believe in the synergy of
-                  science and nature, creating a harmonious balance that
-                  reflects in the efficacy of our offerings.
-                </Typography>
-                <br />
-                <Typography variant="h5" color="textSecondary" component="p">
-                  Experience the eHealt Plus difference – a blend of science,
-                  nature, and unwavering commitment to your well-being.
-                </Typography>
-              </CardContent>
-            </Grid>
-
+          <CardActionArea
+            style={{
+              marginLeft: "2.5%",
+              //marginRight: "25%",
+              width: "90%",
+              //height: 150,
+            }}
+            component={Link}
+            to="/freezewholesalepagead"
+            onClick={() => <FreezePriceAdWholesalePage />}
+          >
             <Grid
+              container
+              direction="row"
+              alignItems="center"
+              className={classes.backgroundAdMobile}
+              justifyContent={matchesSM ? "center" : "space-between"}
+              //direction={matchesSM ? "column" : "row"}
               item
               style={{
-                width: "100%",
-                marginLeft: "0%",
-                marginTop: 10,
-                border: "1px dotted grey",
+                height: 80,
+                marginTop: 20,
+                //marginRight: "25%",
+                marginBottom: 20,
+                // width: "50%",
               }}
-            >
-              <CardContent disableRipple>
-                <Typography variant="h5" color="textSecondary" component="p">
-                  Indulge in the luxury of self-care, embrace the transformative
-                  power of our products, and embark on a path to radiant health
-                  and timeless well-being with eHealt Plus products. Welcome to
-                  a world where excellence meets elegance
-                </Typography>
-              </CardContent>
-            </Grid>
-          </Grid>
-          {/* </CardActionArea> */}
+            ></Grid>
+          </CardActionArea>
         </Card>
       )}
       <Dialog
