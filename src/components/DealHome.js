@@ -54,6 +54,17 @@ const useStyles = makeStyles((theme) => ({
       objectFit: "cover",
     },
   },
+  rootMobile: {
+    maxWidth: "100%",
+    width: "100%",
+    height: "80vh",
+    // height: "100%",
+    marginTop: "8.5em",
+    position: "relative",
+    "& video": {
+      objectFit: "cover",
+    },
+  },
   overlay: {
     position: "absolute",
     top: 0,
@@ -224,6 +235,20 @@ const useStyles = makeStyles((theme) => ({
     backgroundSize: "cover",
     //backgroundAttachment: "fixed",
     backgroundRepeat: "no-repeat",
+    height: "17em",
+    width: "100%",
+    [theme.breakpoints.down("md")]: {
+      // backgroundImage: `url(${mobileBackground})`,
+      backgroundAttachment: "inherit",
+    },
+  },
+  backgroundMobile: {
+    backgroundImage: `url(${background})`,
+    backgroundPosition: "center",
+    backgroundSize: "cover",
+    //backgroundAttachment: "fixed",
+    backgroundRepeat: "no-repeat",
+    //height: "28em",
     height: "17em",
     width: "100%",
     [theme.breakpoints.down("md")]: {
@@ -566,138 +591,131 @@ const DealHome = (props) => {
   return (
     <>
       {/* <Grid container direction="row" className={classes.mainContainer}> */}
-      <Grid container direction="row" className={classes.root}>
-        {/* <section className={classes.root}> */}
-        <Grid
-          container
-          alignItems="center"
-          className={classes.background}
-          justifyContent={matchesSM ? "center" : "space-between"}
-          direction={matchesSM ? "column" : "row"}
-          style={{ marginTop: -100 }}
-        >
-          <Grid item>
-            {" "}
-            {/*..... HERO BLOCK.... */}
-            <Grid
-              container
-              //justifyContent="flex-end"
-              //alignItems="center"
-              direction="row"
-            >
-              <Box
-                width="100%"
-                height="100%"
-                display="flex"
-                flexDirection="column"
-                //justifyContent="center"
+      {matchesMD ? (
+        <Grid container direction="row" className={classes.root}>
+          {/* <section className={classes.root}> */}
+          <Grid
+            container
+            alignItems="center"
+            className={classes.background}
+            justifyContent={matchesSM ? "center" : "space-between"}
+            direction={matchesSM ? "column" : "row"}
+            style={{ marginTop: -100 }}
+          >
+            <Grid item>
+              {" "}
+              {/*..... HERO BLOCK.... */}
+              <Grid
+                container
+                //justifyContent="flex-end"
                 //alignItems="center"
-                color="#fff"
+                direction="row"
               >
-                <Grid sm item className={classes.heroTextContainer}>
-                  {matchesMD ? (
-                    <Typography
-                      variant={matchesSM ? "subtitle2" : "h2"}
-                      align="left"
-                      style={{ marginTop: "16rem" }}
-                      //justifyContent="center"
-                      //alignItems="center"
-                    >
-                      {/* <span
-                        style={{
-                          marginLeft: matchesSM ? 20 : 5,
-                        }}
-                      >
-                        {" "}
-                        NextChamp is a learn-by-doing learning platform <br />
-                      </span>{" "}
-                      <span style={{ marginLeft: matchesSM ? 20 : 60 }}>
-                        that makes professionals from novices
-                      </span>
-                      <br />
-                      <span style={{ marginLeft: matchesSM ? 20 : 110 }}>
-                        and experts from professionals
-                      </span> */}
-                      <br />
-                    </Typography>
-                  ) : (
-                    <Typography
-                      variant={matchesSM ? "subtitle2" : "h2"}
-                      align="left"
-                      style={{ marginTop: "16rem", fontSize: "1.2rem" }}
-                      justifyContent="center"
-                      alignItems="center"
-                    >
-                      {/* <span
-                        style={{
-                          marginLeft: matchesSM ? 7 : 5,
-                        }}
-                      >
-                        {" "}
-                        NextChamp is a learn-by-doing learning platform <br />
-                      </span>{" "}
-                      <span style={{ marginLeft: matchesSM ? 20 : 60 }}>
-                        that makes professionals from novices
-                      </span>
-                      <br />
-                      <span style={{ marginLeft: matchesSM ? 30 : 110 }}>
-                        and experts from professionals
-                      </span> */}
-                    </Typography>
-                  )}
-
-                  {/* {matchesMD ? (
-                    <Grid
-                      container
-                      justifyContent="flex-start"
-                      direction={matchesSM ? "column" : "row"}
-                      // className={classes.topCover}
-                    >
-                      
-                    </Grid>
-                  ) : (
-                    
-                  )} */}
-                </Grid>
-              </Box>
-              {/* </div> */}
-              {/* <Grid sm item className={classes.animation}>
+                {/* </div> */}
+                {/* <Grid sm item className={classes.animation}>
             <Lottie options={defaultOptions} height={"100%"} width={"100%"} />
           </Grid> */}
+              </Grid>
             </Grid>
           </Grid>
-        </Grid>
-        {/* </section> */}
-        <FreezePriceAdDealPage />
-        <TopCoverDeal preference={preference} />
-        <DealPropositionPage />
-        {/* <ShoppingPreferences
+          {/* </section> */}
+          <FreezePriceAdDealPage />
+          <TopCoverDeal preference={preference} />
+          <DealPropositionPage />
+          {/* <ShoppingPreferences
           updatePathHandler={updatePathHandler}
           updateBuyingPathInfoInfo={updateBuyingPathInfoInfo}
           preference={preference}
         /> */}
-        {isLoading && (
-          <CircularProgress
-            size={100}
-            color="inherit"
-            style={{ marginTop: 250, marginLeft: 650 }}
-          />
-        )}
-        {!isLoading && path === "retail" && <Grid item>{allProductList}</Grid>}
-        {!isLoading && path === "derica" && <Grid item>{allProductList}</Grid>}
-        {!isLoading && path === "paint" && <Grid item>{allProductList}</Grid>}
-        {!isLoading && path === "wholesale" && (
-          <Grid item>{allProductList}</Grid>
-        )}
-        {!isLoading && path === "community" && (
-          <Grid item>{allProductList}</Grid>
-        )}
-        {!isLoading && path === "deal" && <Grid item>{allProductList}</Grid>}
+          {isLoading && (
+            <CircularProgress
+              size={100}
+              color="inherit"
+              style={{ marginTop: 250, marginLeft: 650 }}
+            />
+          )}
+          {!isLoading && path === "retail" && (
+            <Grid item>{allProductList}</Grid>
+          )}
+          {!isLoading && path === "derica" && (
+            <Grid item>{allProductList}</Grid>
+          )}
+          {!isLoading && path === "paint" && <Grid item>{allProductList}</Grid>}
+          {!isLoading && path === "wholesale" && (
+            <Grid item>{allProductList}</Grid>
+          )}
+          {!isLoading && path === "community" && (
+            <Grid item>{allProductList}</Grid>
+          )}
+          {!isLoading && path === "deal" && <Grid item>{allProductList}</Grid>}
 
-        <Grid item className={classes.footer}>
-          <UpperFooter />
+          <Grid item className={classes.footer}>
+            <UpperFooter />
+          </Grid>
         </Grid>
-      </Grid>
+      ) : (
+        <Grid container direction="row" className={classes.rootMobile}>
+          {/* <section className={classes.root}> */}
+          <Grid
+            container
+            alignItems="center"
+            className={classes.backgroundMobile}
+            justifyContent={matchesSM ? "center" : "space-between"}
+            direction={matchesSM ? "column" : "row"}
+            style={{ marginTop: -100, height: "22.5%" }}
+          >
+            <Grid item>
+              {" "}
+              {/*..... HERO BLOCK.... */}
+              <Grid
+                container
+                //justifyContent="flex-end"
+                //alignItems="center"
+                direction="row"
+              >
+                {/* </div> */}
+                {/* <Grid sm item className={classes.animation}>
+            <Lottie options={defaultOptions} height={"100%"} width={"100%"} />
+          </Grid> */}
+              </Grid>
+            </Grid>
+          </Grid>
+          {/* </section> */}
+          <FreezePriceAdDealPage />
+          <TopCoverDeal preference={preference} />
+          <DealPropositionPage />
+          {/* <ShoppingPreferences
+          updatePathHandler={updatePathHandler}
+          updateBuyingPathInfoInfo={updateBuyingPathInfoInfo}
+          preference={preference}
+        /> */}
+          {isLoading && (
+            <CircularProgress
+              size={100}
+              color="inherit"
+              style={{ marginTop: 250, marginLeft: 650 }}
+            />
+          )}
+          {!isLoading && path === "retail" && (
+            <Grid item>{allProductList}</Grid>
+          )}
+          {!isLoading && path === "derica" && (
+            <Grid item>{allProductList}</Grid>
+          )}
+          {!isLoading && path === "paint" && <Grid item>{allProductList}</Grid>}
+          {!isLoading && path === "wholesale" && (
+            <Grid item>{allProductList}</Grid>
+          )}
+          {!isLoading && path === "community" && (
+            <Grid item>{allProductList}</Grid>
+          )}
+          {!isLoading && path === "deal" && <Grid item>{allProductList}</Grid>}
+
+          <Grid item className={classes.footer}>
+            <UpperFooter />
+          </Grid>
+        </Grid>
+      )}
     </>
   );
 };

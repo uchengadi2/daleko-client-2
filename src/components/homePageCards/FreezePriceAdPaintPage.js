@@ -260,7 +260,7 @@ export default function FreezePriceAdPaintPage(props) {
               //direction={matchesSM ? "column" : "row"}
               item
               style={{
-                height: 80,
+                height: 123,
                 marginTop: 20,
                 //marginRight: "25%",
                 marginBottom: 20,

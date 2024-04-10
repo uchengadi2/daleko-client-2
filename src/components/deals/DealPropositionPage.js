@@ -269,7 +269,7 @@ export default function DealPropositionPage(props) {
               //direction={matchesSM ? "column" : "row"}
               item
               style={{
-                height: 150,
+                height: 220,
                 marginTop: 20,
                 //marginRight: "25%",
                 marginBottom: 20,

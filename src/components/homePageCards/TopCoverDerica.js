@@ -426,7 +426,7 @@ export default function TopCoverDerica(props) {
           <Grid
             container
             direction="row"
-            style={{ marginTop: 15, height: 160 }}
+            style={{ marginTop: 15, height: 180 }}
           >
             <Grid
               container
