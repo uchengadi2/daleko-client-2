@@ -38,6 +38,7 @@ import AllProducts from "./homePageCards/AllProducts";
 import { baseURL } from "./../apis/util";
 import FreezingPriceAdMainHome from "./homePageCards/FreezingPriceAdMainHome";
 import FreezePriceAdRetailPage from "./homePageCards/FreezePriceAdRetailPage";
+import DealsCentralStandAlonePage from "./deals/DealsCentralStandAlonePage";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -671,6 +672,7 @@ const RetailHome = (props) => {
           {/* </section> */}
           <FreezePriceAdRetailPage />
           <TopCover />
+          <DealsCentralStandAlonePage />
           {/* <ShoppingPreferences
           updatePathHandler={updatePathHandler}
           updateBuyingPathInfoInfo={updateBuyingPathInfoInfo}

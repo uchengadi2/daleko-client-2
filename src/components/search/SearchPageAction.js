@@ -151,7 +151,8 @@ function SearchPageAction(props) {
     price,
     productId,
     slug,
-    categoryId,
+    category,
+    categorySlug,
     minimumQuantity,
     remainingTotalUnits,
     weight,
@@ -200,31 +201,32 @@ function SearchPageAction(props) {
       : 0
   );
   const [loading, setLoading] = useState();
-  const [categorySlug, setCategorySlug] = useState();
 
   //get the category slug
 
-  useEffect(() => {
-    const fetchData = async () => {
-      let allData = [];
-      api.defaults.headers.common["Authorization"] = `Bearer ${props.token}`;
-      const response = await api.get(`/categories/${categoryId}`);
-      const items = response.data.data.data;
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     let allData = [];
+  //     // api.defaults.headers.common["Authorization"] = `Bearer ${props.token}`;
+  //     // const response = await api.get(`/categories/${categoryId}`);
+  //     const items =
 
-      allData.push({
-        id: items._id,
-        slug: items.slug,
-      });
+  //     allData.push({
+  //       id: items._id,
+  //       slug: items.slug,
+  //     });
 
-      if (allData) {
-        setCategorySlug(allData[0].slug);
-      }
-    };
+  //     console.log("all data", allData);
 
-    //call the function
+  //     if (allData) {
+  //       setCategorySlug(allData[0].slug);
+  //     }
+  //   };
 
-    fetchData().catch(console.error);
-  }, [categoryId, props]);
+  //call the function
+
+  //   fetchData().catch(console.error);
+  // }, [categoryId, props]);
 
   const onChange = (e) => {
     const quantity = parseFloat(e.target.value);
@@ -625,10 +627,10 @@ function SearchPageAction(props) {
           justifyContent="center"
         ></Grid>
 
-        <Typography style={{ width: 300, marginTop: 15 }}>
+        {/* <Typography style={{ width: 300, marginTop: 15 }}>
           <strong>Benefits:</strong>&nbsp;
           <ReactMarkdown>{benefits}</ReactMarkdown>
-        </Typography>
+        </Typography> */}
         <br />
 
         {categorySlug && (

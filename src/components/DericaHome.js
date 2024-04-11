@@ -40,6 +40,7 @@ import TopCoverDerica from "./homePageCards/TopCoverDerica";
 import FreezingPriceAdMainHome from "./homePageCards/FreezingPriceAdMainHome";
 import FreezePriceDericaPageAd from "./freeze/FreezePriceDericaPageAd";
 import FreezePriceAdDericaPage from "./homePageCards/FreezePriceAdDericaPage";
+import DealsCentralStandAlonePage from "./deals/DealsCentralStandAlonePage";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -673,6 +674,7 @@ const DericaHome = (props) => {
           {/* </section> */}
           <FreezePriceAdDericaPage />
           <TopCoverDerica preference={preference} />
+          <DealsCentralStandAlonePage />
           {/* <ShoppingPreferences
           updatePathHandler={updatePathHandler}
           updateBuyingPathInfoInfo={updateBuyingPathInfoInfo}

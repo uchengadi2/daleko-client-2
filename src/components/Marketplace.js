@@ -16,6 +16,7 @@ import DialogContent from "@material-ui/core/DialogContent";
 import Snackbar from "@material-ui/core/Snackbar";
 import ReactPlayer from "react-player";
 import CircularProgress from "@material-ui/core/CircularProgress";
+import DealsCentralStandAlonePage from "./deals/DealsCentralStandAlonePage";
 
 import api from "./../apis/local";
 import CallToAction from "./ui/CallToAction";
@@ -1038,6 +1039,7 @@ const Marketplace = (props) => {
           {/* </section> */}
           <FreezingPriceAdMainHome />
           <TopCover />
+          <DealsCentralStandAlonePage />
           <ShoppingPreferences
             updatePathHandler={updatePathHandler}
             updateBuyingPathInfoInfo={updateBuyingPathInfoInfo}

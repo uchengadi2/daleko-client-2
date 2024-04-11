@@ -384,7 +384,7 @@ export default function TopCover(props) {
             <Grid
               container
               direction="column"
-              style={{ marginLeft: 20, width: "22%", marginTop: 0 }}
+              style={{ marginLeft: 20, width: "30%", marginTop: 0 }}
             >
               <CardActionArea></CardActionArea>
               <Grid
@@ -404,7 +404,7 @@ export default function TopCover(props) {
                   to="/derica"
                   onClick={() => <DericaHome />}
                   className={classes.actionButton}
-                  style={{ width: 75, marginLeft: 14, fontSize: 8 }}
+                  style={{ width: 85, marginLeft: 16, fontSize: 10 }}
                   sx={{
                     textAlign: "left",
                     fontSize: 8,
@@ -417,7 +417,7 @@ export default function TopCover(props) {
             <Grid
               container
               direction="column"
-              style={{ marginLeft: 0, width: "22%", marginTop: 0 }}
+              style={{ marginLeft: 0, width: "30%", marginTop: 0 }}
             >
               <Grid
                 container
@@ -436,7 +436,7 @@ export default function TopCover(props) {
                   to="/paint"
                   onClick={() => <PaintHome />}
                   className={classes.actionButton}
-                  style={{ width: 75, marginLeft: 18, fontSize: 8 }}
+                  style={{ width: 85, marginLeft: 20, fontSize: 10 }}
                   sx={{
                     textAlign: "left",
                   }}
@@ -449,7 +449,7 @@ export default function TopCover(props) {
             <Grid
               container
               direction="column"
-              style={{ marginLeft: 0, width: "22%", marginTop: 0 }}
+              style={{ marginLeft: 0, width: "30%", marginTop: 0 }}
             >
               <Grid
                 container
@@ -468,43 +468,12 @@ export default function TopCover(props) {
                   to="/wholesale"
                   onClick={() => <WholesaleHome />}
                   className={classes.actionWholesaleButton}
-                  style={{ width: 75, marginLeft: 18, fontSize: 8 }}
+                  style={{ width: 85, marginLeft: 20, fontSize: 10 }}
                   sx={{
                     textAlign: "left",
                   }}
                 >
                   Buy WholeSale
-                </Button>
-              </Grid>
-            </Grid>
-            <Grid
-              container
-              direction="column"
-              style={{ marginLeft: 0, width: "22%", marginTop: 0 }}
-            >
-              <Grid
-                container
-                //direction="row"
-                alignItems="center"
-                className={classes.backgroundCommunity}
-                justifyContent={matchesSM ? "center" : "space-between"}
-                direction={matchesSM ? "column" : "row"}
-                item
-                style={{ height: "70%", marginTop: 0, marginLeft: 15 }}
-              ></Grid>
-              <Grid item alignItems="center" style={{ height: "30%" }}>
-                <Button
-                  variant="contained"
-                  component={Link}
-                  to="/dealscentral"
-                  onClick={() => <DealHome />}
-                  className={classes.actionButton}
-                  style={{ width: 75, marginLeft: 18, fontSize: 8 }}
-                  sx={{
-                    textAlign: "left",
-                  }}
-                >
-                  Deals Central
                 </Button>
               </Grid>
             </Grid>

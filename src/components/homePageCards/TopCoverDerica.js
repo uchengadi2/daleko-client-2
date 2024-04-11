@@ -431,7 +431,7 @@ export default function TopCoverDerica(props) {
             <Grid
               container
               direction="column"
-              style={{ marginLeft: 20, width: "22%", marginTop: 0 }}
+              style={{ marginLeft: 20, width: "30%", marginTop: 0 }}
             >
               <CardActionArea></CardActionArea>
               <Grid
@@ -451,7 +451,7 @@ export default function TopCoverDerica(props) {
                   to="/retail"
                   onClick={() => <RetailHome />}
                   className={classes.actionButton}
-                  style={{ width: 75, marginLeft: 14, fontSize: 8 }}
+                  style={{ width: 85, marginLeft: 16, fontSize: 10 }}
                   sx={{
                     textAlign: "left",
                     fontSize: 8,
@@ -464,7 +464,7 @@ export default function TopCoverDerica(props) {
             <Grid
               container
               direction="column"
-              style={{ marginLeft: 0, width: "22%", marginTop: 0 }}
+              style={{ marginLeft: 0, width: "30%", marginTop: 0 }}
             >
               <Grid
                 container
@@ -483,7 +483,7 @@ export default function TopCoverDerica(props) {
                   to="/paint"
                   onClick={() => <PaintHome />}
                   className={classes.actionButton}
-                  style={{ width: 75, marginLeft: 18, fontSize: 8 }}
+                  style={{ width: 85, marginLeft: 20, fontSize: 10 }}
                   sx={{
                     textAlign: "left",
                   }}
@@ -496,7 +496,7 @@ export default function TopCoverDerica(props) {
             <Grid
               container
               direction="column"
-              style={{ marginLeft: 0, width: "22%", marginTop: 0 }}
+              style={{ marginLeft: 0, width: "30%", marginTop: 0 }}
             >
               <Grid
                 container
@@ -515,7 +515,7 @@ export default function TopCoverDerica(props) {
                   to="/wholesale"
                   onClick={() => <WholesaleHome />}
                   className={classes.actionWholesaleButton}
-                  style={{ width: 75, marginLeft: 18, fontSize: 8 }}
+                  style={{ width: 85, marginLeft: 20, fontSize: 10 }}
                   sx={{
                     textAlign: "left",
                   }}
@@ -524,10 +524,10 @@ export default function TopCoverDerica(props) {
                 </Button>
               </Grid>
             </Grid>
-            <Grid
+            {/* <Grid
               container
               direction="column"
-              style={{ marginLeft: 0, width: "22%", marginTop: 0 }}
+              style={{ marginLeft: 0, width: "30%", marginTop: 0 }}
             >
               <Grid
                 container
@@ -554,7 +554,7 @@ export default function TopCoverDerica(props) {
                   Deals Central
                 </Button>
               </Grid>
-            </Grid>
+            </Grid> */}
           </Grid>
         </Card>
       )}
