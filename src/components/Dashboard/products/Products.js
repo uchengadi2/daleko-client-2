@@ -140,6 +140,12 @@ function Products(props) {
           communityInstruction: product.communityInstruction,
           dealCode: product.dealCode,
           dealExpiryDate: product.dealExpiryDate,
+
+          dealType: product.dealType,
+          showDealPricePerUnit: product.showDealPricePerUnit,
+          allowDealQuantityChange: product.allowDealQuantityChange,
+          dealStatus: product.dealStatus,
+          dealComment: product.dealComment,
         });
       });
       setProductsList(allData);
@@ -431,6 +437,11 @@ function Products(props) {
         communityInstruction: product.communityInstruction,
         dealCode: product.dealCode,
         dealExpiryDate: product.dealExpiryDate,
+        dealType: product.dealType,
+        showDealPricePerUnit: product.showDealPricePerUnit,
+        allowDealQuantityChange: product.allowDealQuantityChange,
+        dealStatus: product.dealStatus,
+        dealComment: product.dealComment,
       };
       rows.push(row);
     });

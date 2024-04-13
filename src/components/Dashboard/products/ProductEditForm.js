@@ -906,6 +906,15 @@ function ProductEditForm(props) {
     params[0].communityDeliveryType
   );
 
+  const [showDealPricePerUnit, setShowDealPricePerUnit] = useState(
+    params[0].showDealPricePerUnit
+  );
+  const [allowDealQuantityChange, setAllowDealQuantityChange] = useState(
+    params[0].allowDealQuantityChange
+  );
+  const [dealStatus, setDealStatus] = useState(params[0].dealStatus);
+  const [dealType, setDealType] = useState(params[0].dealType);
+
   const [loading, setLoading] = useState(false);
 
   const dispatch = useDispatch();
@@ -1138,6 +1147,22 @@ function ProductEditForm(props) {
 
   const handleCommunityDeliveryTypeChange = (event) => {
     setCommunityDeliveryType(event.target.value);
+  };
+
+  const handleShowDealPricePerUnitChange = (event) => {
+    setShowDealPricePerUnit(event.target.value);
+  };
+
+  const handleDealStatusChange = (event) => {
+    setDealStatus(event.target.value);
+  };
+
+  const handleDealTypeChange = (event) => {
+    setDealType(event.target.value);
+  };
+
+  const handleAllowDealQuantityChange = (event) => {
+    setAllowDealQuantityChange(event.target.value);
   };
 
   const handleUploadFiles = (files) => {
@@ -1589,6 +1614,130 @@ function ProductEditForm(props) {
     );
   };
 
+  const renderShowDealPricePerUnitField = ({
+    input,
+    label,
+    meta: { touched, error, invalid },
+    type,
+    id,
+    ...custom
+  }) => {
+    return (
+      <Box>
+        <FormControl variant="outlined">
+          {/* <InputLabel id="vendor_city">City</InputLabel> */}
+          <Select
+            labelId="showDealPricePerUnit"
+            id="showDealPricePerUnit"
+            value={showDealPricePerUnit}
+            onChange={handleShowDealPricePerUnitChange}
+            //label="Allow Price Freezing"
+
+            style={{ width: 237, marginTop: 0, height: 38 }}
+            //{...input}
+          >
+            <MenuItem value={"false"}>No</MenuItem>
+            <MenuItem value={"true"}>Yes</MenuItem>
+          </Select>
+          <FormHelperText>Show Deal Price Per Unit</FormHelperText>
+        </FormControl>
+      </Box>
+    );
+  };
+
+  const renderDealStatusField = ({
+    input,
+    label,
+    meta: { touched, error, invalid },
+    type,
+    id,
+    ...custom
+  }) => {
+    return (
+      <Box>
+        <FormControl variant="outlined">
+          {/* <InputLabel id="vendor_city">City</InputLabel> */}
+          <Select
+            labelId="dealStatus"
+            id="dealStatus"
+            value={dealStatus}
+            onChange={handleDealStatusChange}
+            //label="Allow Price Freezing"
+
+            style={{ width: 237, marginTop: 20, height: 38 }}
+            //{...input}
+          >
+            <MenuItem value={"inactive"}>In Active</MenuItem>
+            <MenuItem value={"active"}>Active</MenuItem>
+          </Select>
+          <FormHelperText>Select Deal Status</FormHelperText>
+        </FormControl>
+      </Box>
+    );
+  };
+
+  const renderDealTypeField = ({
+    input,
+    label,
+    meta: { touched, error, invalid },
+    type,
+    id,
+    ...custom
+  }) => {
+    return (
+      <Box>
+        <FormControl variant="outlined">
+          {/* <InputLabel id="vendor_city">City</InputLabel> */}
+          <Select
+            labelId="dealType"
+            id="dealType"
+            value={dealType}
+            onChange={handleDealTypeChange}
+            //label="Allow Price Freezing"
+
+            style={{ width: 237, marginTop: 20, height: 38 }}
+            //{...input}
+          >
+            <MenuItem value={"public"}>Public</MenuItem>
+            <MenuItem value={"private"}>Private</MenuItem>
+          </Select>
+          <FormHelperText>Select Deal Type</FormHelperText>
+        </FormControl>
+      </Box>
+    );
+  };
+
+  const renderAllowDealQuantityChangeField = ({
+    input,
+    label,
+    meta: { touched, error, invalid },
+    type,
+    id,
+    ...custom
+  }) => {
+    return (
+      <Box>
+        <FormControl variant="outlined">
+          {/* <InputLabel id="vendor_city">City</InputLabel> */}
+          <Select
+            labelId="allowDealQuantityChange"
+            id="allowDealQuantityChange"
+            value={allowDealQuantityChange}
+            onChange={handleAllowDealQuantityChange}
+            //label="Allow Price Freezing"
+
+            style={{ width: 237, marginTop: 0, height: 38 }}
+            //{...input}
+          >
+            <MenuItem value={"false"}>No</MenuItem>
+            <MenuItem value={"true"}>Yes</MenuItem>
+          </Select>
+          <FormHelperText>Allow Deal Quantity Change?</FormHelperText>
+        </FormControl>
+      </Box>
+    );
+  };
+
   const buttonContent = () => {
     return <React.Fragment> Submit</React.Fragment>;
   };
@@ -1850,6 +1999,27 @@ function ProductEditForm(props) {
       formValues.dealExpiryDate
         ? formValues.dealExpiryDate
         : params[0].dealExpiryDate
+    );
+
+    form.append("dealType", dealType ? dealType : params[0].dealType);
+
+    form.append(
+      "showDealPricePerUnit",
+      showDealPricePerUnit
+        ? showDealPricePerUnit
+        : params[0].showDealPricePerUnit
+    );
+
+    form.append(
+      "allowDealQuantityChange",
+      allowDealQuantityChange
+        ? allowDealQuantityChange
+        : params[0].allowDealQuantityChange
+    );
+    form.append("dealStatus", dealStatus ? dealStatus : params[0].dealStatus);
+    form.append(
+      "dealComment",
+      formValues.dealComment ? formValues.dealComment : params[0].dealComment
     );
 
     if (formValues.imageCover) {
@@ -2416,6 +2586,7 @@ function ProductEditForm(props) {
               component={renderEditableMultilineField}
             />
           )}
+
           {salesPreference === "deal" && (
             <Grid item container style={{ marginTop: 20, marginBottom: 20 }}>
               <FormLabel style={{ color: "blue" }} component="legend">
@@ -2448,6 +2619,68 @@ function ProductEditForm(props) {
                 />
               </Grid>
             </Grid>
+          )}
+
+          {salesPreference === "deal" && (
+            <Grid container direction="row" style={{ marginTop: 20 }}>
+              <Grid item style={{ width: "50%" }}>
+                <Field
+                  label=""
+                  id="showDealPricePerUnit"
+                  name="showDealPricePerUnit"
+                  // helperText="Show Deal's Price Per Unit"
+                  type="text"
+                  component={renderShowDealPricePerUnitField}
+                />
+              </Grid>
+              <Grid item style={{ marginLeft: 15, width: "47%" }}>
+                <Field
+                  label=""
+                  id="allowDealQuantityChange"
+                  name="allowDealQuantityChange"
+                  type="text"
+                  //helperText="Allow the Customer to Change Deal Quantity"
+                  component={renderAllowDealQuantityChangeField}
+                />
+              </Grid>
+            </Grid>
+          )}
+
+          {salesPreference === "deal" && (
+            <Grid container direction="row" style={{ marginTop: 20 }}>
+              <Grid item style={{ width: "50%" }}>
+                <Field
+                  label=""
+                  id="dealType"
+                  name="dealType"
+                  // helperText="Show Deal's Price Per Unit"
+                  type="text"
+                  component={renderDealTypeField}
+                />
+              </Grid>
+              <Grid item style={{ marginLeft: 15, width: "47%" }}>
+                <Field
+                  label=""
+                  id="dealStatus"
+                  name="dealStatus"
+                  type="text"
+                  //helperText="Allow the Customer to Change Deal Quantity"
+                  component={renderDealStatusField}
+                />
+              </Grid>
+            </Grid>
+          )}
+
+          {salesPreference === "deal" && (
+            <Field
+              label=""
+              id="dealComment"
+              name="dealComment"
+              defaultValue={params[0].dealComment}
+              type="text"
+              helperText="Deal Instruction Or Direction(optional)"
+              component={renderEditableMultilineField}
+            />
           )}
           <Grid item container style={{ marginTop: 20 }}>
             <FormLabel style={{ color: "blue" }} component="legend">

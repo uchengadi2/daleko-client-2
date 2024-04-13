@@ -42,6 +42,7 @@ import FreezingPriceAdMainHome from "./homePageCards/FreezingPriceAdMainHome";
 import FreezePriceAdCommunityPage from "./homePageCards/FreezePriceAdCommunityPage";
 import FreezePriceAdDealPage from "./homePageCards/FreezePriceAdDealPage";
 import DealPropositionPage from "./deals/DealPropositionPage";
+import DealSearchBox from "./deals/DealSearchBox";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -300,10 +301,14 @@ const DealHome = (props) => {
   const [updateLearningPath, setUpdateLearningPath] = useState(false);
   const [updateBuyingPath, setUpdateBuyingPath] = useState(false);
   const [path, setPath] = useState("community");
+  const [deal, setDeal] = useState("");
+  const [updateDeal, setUpdateDeal] = useState(false);
+  const [dealCode, setDealCode] = useState(null);
   const [preference, setPreference] = useState("community");
   //const [path, setPath] = useState("retail");
   const [policy, setPolicy] = useState();
   const [currency, setCurrency] = useState();
+  const [numberOfDeals, setNumberOfDeals] = useState();
 
   const [alert, setAlert] = useState({
     open: false,
@@ -329,12 +334,17 @@ const DealHome = (props) => {
     setPath(value);
   };
 
+  const dealHandler = (value) => {
+    console.log("deal value:", value);
+    setDeal(value);
+  };
+
   const updateLearningPathInfoInfo = () => {
     setUpdateLearningPath((prevState) => !prevState);
   };
 
-  const updateBuyingPathInfoInfo = () => {
-    setUpdateBuyingPath((prevState) => !prevState);
+  const updateDealHandler = () => {
+    setUpdateDeal((prevState) => !prevState);
   };
 
   const handleSuccessfulBecomeAPartnerOpenDialogBoxWithSnackbar = () => {
@@ -361,68 +371,137 @@ const DealHome = (props) => {
       let allData = [];
 
       //data.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-      const response = await api.get("/products?sort=desc", {
-        params: { displayOnStore: "yes", salesPreference: "deal" },
-      });
-      const workingData = response.data.data.data;
-      workingData.map((product) => {
-        allData.push({
-          id: product._id,
-          name: product.name,
-          image: product.imageCover,
-          shortDescription: product.shortDescription,
-          fullDescription: product.fullDescription,
-          pricePerUnit: product.pricePerUnit,
-          category: product.category,
-          minimumQuantity: product.minimumQuantity,
-          currency: product.currency,
-          unit: product.unit,
-          isFeaturedProduct: product.isFeaturedProduct,
-          configuration: product.configuration,
-          displayOnStore: product.displayOnStore,
-          brand: product.brand,
-          salesPreference: product.salesPreference,
-          keyword1: product.keyword1,
-          keyword2: product.keyword2,
-          keyword3: product.keyword3,
-          slug: product.slug,
-          images: product.images,
-          sku: product.sku,
-          pricingMechanism: product.pricingMechanism,
-          priceLabel: product.priceLabel,
-          weightPerUnit: product.weightPerUnit,
-          stockStatus: product.stockStatus,
-          allowSubscription: product.allowSubscription,
-          isVatable: product.isVatable,
-          hasVariant: product.hasVariant,
-          barcode: product.barcode,
-          marketPricingCondition: product.marketPricingCondition,
-          deliverability: product.deliverability,
-          pickupInfo: product.pickupInfo,
-          allowPriceFreezing: product.allowPriceFreezing,
-          allowFreezedPriceLowBound: product.allowFreezedPriceLowBound,
-          freezedPriceLowBound: product.freezedPriceLowBound,
-          chargesPerWeekOnFreezedPriceServiceWithoutPriceLowBound:
-            product.chargesPerWeekOnFreezedPriceServiceWithoutPriceLowBound,
-          chargesPerWeekOnFreezedPriceServiceWithPriceLowBound:
-            product.chargesPerWeekOnFreezedPriceServiceWithPriceLowBound,
-          freezedPriceMaximumDurationInWeeks:
-            product.freezedPriceMaximumDurationInWeeks,
-          minimumFreezableQuantity: product.minimumFreezableQuantity,
-          datePriceWasSet: product.datePriceWasSet,
-          dealCode: product.dealCode,
-          dealExpiryDate: product.dealExpiryDate,
+
+      if (deal === "") {
+        const response = await api.get("/products?sort=desc", {
+          params: { displayOnStore: "yes", salesPreference: "deal" },
         });
-      });
-      setProductsList(allData);
-      setCurrency(allData[0].currency);
-      setIsLoading(false);
+        const workingData = response.data.data.data;
+        workingData.map((product) => {
+          allData.push({
+            id: product._id,
+            name: product.name,
+            image: product.imageCover,
+            shortDescription: product.shortDescription,
+            fullDescription: product.fullDescription,
+            pricePerUnit: product.pricePerUnit,
+            category: product.category,
+            minimumQuantity: product.minimumQuantity,
+            currency: product.currency,
+            unit: product.unit,
+            isFeaturedProduct: product.isFeaturedProduct,
+            configuration: product.configuration,
+            displayOnStore: product.displayOnStore,
+            brand: product.brand,
+            salesPreference: product.salesPreference,
+            keyword1: product.keyword1,
+            keyword2: product.keyword2,
+            keyword3: product.keyword3,
+            slug: product.slug,
+            images: product.images,
+            sku: product.sku,
+            pricingMechanism: product.pricingMechanism,
+            priceLabel: product.priceLabel,
+            weightPerUnit: product.weightPerUnit,
+            stockStatus: product.stockStatus,
+            allowSubscription: product.allowSubscription,
+            isVatable: product.isVatable,
+            hasVariant: product.hasVariant,
+            barcode: product.barcode,
+            marketPricingCondition: product.marketPricingCondition,
+            deliverability: product.deliverability,
+            pickupInfo: product.pickupInfo,
+            allowPriceFreezing: product.allowPriceFreezing,
+            allowFreezedPriceLowBound: product.allowFreezedPriceLowBound,
+            freezedPriceLowBound: product.freezedPriceLowBound,
+            chargesPerWeekOnFreezedPriceServiceWithoutPriceLowBound:
+              product.chargesPerWeekOnFreezedPriceServiceWithoutPriceLowBound,
+            chargesPerWeekOnFreezedPriceServiceWithPriceLowBound:
+              product.chargesPerWeekOnFreezedPriceServiceWithPriceLowBound,
+            freezedPriceMaximumDurationInWeeks:
+              product.freezedPriceMaximumDurationInWeeks,
+            minimumFreezableQuantity: product.minimumFreezableQuantity,
+            datePriceWasSet: product.datePriceWasSet,
+            dealCode: product.dealCode,
+            dealExpiryDate: product.dealExpiryDate,
+          });
+        });
+        setProductsList(allData);
+        console.log("deal products list number:", allData.length);
+        setNumberOfDeals(allData.length);
+
+        setIsLoading(false);
+        setCurrency(allData.length > 0 ? allData[0].currency : "");
+      } else {
+        const response = await api.get("/products?sort=desc", {
+          params: {
+            displayOnStore: "yes",
+            salesPreference: "deal",
+            dealCode: deal,
+          },
+        });
+        const workingData = response.data.data.data;
+        workingData.map((product) => {
+          allData.push({
+            id: product._id,
+            name: product.name,
+            image: product.imageCover,
+            shortDescription: product.shortDescription,
+            fullDescription: product.fullDescription,
+            pricePerUnit: product.pricePerUnit,
+            category: product.category,
+            minimumQuantity: product.minimumQuantity,
+            currency: product.currency,
+            unit: product.unit,
+            isFeaturedProduct: product.isFeaturedProduct,
+            configuration: product.configuration,
+            displayOnStore: product.displayOnStore,
+            brand: product.brand,
+            salesPreference: product.salesPreference,
+            keyword1: product.keyword1,
+            keyword2: product.keyword2,
+            keyword3: product.keyword3,
+            slug: product.slug,
+            images: product.images,
+            sku: product.sku,
+            pricingMechanism: product.pricingMechanism,
+            priceLabel: product.priceLabel,
+            weightPerUnit: product.weightPerUnit,
+            stockStatus: product.stockStatus,
+            allowSubscription: product.allowSubscription,
+            isVatable: product.isVatable,
+            hasVariant: product.hasVariant,
+            barcode: product.barcode,
+            marketPricingCondition: product.marketPricingCondition,
+            deliverability: product.deliverability,
+            pickupInfo: product.pickupInfo,
+            allowPriceFreezing: product.allowPriceFreezing,
+            allowFreezedPriceLowBound: product.allowFreezedPriceLowBound,
+            freezedPriceLowBound: product.freezedPriceLowBound,
+            chargesPerWeekOnFreezedPriceServiceWithoutPriceLowBound:
+              product.chargesPerWeekOnFreezedPriceServiceWithoutPriceLowBound,
+            chargesPerWeekOnFreezedPriceServiceWithPriceLowBound:
+              product.chargesPerWeekOnFreezedPriceServiceWithPriceLowBound,
+            freezedPriceMaximumDurationInWeeks:
+              product.freezedPriceMaximumDurationInWeeks,
+            minimumFreezableQuantity: product.minimumFreezableQuantity,
+            datePriceWasSet: product.datePriceWasSet,
+            dealCode: product.dealCode,
+            dealExpiryDate: product.dealExpiryDate,
+          });
+        });
+        setProductsList(allData);
+        console.log("deal products list number:", allData.length);
+        setNumberOfDeals(allData.length);
+        setIsLoading(false);
+        setCurrency(allData.length > 0 ? allData[0].currency : "");
+      }
     };
 
     //call the function
 
     fetchData().catch(console.error);
-  }, [path, updateBuyingPath]);
+  }, [updateDeal, deal]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -518,8 +597,8 @@ const DealHome = (props) => {
               setToken={props.setToken}
               setUserId={props.setUserId}
               updateLearningPathInfoInfo={updateLearningPathInfoInfo}
-              updateBuyingPathInfoInfo={updateBuyingPathInfoInfo}
-              path={path}
+              updateDealHandler={updateDealHandler}
+              deal={deal}
             />
           ))}
         </Grid>
@@ -579,14 +658,17 @@ const DealHome = (props) => {
               setToken={props.setToken}
               setUserId={props.setUserId}
               updateLearningPathInfoInfo={updateLearningPathInfoInfo}
-              updateBuyingPathInfoInfo={updateBuyingPathInfoInfo}
-              path={path}
+              updateDealHandler={updateDealHandler}
+              deal={deal}
             />
           ))}
         </Grid>
       }
     </React.Fragment>
   );
+
+  console.log("product list:", productsList.length);
+  console.log("number of deals:", numberOfDeals);
 
   return (
     <>
@@ -622,11 +704,17 @@ const DealHome = (props) => {
           <FreezePriceAdDealPage />
           <TopCoverDeal preference={preference} />
           <DealPropositionPage />
-          {/* <ShoppingPreferences
-          updatePathHandler={updatePathHandler}
-          updateBuyingPathInfoInfo={updateBuyingPathInfoInfo}
-          preference={preference}
-        /> */}
+          <DealSearchBox
+            updateDealHandler={updateDealHandler}
+            dealHandler={dealHandler}
+          />
+
+          {!isLoading && numberOfDeals === 0 && (
+            <Typography style={{ marginLeft: 100, marginTop: 80 }}>
+              There Are No Available Deals
+            </Typography>
+          )}
+
           {isLoading && (
             <CircularProgress
               size={100}
@@ -684,11 +772,16 @@ const DealHome = (props) => {
           <FreezePriceAdDealPage />
           <TopCoverDeal preference={preference} />
           <DealPropositionPage />
-          {/* <ShoppingPreferences
-          updatePathHandler={updatePathHandler}
-          updateBuyingPathInfoInfo={updateBuyingPathInfoInfo}
-          preference={preference}
-        /> */}
+          <DealSearchBox
+            updateDealHandler={updateDealHandler}
+            dealHandler={dealHandler}
+          />
+
+          {!isLoading && numberOfDeals === 0 && (
+            <Typography style={{ marginLeft: 110, marginTop: 50 }}>
+              There Are No Available Deals
+            </Typography>
+          )}
           {isLoading && (
             <CircularProgress
               size={100}
