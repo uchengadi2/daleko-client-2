@@ -212,6 +212,20 @@ export default function CartProductCard(props) {
           product.freezedPriceMaximumDurationInWeeks,
         minimumFreezableQuantity: product.minimumFreezableQuantity,
         datePriceWasSet: product.datePriceWasSet,
+
+        requiredMaximumNumberOfCommunityMembers:
+          product.requiredMaximumNumberOfCommunityMembers,
+        communityTotalPurchaseableUnit: product.communityTotalPurchaseableUnit,
+        communityDeliveryPeriod: product.communityDeliveryPeriod,
+        communityDeliveryType: product.communityDeliveryType,
+        communityInstruction: product.communityInstruction,
+        dealCode: product.dealCode,
+        dealExpiryDate: product.dealExpiryDate,
+        dealType: product.dealType,
+        showDealPricePerUnit: product.showDealPricePerUnit,
+        allowDealQuantityChange: product.allowDealQuantityChange,
+        dealStatus: product.dealStatus,
+        dealComment: product.dealComment,
       });
 
       if (!allData) {
@@ -265,6 +279,21 @@ export default function CartProductCard(props) {
           allData[0].freezedPriceMaximumDurationInWeeks,
         minimumFreezableQuantity: allData[0].minimumFreezableQuantity,
         datePriceWasSet: allData[0].datePriceWasSet,
+
+        requiredMaximumNumberOfCommunityMembers:
+          allData[0].requiredMaximumNumberOfCommunityMembers,
+        communityTotalPurchaseableUnit:
+          allData[0].communityTotalPurchaseableUnit,
+        communityDeliveryPeriod: allData[0].communityDeliveryPeriod,
+        communityDeliveryType: allData[0].communityDeliveryType,
+        communityInstruction: allData[0].communityInstruction,
+        dealCode: allData[0].dealCode,
+        dealExpiryDate: allData[0].dealExpiryDate,
+        dealType: allData[0].dealType,
+        showDealPricePerUnit: allData[0].showDealPricePerUnit,
+        allowDealQuantityChange: allData[0].allowDealQuantityChange,
+        dealStatus: allData[0].dealStatus,
+        dealComment: allData[0].dealComment,
       });
       setCurrency(allData[0].currency);
     };
@@ -513,8 +542,6 @@ export default function CartProductCard(props) {
     return <></>;
   }
 
-  console.log("props:", props);
-
   return (
     <>
       {matchesMDUp ? (
@@ -553,50 +580,132 @@ export default function CartProductCard(props) {
                 >
                   {Str(product.shortDescription).limit(200, "...").get()}
                 </Typography>
-                <Typography
-                  variant="h5"
-                  color="textSecondary"
-                  component="p"
-                  style={{ marginTop: 30 }}
-                >
-                  <span style={{ marginLeft: 130 }}>
-                    <strong>
-                      {getCurrencyCode()}
-                      {product.pricePerUnit
-                        ? product.pricePerUnit
-                            .toFixed(2)
-                            .replace(/\d(?=(\d{3})+\.)/g, "$&,")
-                        : ""}
-                      <span style={{ fontSize: 10 }}>{`per unit`}</span>
-                    </strong>
-                  </span>
-                  {product.pricingMechanism === "pricing" && (
+                {product.pricingMechanism === "pricing" &&
+                  product.salesPreference !== "deal" && (
+                    <Typography
+                      variant="h4"
+                      color="textSecondary"
+                      component="p"
+                      style={{ marginTop: 5, marginBottom: 15 }}
+                    >
+                      <span style={{ marginLeft: 130 }}>
+                        <strong>
+                          {getCurrencyCode()}
+                          {product.pricePerUnit
+                            ? product.pricePerUnit
+                                .toFixed(2)
+                                .replace(/\d(?=(\d{3})+\.)/g, "$&,")
+                            : 0}
+                        </strong>
+                      </span>
+                    </Typography>
+                  )}
+                {product.pricingMechanism === "pricing" &&
+                  product.salesPreference === "deal" && (
+                    <Typography
+                      variant="h4"
+                      color="textSecondary"
+                      component="p"
+                      style={{ marginTop: 5, marginBottom: 15 }}
+                    >
+                      {product.showDealPricePerUnit ? (
+                        <span style={{ marginLeft: 130 }}>
+                          <strong>
+                            {getCurrencyCode()}
+                            {product.pricePerUnit
+                              ? product.pricePerUnit
+                                  .toFixed(2)
+                                  .replace(/\d(?=(\d{3})+\.)/g, "$&,")
+                              : 0}
+                          </strong>
+                        </span>
+                      ) : (
+                        ""
+                      )}
+                    </Typography>
+                  )}
+                {product.pricingMechanism === "pricing" &&
+                  product.salesPreference !== "deal" && (
                     <Typography
                       //variant="h6"
                       color="red"
                       component="p"
-                      style={{ marginTop: 5, marginBottom: 2 }}
+                      style={{ marginTop: 5, marginBottom: 15 }}
                     >
                       <span
-                        style={{ marginLeft: 130, color: "red", fontSize: 12 }}
+                        style={{
+                          marginLeft: 130,
+                          color: "red",
+                          fontSize: 12,
+                        }}
                       >
                         <strong>{product.priceLabel}</strong>
                       </span>
                     </Typography>
                   )}
-                  <br />
-                  <br />
-                </Typography>
-                {product.sku !== undefined && (
+                {product.pricingMechanism === "pricing" &&
+                  product.salesPreference === "deal" && (
+                    <Typography
+                      //variant="h6"
+                      color="red"
+                      component="p"
+                      style={{ marginTop: 5, marginBottom: 15 }}
+                    >
+                      {product.showDealPricePerUnit ? (
+                        <span
+                          style={{
+                            marginLeft: 130,
+                            color: "red",
+                            fontSize: 12,
+                          }}
+                        >
+                          <strong>{product.priceLabel}</strong>
+                        </span>
+                      ) : (
+                        <span
+                          style={{
+                            marginLeft: 130,
+                            color: "red",
+                            fontSize: 12,
+                          }}
+                        >
+                          <strong>{product.priceLabel}</strong>
+                        </span>
+                      )}
+                    </Typography>
+                  )}
+                {product.pricingMechanism === "request-quote" && (
                   <Typography
-                    variant="h5"
-                    style={{ color: "black", fontSize: 15 }}
+                    variant="h4"
+                    color="textSecondary"
+                    component="p"
+                    style={{ marginTop: 5, marginBottom: 15 }}
                   >
-                    <span style={{ marginLeft: 10, marginRight: 15 }}>
-                      {" "}
-                      <strong>Sku:</strong>
+                    <span style={{ marginLeft: 130 }}>
+                      <strong>
+                        {getCurrencyCode()}
+                        {product.pricePerUnit
+                          ? product.pricePerUnit
+                              .toFixed(2)
+                              .replace(/\d(?=(\d{3})+\.)/g, "$&,")
+                          : 0}
+                      </strong>
+                      <span style={{ fontSize: 12 }}>per unit</span>
                     </span>
-                    {product.sku}
+                  </Typography>
+                )}
+                {product.pricingMechanism === "request-quote" && (
+                  <Typography
+                    //variant="h6"
+                    color="red"
+                    component="p"
+                    style={{ marginTop: 5, marginBottom: 15 }}
+                  >
+                    <span
+                      style={{ marginLeft: 130, color: "red", fontSize: 12 }}
+                    >
+                      <strong>{product.priceLabel}</strong>
+                    </span>
                   </Typography>
                 )}
                 <Typography>
@@ -638,6 +747,46 @@ export default function CartProductCard(props) {
                     <span>{product.pickupInfo}</span>
                   </span>
                 </Typography>
+                {product.salesPreference === "deal" && (
+                  <Typography>
+                    <span style={{ fontSize: 14, marginLeft: 10 }}>
+                      <strong> Deal Code:</strong>
+                      <span>{product.dealCode}</span>
+                    </span>
+                  </Typography>
+                )}
+                {product.salesPreference === "deal" && (
+                  <Typography>
+                    <span style={{ fontSize: 14, marginLeft: 10 }}>
+                      <strong> Deal Expiry Date:</strong>
+                      <span>{product.dealExpiryDate}</span>
+                    </span>
+                  </Typography>
+                )}
+                {product.salesPreference === "deal" && (
+                  <Typography>
+                    <span style={{ fontSize: 14, marginLeft: 10 }}>
+                      <strong> Deal Type:</strong>
+                      <span>{product.dealType}</span>
+                    </span>
+                  </Typography>
+                )}
+                {product.salesPreference === "deal" && (
+                  <Typography>
+                    <span style={{ fontSize: 14, marginLeft: 10 }}>
+                      <strong> Deal Status:</strong>
+                      <span>{product.dealStatus}</span>
+                    </span>
+                  </Typography>
+                )}
+                {product.salesPreference === "deal" && (
+                  <Typography>
+                    <span style={{ fontSize: 14, marginLeft: 10 }}>
+                      <strong> Deal Direction:</strong>
+                      <span>{product.dealComment}</span>
+                    </span>
+                  </Typography>
+                )}
               </CardContent>
             </Grid>
 
@@ -649,6 +798,9 @@ export default function CartProductCard(props) {
                   unit={product.unit}
                   weightPerUnit={product.weightPerUnit}
                   unitInCart={props.unit}
+                  salesPreference={product.salesPreference}
+                  showDealPricePerUnit={product.showDealPricePerUnit}
+                  allowDealQuantityChange={product.allowDealQuantityChange}
                   weightPerUnitInCart={props.weightPerUnit}
                   productId={product.id}
                   currency={props.currency}
@@ -713,52 +865,132 @@ export default function CartProductCard(props) {
                 >
                   {Str(product.shortDescription).limit(200, "...").get()}
                 </Typography>
-                <Typography
-                  variant="h5"
-                  color="textSecondary"
-                  component="p"
-                  style={{ marginTop: 5 }}
-                >
-                  <span style={{ marginLeft: 90 }}>
-                    <strong>
-                      {getCurrencyCode()}
-                      {product.pricePerUnit
-                        ? product.pricePerUnit
-                            .toFixed(2)
-                            .replace(/\d(?=(\d{3})+\.)/g, "$&,")
-                        : ""}
-                    </strong>
-                    <span style={{ fontSize: 10 }}>{`per unit`}</span>
-                  </span>
-                </Typography>
-
-                {product.pricingMechanism === "pricing" && (
+                {product.pricingMechanism === "pricing" &&
+                  product.salesPreference !== "deal" && (
+                    <Typography
+                      variant="h4"
+                      color="textSecondary"
+                      component="p"
+                      style={{ marginTop: 5, marginBottom: 15 }}
+                    >
+                      <span style={{ marginLeft: 60 }}>
+                        <strong>
+                          {getCurrencyCode()}
+                          {product.pricePerUnit
+                            ? product.pricePerUnit
+                                .toFixed(2)
+                                .replace(/\d(?=(\d{3})+\.)/g, "$&,")
+                            : 0}
+                        </strong>
+                      </span>
+                    </Typography>
+                  )}
+                {product.pricingMechanism === "pricing" &&
+                  product.salesPreference === "deal" && (
+                    <Typography
+                      variant="h4"
+                      color="textSecondary"
+                      component="p"
+                      style={{ marginTop: 5, marginBottom: 15 }}
+                    >
+                      {product.showDealPricePerUnit ? (
+                        <span style={{ marginLeft: 60 }}>
+                          <strong>
+                            {getCurrencyCode()}
+                            {product.pricePerUnit
+                              ? product.pricePerUnit
+                                  .toFixed(2)
+                                  .replace(/\d(?=(\d{3})+\.)/g, "$&,")
+                              : 0}
+                          </strong>
+                        </span>
+                      ) : (
+                        ""
+                      )}
+                    </Typography>
+                  )}
+                {product.pricingMechanism === "pricing" &&
+                  product.salesPreference !== "deal" && (
+                    <Typography
+                      //variant="h6"
+                      color="red"
+                      component="p"
+                      style={{ marginTop: 5, marginBottom: 15 }}
+                    >
+                      <span
+                        style={{
+                          marginLeft: 60,
+                          color: "red",
+                          fontSize: 12,
+                        }}
+                      >
+                        <strong>{product.priceLabel}</strong>
+                      </span>
+                    </Typography>
+                  )}
+                {product.pricingMechanism === "pricing" &&
+                  product.salesPreference === "deal" && (
+                    <Typography
+                      //variant="h6"
+                      color="red"
+                      component="p"
+                      style={{ marginTop: 5, marginBottom: 15 }}
+                    >
+                      {product.showDealPricePerUnit ? (
+                        <span
+                          style={{
+                            marginLeft: 60,
+                            color: "red",
+                            fontSize: 12,
+                          }}
+                        >
+                          <strong>{product.priceLabel}</strong>
+                        </span>
+                      ) : (
+                        <span
+                          style={{
+                            marginLeft: 60,
+                            color: "red",
+                            fontSize: 12,
+                          }}
+                        >
+                          <strong>{product.priceLabel}</strong>
+                        </span>
+                      )}
+                    </Typography>
+                  )}
+                {product.pricingMechanism === "request-quote" && (
+                  <Typography
+                    variant="h4"
+                    color="textSecondary"
+                    component="p"
+                    style={{ marginTop: 5, marginBottom: 15 }}
+                  >
+                    <span style={{ marginLeft: 60 }}>
+                      <strong>
+                        {getCurrencyCode()}
+                        {product.pricePerUnit
+                          ? product.pricePerUnit
+                              .toFixed(2)
+                              .replace(/\d(?=(\d{3})+\.)/g, "$&,")
+                          : 0}
+                      </strong>
+                      <span style={{ fontSize: 12 }}>per unit</span>
+                    </span>
+                  </Typography>
+                )}
+                {product.pricingMechanism === "request-quote" && (
                   <Typography
                     //variant="h6"
                     color="red"
                     component="p"
-                    style={{ marginTop: 5, marginBottom: 2 }}
+                    style={{ marginTop: 5, marginBottom: 15 }}
                   >
                     <span
-                      style={{ marginLeft: 60, color: "red", fontSize: 11 }}
+                      style={{ marginLeft: 60, color: "red", fontSize: 12 }}
                     >
                       <strong>{product.priceLabel}</strong>
                     </span>
-                  </Typography>
-                )}
-                <br />
-                <br />
-
-                {product.sku !== undefined && (
-                  <Typography
-                    variant="h5"
-                    style={{ color: "black", fontSize: 15 }}
-                  >
-                    <span style={{ marginLeft: 5, marginRight: 15 }}>
-                      {" "}
-                      <strong>Sku:</strong>
-                    </span>
-                    {product.sku}
                   </Typography>
                 )}
                 <Typography>
@@ -800,6 +1032,46 @@ export default function CartProductCard(props) {
                     <span>{product.pickupInfo}</span>
                   </span>
                 </Typography>
+                {product.salesPreference === "deal" && (
+                  <Typography>
+                    <span style={{ fontSize: 14, marginLeft: 5 }}>
+                      <strong> Deal Code:</strong>
+                      <span>{product.dealCode}</span>
+                    </span>
+                  </Typography>
+                )}
+                {product.salesPreference === "deal" && (
+                  <Typography>
+                    <span style={{ fontSize: 14, marginLeft: 5 }}>
+                      <strong> Deal Expiry Date:</strong>
+                      <span>{product.dealExpiryDate}</span>
+                    </span>
+                  </Typography>
+                )}
+                {product.salesPreference === "deal" && (
+                  <Typography>
+                    <span style={{ fontSize: 14, marginLeft: 5 }}>
+                      <strong> Deal Type:</strong>
+                      <span>{product.dealType}</span>
+                    </span>
+                  </Typography>
+                )}
+                {product.salesPreference === "deal" && (
+                  <Typography>
+                    <span style={{ fontSize: 14, marginLeft: 5 }}>
+                      <strong> Deal Status:</strong>
+                      <span>{product.dealStatus}</span>
+                    </span>
+                  </Typography>
+                )}
+                {product.salesPreference === "deal" && (
+                  <Typography>
+                    <span style={{ fontSize: 14, marginLeft: 5 }}>
+                      <strong> Deal Direction:</strong>
+                      <span>{product.dealComment}</span>
+                    </span>
+                  </Typography>
+                )}
               </CardContent>
             </Grid>
 
@@ -811,6 +1083,9 @@ export default function CartProductCard(props) {
                   unit={product.unit}
                   weightPerUnit={product.weightPerUnit}
                   unitInCart={props.unit}
+                  salesPreference={product.salesPreference}
+                  showDealPricePerUnit={product.showDealPricePerUnit}
+                  allowDealQuantityChange={product.allowDealQuantityChange}
                   weightPerUnitInCart={props.weightPerUnit}
                   productId={product.id}
                   currency={props.currency}

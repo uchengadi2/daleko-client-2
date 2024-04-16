@@ -46,6 +46,20 @@ const useStyles = makeStyles((theme) => ({
       backgroundColor: theme.palette.common.green,
     },
   },
+
+  sumitDisabledButton: {
+    borderRadius: 10,
+    height: 40,
+    width: 200,
+    marginLeft: 70,
+    marginTop: 30,
+    color: "white",
+    backgroundColor: theme.palette.common.grey,
+    "&:hover": {
+      backgroundColor: theme.palette.common.grey,
+    },
+  },
+
   offDeliveryLocationButton: {
     borderRadius: 10,
     height: 40,
@@ -222,8 +236,51 @@ const renderRequestedQuantityField = ({
   );
 };
 
+const renderDealSameQuantityField = ({
+  input,
+  label,
+  meta: { touched, error, invalid },
+  type,
+  id,
+  ...custom
+}) => {
+  return (
+    <TextField
+      //error={touched && invalid}
+      helperText="How many quantities do you need?"
+      variant="outlined"
+      label={label}
+      id={input.name}
+      //value={input.value}
+      fullWidth
+      //required
+      type={type}
+      //defaultValue={quantity}
+      {...custom}
+      onChange={input.onChange}
+      InputProps={{
+        inputProps: {
+          min: 1,
+          style: {
+            height: 1,
+          },
+          readOnly: true,
+        },
+        //readOnly: true,
+      }}
+    />
+  );
+};
+
 function CartUpdateAndDeliveryForm(props) {
-  const { price, productId, token, userId } = props;
+  const {
+    price,
+    productId,
+    token,
+    userId,
+    allowDealQuantityChange,
+    salesPreference,
+  } = props;
   const [quantity, setQuantity] = useState(+props.quantity);
   const [productQuantityInCart, setProductQuantityInCart] = useState();
   const [productLocation, setProductLocation] = useState();
@@ -713,7 +770,13 @@ function CartUpdateAndDeliveryForm(props) {
           defaultValue={quantity}
           type="number"
           onChange={onChange}
-          component={renderRequestedQuantityField}
+          component={
+            salesPreference === "deal" && allowDealQuantityChange
+              ? renderRequestedQuantityField
+              : salesPreference !== "deal"
+              ? renderRequestedQuantityField
+              : renderDealSameQuantityField
+          }
           style={{ width: 300, marginTop: 10 }}
         />
         <Grid container direction="row">
@@ -738,8 +801,21 @@ function CartUpdateAndDeliveryForm(props) {
           //component={Link}
           // to="/mobileapps"
           // to={`/checkouts/${userId}`}
-          className={classes.submitButton}
+          className={
+            salesPreference === "deal" && allowDealQuantityChange
+              ? classes.submitButton
+              : salesPreference !== "deal"
+              ? classes.submitButton
+              : classes.sumitDisabledButton
+          }
           onClick={onSubmit}
+          disabled={
+            salesPreference === "deal" && allowDealQuantityChange
+              ? false
+              : salesPreference !== "deal"
+              ? false
+              : true
+          }
         >
           {loading ? (
             <CircularProgress size={30} color="inherit" />

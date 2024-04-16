@@ -358,6 +358,11 @@ function ProductDetails(props) {
           communityInstruction: product[0].communityInstruction,
           dealCode: product[0].dealCode,
           dealExpiryDate: product[0].dealExpiryDate,
+          dealType: product[0].dealType,
+          showDealPricePerUnit: product[0].showDealPricePerUnit,
+          allowDealQuantityChange: product[0].allowDealQuantityChange,
+          dealStatus: product[0].dealStatus,
+          dealComment: product[0].dealComment,
         });
 
         setProduct({
@@ -416,6 +421,11 @@ function ProductDetails(props) {
           communityInstruction: allData[0].communityInstruction,
           dealCode: allData[0].dealCode,
           dealExpiryDate: allData[0].dealExpiryDate,
+          dealType: allData[0].dealType,
+          showDealPricePerUnit: allData[0].showDealPricePerUnit,
+          allowDealQuantityChange: allData[0].allowDealQuantityChange,
+          dealStatus: allData[0].dealStatus,
+          dealComment: allData[0].dealComment,
         });
 
         setIsLoading(false);
@@ -489,6 +499,11 @@ function ProductDetails(props) {
             communityInstruction={product.communityInstruction}
             dealCode={product.dealCode}
             dealExpiryDate={product.dealExpiryDate}
+            dealType={product.dealType}
+            showDealPricePerUnit={product.showDealPricePerUnit}
+            allowDealQuantityChange={product.allowDealQuantityChange}
+            dealStatus={product.dealStatus}
+            dealComment={product.dealComment}
             key={product.id}
             token={props.token}
             userId={props.userId}
@@ -568,6 +583,11 @@ function ProductDetails(props) {
             communityInstruction={product.communityInstruction}
             dealCode={product.dealCode}
             dealExpiryDate={product.dealExpiryDate}
+            dealType={product.dealType}
+            showDealPricePerUnit={product.showDealPricePerUnit}
+            allowDealQuantityChange={product.allowDealQuantityChange}
+            dealStatus={product.dealStatus}
+            dealComment={product.dealComment}
             key={product.id}
             token={props.token}
             userId={props.userId}

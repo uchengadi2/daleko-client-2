@@ -409,11 +409,18 @@ const DericaHome = (props) => {
             product.freezedPriceMaximumDurationInWeeks,
           minimumFreezableQuantity: product.minimumFreezableQuantity,
           datePriceWasSet: product.datePriceWasSet,
+          dealCode: product.dealCode,
+          dealExpiryDate: product.dealExpiryDate,
+          dealType: product.dealType,
+          showDealPricePerUnit: product.showDealPricePerUnit,
+          allowDealQuantityChange: product.allowDealQuantityChange,
+          dealStatus: product.dealStatus,
+          dealComment: product.dealComment,
         });
       });
       setProductsList(allData);
-      setCurrency(allData[0].currency);
       setIsLoading(false);
+      setCurrency(allData.length > 0 ? allData[0].currency : "");
     };
 
     //call the function
@@ -515,6 +522,14 @@ const DericaHome = (props) => {
               updateLearningPathInfoInfo={updateLearningPathInfoInfo}
               updateBuyingPathInfoInfo={updateBuyingPathInfoInfo}
               path={path}
+              allowPriceFreezing={product.allowPriceFreezing}
+              dealCode={product.dealCode}
+              dealExpiryDate={product.dealExpiryDate}
+              dealType={product.dealType}
+              showDealPricePerUnit={product.showDealPricePerUnit}
+              allowDealQuantityChange={product.allowDealQuantityChange}
+              dealStatus={product.dealStatus}
+              dealComment={product.dealComment}
             />
           ))}
         </Grid>
@@ -574,6 +589,14 @@ const DericaHome = (props) => {
               updateLearningPathInfoInfo={updateLearningPathInfoInfo}
               updateBuyingPathInfoInfo={updateBuyingPathInfoInfo}
               path={path}
+              allowPriceFreezing={product.allowPriceFreezing}
+              dealCode={product.dealCode}
+              dealExpiryDate={product.dealExpiryDate}
+              dealType={product.dealType}
+              showDealPricePerUnit={product.showDealPricePerUnit}
+              allowDealQuantityChange={product.allowDealQuantityChange}
+              dealStatus={product.dealStatus}
+              dealComment={product.dealComment}
             />
           ))}
         </Grid>
@@ -619,6 +642,11 @@ const DericaHome = (props) => {
           updateBuyingPathInfoInfo={updateBuyingPathInfoInfo}
           preference={preference}
         /> */}
+          {!isLoading && productsList.length === 0 && (
+            <Typography style={{ marginLeft: 100, marginTop: 80 }}>
+              There Are No Available Products In this category
+            </Typography>
+          )}
           {isLoading && (
             <CircularProgress
               size={100}
@@ -680,6 +708,11 @@ const DericaHome = (props) => {
           updateBuyingPathInfoInfo={updateBuyingPathInfoInfo}
           preference={preference}
         /> */}
+          {!isLoading && productsList.length === 0 && (
+            <Typography style={{ marginLeft: 50, marginTop: 30 }}>
+              There Are No Available Products In this category
+            </Typography>
+          )}
           {isLoading && (
             <CircularProgress
               size={100}

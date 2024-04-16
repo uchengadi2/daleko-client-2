@@ -424,10 +424,15 @@ const DealHome = (props) => {
             datePriceWasSet: product.datePriceWasSet,
             dealCode: product.dealCode,
             dealExpiryDate: product.dealExpiryDate,
+            dealType: product.dealType,
+            showDealPricePerUnit: product.showDealPricePerUnit,
+            allowDealQuantityChange: product.allowDealQuantityChange,
+            dealStatus: product.dealStatus,
+            dealComment: product.dealComment,
           });
         });
         setProductsList(allData);
-        console.log("deal products list number:", allData.length);
+
         setNumberOfDeals(allData.length);
 
         setIsLoading(false);
@@ -488,10 +493,14 @@ const DealHome = (props) => {
             datePriceWasSet: product.datePriceWasSet,
             dealCode: product.dealCode,
             dealExpiryDate: product.dealExpiryDate,
+            dealType: product.dealType,
+            showDealPricePerUnit: product.showDealPricePerUnit,
+            allowDealQuantityChange: product.allowDealQuantityChange,
+            dealStatus: product.dealStatus,
+            dealComment: product.dealComment,
           });
         });
         setProductsList(allData);
-        console.log("deal products list number:", allData.length);
         setNumberOfDeals(allData.length);
         setIsLoading(false);
         setCurrency(allData.length > 0 ? allData[0].currency : "");
@@ -577,6 +586,12 @@ const DealHome = (props) => {
               salesPreference={product.salesPreference}
               dealCode={product.dealCode}
               dealExpiryDate={product.dealExpiryDate}
+              dealType={product.dealType}
+              showDealPricePerUnit={product.showDealPricePerUnit}
+              allowDealQuantityChange={product.allowDealQuantityChange}
+              dealStatus={product.dealStatus}
+              dealComment={product.dealComment}
+              allowPriceFreezing={product.allowPriceFreezing}
               keyword1={product.keyword1}
               keyword2={product.keyword2}
               keyword3={product.keyword3}
@@ -638,6 +653,12 @@ const DealHome = (props) => {
               salesPreference={product.salesPreference}
               dealCode={product.dealCode}
               dealExpiryDate={product.dealExpiryDate}
+              dealType={product.dealType}
+              showDealPricePerUnit={product.showDealPricePerUnit}
+              allowDealQuantityChange={product.allowDealQuantityChange}
+              dealStatus={product.dealStatus}
+              dealComment={product.dealComment}
+              allowPriceFreezing={product.allowPriceFreezing}
               deliverability={product.deliverability}
               pickupInfo={product.pickupInfo}
               keyword1={product.keyword1}
@@ -666,9 +687,6 @@ const DealHome = (props) => {
       }
     </React.Fragment>
   );
-
-  console.log("product list:", productsList.length);
-  console.log("number of deals:", numberOfDeals);
 
   return (
     <>
@@ -778,7 +796,7 @@ const DealHome = (props) => {
           />
 
           {!isLoading && numberOfDeals === 0 && (
-            <Typography style={{ marginLeft: 110, marginTop: 50 }}>
+            <Typography style={{ marginLeft: 50, marginTop: 30 }}>
               There Are No Available Deals
             </Typography>
           )}

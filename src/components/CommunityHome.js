@@ -382,6 +382,13 @@ const CommunityHome = (props) => {
             product.freezedPriceMaximumDurationInWeeks,
           minimumFreezableQuantity: product.minimumFreezableQuantity,
           datePriceWasSet: product.datePriceWasSet,
+          dealCode: product.dealCode,
+          dealExpiryDate: product.dealExpiryDate,
+          dealType: product.dealType,
+          showDealPricePerUnit: product.showDealPricePerUnit,
+          allowDealQuantityChange: product.allowDealQuantityChange,
+          dealStatus: product.dealStatus,
+          dealComment: product.dealComment,
         });
       });
       setProductsList(allData);
@@ -488,6 +495,14 @@ const CommunityHome = (props) => {
               updateLearningPathInfoInfo={updateLearningPathInfoInfo}
               updateBuyingPathInfoInfo={updateBuyingPathInfoInfo}
               path={path}
+              allowPriceFreezing={product.allowPriceFreezing}
+              dealCode={product.dealCode}
+              dealExpiryDate={product.dealExpiryDate}
+              dealType={product.dealType}
+              showDealPricePerUnit={product.showDealPricePerUnit}
+              allowDealQuantityChange={product.allowDealQuantityChange}
+              dealStatus={product.dealStatus}
+              dealComment={product.dealComment}
             />
           ))}
         </Grid>
@@ -547,6 +562,14 @@ const CommunityHome = (props) => {
               updateLearningPathInfoInfo={updateLearningPathInfoInfo}
               updateBuyingPathInfoInfo={updateBuyingPathInfoInfo}
               path={path}
+              allowPriceFreezing={product.allowPriceFreezing}
+              dealCode={product.dealCode}
+              dealExpiryDate={product.dealExpiryDate}
+              dealType={product.dealType}
+              showDealPricePerUnit={product.showDealPricePerUnit}
+              allowDealQuantityChange={product.allowDealQuantityChange}
+              dealStatus={product.dealStatus}
+              dealComment={product.dealComment}
             />
           ))}
         </Grid>
@@ -666,6 +689,11 @@ const CommunityHome = (props) => {
           updateBuyingPathInfoInfo={updateBuyingPathInfoInfo}
           preference={preference}
         /> */}
+        {!isLoading && productsList.length === 0 && (
+          <Typography style={{ marginLeft: 100, marginTop: 80 }}>
+            There Are No Available Products In this category
+          </Typography>
+        )}
         {isLoading && (
           <CircularProgress
             size={100}

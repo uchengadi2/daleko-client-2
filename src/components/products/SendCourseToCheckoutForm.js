@@ -45,7 +45,7 @@ const useStyles = makeStyles((theme) => ({
     marginLeft: 110,
     marginTop: 30,
     color: "white",
-    backgroundColor: theme.palette.common.grey,
+    backgroundColor: theme.palette.common.orange,
     "&:hover": {
       backgroundColor: theme.palette.common.green,
     },
@@ -101,7 +101,7 @@ const useStyles = makeStyles((theme) => ({
     marginTop: 30,
     marginBottom: 15,
     color: "white",
-    backgroundColor: theme.palette.common.orange,
+    backgroundColor: theme.palette.common.blue,
     "&:hover": {
       backgroundColor: theme.palette.common.green,
       color: "white",
@@ -157,7 +157,7 @@ const renderRequestedQuantityField = ({
   );
 };
 
-const renderCommunityQuantityField = ({
+const renderDealSameQuantityField = ({
   input,
   label,
   meta: { touched, error, invalid },
@@ -229,7 +229,15 @@ const renderPreferredStartDateField = ({
 };
 
 function SendCourseToCheckoutForm(props) {
-  const { productId, token, userId, salesPreference } = props;
+  const {
+    productId,
+    token,
+    userId,
+    salesPreference,
+    allowPriceFreezing,
+    allowDealQuantityChange,
+    showDealPricePerUnit,
+  } = props;
   const [quantity, setQuantity] = useState(props.minQuantity);
   const [newQuantity, setNewQuantity] = useState(props.minQuantity);
   const [price, setPrice] = useState();
@@ -274,6 +282,8 @@ function SendCourseToCheckoutForm(props) {
   const [loading, setLoading] = useState();
   const [isLoading, setIsLoading] = useState();
 
+  const [isFreezeLoading, setIsFreezeLoading] = useState();
+
   //get the currency name
   useEffect(() => {
     const fetchData = async () => {
@@ -300,12 +310,7 @@ function SendCourseToCheckoutForm(props) {
       if (allData[0].quantity) {
         setProductQuantityInCart(allData[0].quantity);
       }
-      // if (allData[0].location) {
-      //   setProductLocation(allData[0].location);
-      // }
-      // if (allData[0].locationCountry) {
-      //   setProductLocationCountry(allData[0].locationCountry);
-      // }
+
       if (allData[0].cartHolder) {
         setCartHolder(allData[0].cartHolder);
       }
@@ -647,38 +652,6 @@ function SendCourseToCheckoutForm(props) {
       revenueMarginShouldPrevail: props.revenueMarginShouldPrevail,
     };
 
-    //create a new cart and add the product
-    // if (data) {
-    //   const createForm = async () => {
-    //     api.defaults.headers.common["Authorization"] = `Bearer ${props.token}`;
-    //     const response = await api.post(`/carts`, data);
-
-    //     if (response.data.status === "success") {
-    //       dispatch({
-    //         type: CREATE_CART,
-    //         payload: response.data.data.data,
-    //       });
-
-    //       props.handleSuccessfulCreateSnackbar(
-    //         `item(s) successfully added to cart. Please visit the cart to continue to checkout and payment`
-    //       );
-    //       props.cartCounterHandler(1);
-
-    //       history.push(`/`);
-    //       setIsLoading(false);
-    //     } else {
-    //       props.handleFailedSnackbar(
-    //         "Something went wrong, please try again!!!"
-    //       );
-    //     }
-    //   };
-    //   createForm().catch((err) => {
-    //     props.handleFailedSnackbar();
-    //     console.log("err:", err.message);
-    //   });
-    // } else {
-    //   props.handleFailedSnackbar("Something went wrong, please try again!!!");
-    // }
     if (sameProductAlreadyInCart === false) {
       //create a new cart and add the product
       if (data) {
@@ -823,9 +796,11 @@ function SendCourseToCheckoutForm(props) {
           onChange={onQuantityChange}
           // component={renderRequestedQuantityField}
           component={
-            salesPreference !== "deal"
+            salesPreference === "deal" && allowDealQuantityChange
               ? renderRequestedQuantityField
-              : renderCommunityQuantityField
+              : salesPreference !== "deal"
+              ? renderRequestedQuantityField
+              : renderDealSameQuantityField
           }
           style={{ width: 300, marginTop: 10 }}
         />
@@ -893,7 +868,7 @@ function SendCourseToCheckoutForm(props) {
           </Button>
         )}
 
-        {props.pricingMechanism === "pricing" && (
+        {props.pricingMechanism === "pricing" && allowPriceFreezing && (
           <Button
             component={Link}
             // to="/mobileapps"
@@ -903,7 +878,7 @@ function SendCourseToCheckoutForm(props) {
             className={classes.submitFreezePricingButton}
             onClick={() => <FreezePriceForm />}
           >
-            {isLoading ? (
+            {isFreezeLoading ? (
               <CircularProgress size={30} color="inherit" />
             ) : (
               freezePriceButtonContent()

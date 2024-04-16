@@ -63,7 +63,7 @@ const useStyles = makeStyles((theme) => ({
     marginTop: 30,
     marginBottom: 15,
     color: "white",
-    backgroundColor: theme.palette.common.grey,
+    backgroundColor: theme.palette.common.orange,
     "&:hover": {
       backgroundColor: theme.palette.common.green,
       color: "white",
@@ -136,6 +136,7 @@ function ProductInfo(props) {
     productId,
     pricingMechanism,
     policy,
+    allowPriceFreezing,
 
     slug,
   } = props;
@@ -189,6 +190,8 @@ function ProductInfo(props) {
     return <React.Fragment>Freeze Price</React.Fragment>;
   };
 
+  console.log("allowPriceFreezing is:", allowPriceFreezing);
+
   return (
     <form id="courseInfo">
       <Box
@@ -219,29 +222,31 @@ function ProductInfo(props) {
           <ReactMarkdown>{targetAudience}</ReactMarkdown>
         </Typography> */}
 
-        {categorySlug && pricingMechanism === "pricing" && (
-          <Button
-            component={Link}
-            // to="/mobileapps"
-            //to={`/categories/${categoryId}/${productId}`}
-            to={`/freezeprice/${categorySlug}/${slug}`}
-            //varaint="outlined"
-            className={classes.submitFreezePricingButton}
-            onClick={() => <FreezePrice />}
-          >
-            {/* <span style={{ marginRight: 10 }}>Show Details </span> */}
-            {loading ? (
-              <CircularProgress size={30} color="inherit" />
-            ) : (
-              buttonFreezePriceContent()
-            )}
-            {/* <ButtonArrow
+        {categorySlug &&
+          pricingMechanism === "pricing" &&
+          allowPriceFreezing && (
+            <Button
+              component={Link}
+              // to="/mobileapps"
+              //to={`/categories/${categoryId}/${productId}`}
+              to={`/freezeprice/${categorySlug}/${slug}`}
+              //varaint="outlined"
+              className={classes.submitFreezePricingButton}
+              onClick={() => <FreezePrice />}
+            >
+              {/* <span style={{ marginRight: 10 }}>Show Details </span> */}
+              {loading ? (
+                <CircularProgress size={30} color="inherit" />
+              ) : (
+                buttonFreezePriceContent()
+              )}
+              {/* <ButtonArrow
             height={10}
             width={10}
             fill={theme.palette.common.blue}
           /> */}
-          </Button>
-        )}
+            </Button>
+          )}
 
         {categorySlug && pricingMechanism === "request-quote" && (
           <Button

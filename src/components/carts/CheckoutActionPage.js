@@ -62,6 +62,19 @@ const useStyles = makeStyles((theme) => ({
       backgroundColor: theme.palette.common.green,
     },
   },
+
+  submitDisabledUpdateButton: {
+    borderRadius: 10,
+    height: 40,
+    width: 200,
+    marginLeft: 70,
+    marginTop: 30,
+    color: "white",
+    backgroundColor: theme.palette.common.grey,
+    "&:hover": {
+      backgroundColor: theme.palette.common.grey,
+    },
+  },
   removeItem: {
     borderRadius: 10,
     height: 40,
@@ -242,8 +255,57 @@ const renderRequestedQuantityField = ({
   );
 };
 
+const renderDealSameQuantityField = ({
+  input,
+  label,
+  meta: { touched, error, invalid },
+  type,
+  id,
+  ...custom
+}) => {
+  return (
+    <TextField
+      //error={touched && invalid}
+      helperText="Quantity"
+      variant="outlined"
+      label={label}
+      id={input.name}
+      //value={input.value}
+      fullWidth
+      //required
+      type={type}
+      {...custom}
+      //defaultValue={quantity}
+      onChange={input.onChange}
+      //   inputProps={{
+      //     style: {
+      //       height: 1,
+      //     },
+
+      //   }}
+      InputProps={{
+        inputProps: {
+          min: 1,
+          style: {
+            height: 1,
+          },
+          readOnly: true,
+        },
+      }}
+    />
+  );
+};
+
 function CheckoutActionPage(props) {
-  const { price, productId, token, userId } = props;
+  const {
+    price,
+    productId,
+    token,
+    userId,
+    showDealPricePerUnit,
+    allowDealQuantityChange,
+    salesPreference,
+  } = props;
   const [quantity, setQuantity] = useState(+props.quantity);
   const [productQuantityInCart, setProductQuantityInCart] = useState();
   const [productLocation, setProductLocation] = useState();
@@ -906,9 +968,16 @@ function CheckoutActionPage(props) {
             defaultValue={quantity}
             type="number"
             onChange={onChange}
-            component={renderRequestedQuantityField}
+            component={
+              salesPreference === "deal" && allowDealQuantityChange
+                ? renderRequestedQuantityField
+                : salesPreference !== "deal"
+                ? renderRequestedQuantityField
+                : renderDealSameQuantityField
+            }
             style={{ width: 300, marginTop: 10 }}
           />
+
           <Grid container direction="row">
             <Grid item style={{ width: 50, marginTop: 10, fontSize: 25 }}>
               <span style={{ color: "grey" }}>&#8358;</span>
@@ -931,7 +1000,20 @@ function CheckoutActionPage(props) {
             //component={Link}
             // to="/mobileapps"
             // to={`/checkouts/${userId}`}
-            className={classes.submitUpdateButton}
+            className={
+              salesPreference === "deal" && allowDealQuantityChange
+                ? classes.submitUpdateButton
+                : salesPreference !== "deal"
+                ? classes.submitUpdateButton
+                : classes.submitDisabledUpdateButton
+            }
+            disabled={
+              salesPreference === "deal" && allowDealQuantityChange
+                ? false
+                : salesPreference !== "deal"
+                ? false
+                : true
+            }
             onClick={onSubmit}
           >
             {loading ? (

@@ -626,52 +626,120 @@ export default function ProductDetailCard(props) {
                     {props.product.shortDescription}
                   </ReactMarkdown>
                 </Typography>
-                {props.product.pricingMechanism === "pricing" && (
+                {props.product.pricingMechanism === "pricing" &&
+                  props.product.salesPreference !== "deal" && (
+                    <Typography
+                      variant="h4"
+                      color="textSecondary"
+                      component="p"
+                      style={{ marginTop: 5, marginBottom: 15 }}
+                    >
+                      <span style={{ marginLeft: 130 }}>
+                        <strong>
+                          {getCurrencyCode()}
+                          {price
+                            ? price
+                                .toFixed(2)
+                                .replace(/\d(?=(\d{3})+\.)/g, "$&,")
+                            : 0}
+                        </strong>
+                      </span>
+                    </Typography>
+                  )}
+                {props.product.pricingMechanism === "pricing" &&
+                  props.product.salesPreference === "deal" && (
+                    <Typography
+                      variant="h4"
+                      color="textSecondary"
+                      component="p"
+                      style={{ marginTop: 5, marginBottom: 15 }}
+                    >
+                      {props.product.showDealPricePerUnit ? (
+                        <span style={{ marginLeft: 130 }}>
+                          <strong>
+                            {getCurrencyCode()}
+                            {price
+                              ? price
+                                  .toFixed(2)
+                                  .replace(/\d(?=(\d{3})+\.)/g, "$&,")
+                              : 0}
+                          </strong>
+                        </span>
+                      ) : (
+                        ""
+                      )}
+                    </Typography>
+                  )}
+                {props.product.pricingMechanism === "pricing" &&
+                  props.product.salesPreference !== "deal" && (
+                    <Typography
+                      //variant="h6"
+                      color="red"
+                      component="p"
+                      style={{ marginTop: 5, marginBottom: 15 }}
+                    >
+                      <span
+                        style={{
+                          marginLeft: 130,
+                          color: "red",
+                          fontSize: 12,
+                        }}
+                      >
+                        <strong>{props.product.priceLabel}</strong>
+                      </span>
+                    </Typography>
+                  )}
+                {props.product.pricingMechanism === "pricing" &&
+                  props.product.salesPreference === "deal" && (
+                    <Typography
+                      //variant="h6"
+                      color="red"
+                      component="p"
+                      style={{ marginTop: 5, marginBottom: 15 }}
+                    >
+                      {props.product.showDealPricePerUnit ? (
+                        <span
+                          style={{
+                            marginLeft: 130,
+                            color: "red",
+                            fontSize: 12,
+                          }}
+                        >
+                          <strong>{props.product.priceLabel}</strong>
+                        </span>
+                      ) : (
+                        <span
+                          style={{
+                            marginLeft: 130,
+                            color: "red",
+                            fontSize: 12,
+                          }}
+                        >
+                          <strong>{props.product.priceLabel}</strong>
+                        </span>
+                      )}
+                    </Typography>
+                  )}
+                {props.product.pricingMechanism === "request-quote" && (
                   <Typography
                     variant="h4"
-                    style={{ marginTop: 20, marginLeft: 150 }}
-                  >
-                    {getCurrencyCode()}
-                    {price
-                      ? price.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")
-                      : 0}
-                    &nbsp;
-                    <span style={{ fontSize: 12, marginLeft: 0 }}>
-                      &nbsp;{"per unit"}
-                    </span>
-                  </Typography>
-                )}
-                {props.pricingMechanism === "pricing" && (
-                  <Typography
-                    //variant="h6"
-                    color="red"
+                    color="textSecondary"
                     component="p"
                     style={{ marginTop: 5, marginBottom: 15 }}
                   >
-                    <span
-                      style={{ marginLeft: 130, color: "red", fontSize: 12 }}
-                    >
-                      <strong>{props.priceLabel}</strong>
+                    <span style={{ marginLeft: 130 }}>
+                      <strong>
+                        {getCurrencyCode()}
+                        {price
+                          ? price.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")
+                          : 0}
+                      </strong>
+                      <span style={{ fontSize: 12 }}>per unit</span>
                     </span>
                   </Typography>
                 )}
                 {props.product.pricingMechanism === "request-quote" && (
                   <Typography
-                    variant="h4"
-                    style={{ marginTop: 10, marginLeft: 150 }}
-                  >
-                    {getCurrencyCode()}
-                    {price
-                      ? price.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")
-                      : 0}
-                    &nbsp;
-                    <span style={{ fontSize: 12, marginLeft: 0 }}>
-                      {`per unit`}
-                    </span>
-                  </Typography>
-                )}
-                {props.pricingMechanism === "request-quote" && (
-                  <Typography
                     //variant="h6"
                     color="red"
                     component="p"
@@ -680,7 +748,7 @@ export default function ProductDetailCard(props) {
                     <span
                       style={{ marginLeft: 130, color: "red", fontSize: 12 }}
                     >
-                      <strong>{props.priceLabel}</strong>
+                      <strong>{props.product.priceLabel}</strong>
                     </span>
                   </Typography>
                 )}
@@ -768,6 +836,30 @@ export default function ProductDetailCard(props) {
                     </span>
                   </Typography>
                 )}
+                {props.product.salesPreference === "deal" && (
+                  <Typography>
+                    <span style={{ fontSize: 14, marginLeft: 10 }}>
+                      <strong> Deal Type:</strong>
+                      <span>{props.product.dealType}</span>
+                    </span>
+                  </Typography>
+                )}
+                {props.product.salesPreference === "deal" && (
+                  <Typography>
+                    <span style={{ fontSize: 14, marginLeft: 10 }}>
+                      <strong> Deal Status:</strong>
+                      <span>{props.product.dealStatus}</span>
+                    </span>
+                  </Typography>
+                )}
+                {props.product.salesPreference === "deal" && (
+                  <Typography>
+                    <span style={{ fontSize: 14, marginLeft: 10 }}>
+                      <strong> Deal Direction:</strong>
+                      <span>{props.product.dealComment}</span>
+                    </span>
+                  </Typography>
+                )}
               </Box>
             </Grid>
 
@@ -791,6 +883,12 @@ export default function ProductDetailCard(props) {
                   salesPreference={props.product.salesPreference}
                   dealCode={props.product.dealCode}
                   dealExpiryDate={props.product.dealExpiryDate}
+                  showDealPricePerUnit={props.product.showDealPricePerUnit}
+                  allowDealQuantityChange={
+                    props.product.allowDealQuantityChange
+                  }
+                  dealStatus={props.product.dealStatus}
+                  allowPriceFreezing={props.product.allowPriceFreezing}
                   isVatable={props.product.isVatable}
                   revenueMargin={props.product.revenueMargin}
                   revenueMarginShouldPrevail={
@@ -1487,72 +1585,129 @@ export default function ProductDetailCard(props) {
                   </Typography>
                 )}
 
-                {props.product.pricingMechanism === "pricing" && (
+                {props.product.pricingMechanism === "pricing" &&
+                  props.product.salesPreference !== "deal" && (
+                    <Typography
+                      variant="h4"
+                      color="textSecondary"
+                      component="p"
+                      style={{ marginTop: 5, marginBottom: 15 }}
+                    >
+                      <span style={{ marginLeft: 50 }}>
+                        <strong>
+                          {getCurrencyCode()}
+                          {price
+                            ? price
+                                .toFixed(2)
+                                .replace(/\d(?=(\d{3})+\.)/g, "$&,")
+                            : 0}
+                        </strong>
+                      </span>
+                    </Typography>
+                  )}
+                {props.product.pricingMechanism === "pricing" &&
+                  props.product.salesPreference === "deal" && (
+                    <Typography
+                      variant="h4"
+                      color="textSecondary"
+                      component="p"
+                      style={{ marginTop: 5, marginBottom: 15 }}
+                    >
+                      {props.product.showDealPricePerUnit ? (
+                        <span style={{ marginLeft: 50 }}>
+                          <strong>
+                            {getCurrencyCode()}
+                            {price
+                              ? price
+                                  .toFixed(2)
+                                  .replace(/\d(?=(\d{3})+\.)/g, "$&,")
+                              : 0}
+                          </strong>
+                        </span>
+                      ) : (
+                        ""
+                      )}
+                    </Typography>
+                  )}
+                {props.product.pricingMechanism === "pricing" &&
+                  props.product.salesPreference !== "deal" && (
+                    <Typography
+                      //variant="h6"
+                      color="red"
+                      component="p"
+                      style={{ marginTop: 5, marginBottom: 15 }}
+                    >
+                      <span
+                        style={{
+                          marginLeft: 50,
+                          color: "red",
+                          fontSize: 12,
+                        }}
+                      >
+                        <strong>{props.product.priceLabel}</strong>
+                      </span>
+                    </Typography>
+                  )}
+                {props.product.pricingMechanism === "pricing" &&
+                  props.product.salesPreference === "deal" && (
+                    <Typography
+                      //variant="h6"
+                      color="red"
+                      component="p"
+                      style={{ marginTop: 5, marginBottom: 15 }}
+                    >
+                      {props.product.showDealPricePerUnit ? (
+                        <span
+                          style={{
+                            marginLeft: 50,
+                            color: "red",
+                            fontSize: 12,
+                          }}
+                        >
+                          <strong>{props.product.priceLabel}</strong>
+                        </span>
+                      ) : (
+                        <span
+                          style={{
+                            marginLeft: 50,
+                            color: "red",
+                            fontSize: 12,
+                          }}
+                        >
+                          <strong>{props.product.priceLabel}</strong>
+                        </span>
+                      )}
+                    </Typography>
+                  )}
+                {props.product.pricingMechanism === "request-quote" && (
                   <Typography
-                    variant="h5"
-                    // style={{ marginTop: 10, marginLeft: 150 }}
-                  >
-                    {getCurrencyCode()}
-                    {price
-                      ? price.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")
-                      : 0}
-                    &nbsp;
-                    <span style={{ fontSize: 12, marginLeft: 0 }}>
-                      {`per ${props.product.unit}`}
-                    </span>
-                  </Typography>
-                )}
-                <Typography
-                  variant="h5"
-                  style={{
-                    color: "black",
-                    marginTop: 20,
-                    marginBottom: 20,
-                    justifyContent: "center",
-                  }}
-                >
-                  {props.product.shortDescription}
-                </Typography>
-                {props.pricingMechanism === "pricing" && (
-                  <Typography
-                    //variant="h6"
-                    color="red"
+                    variant="h4"
+                    color="textSecondary"
                     component="p"
                     style={{ marginTop: 5, marginBottom: 15 }}
                   >
-                    <span
-                      style={{ marginLeft: 30, color: "red", fontSize: 11 }}
-                    >
-                      <strong>{props.priceLabel}</strong>
+                    <span style={{ marginLeft: 50 }}>
+                      <strong>
+                        {getCurrencyCode()}
+                        {price
+                          ? price.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")
+                          : 0}
+                      </strong>
+                      <span style={{ fontSize: 12 }}>per unit</span>
                     </span>
                   </Typography>
                 )}
                 {props.product.pricingMechanism === "request-quote" && (
                   <Typography
-                    variant="h4"
-                    style={{ marginTop: 10, marginLeft: 50 }}
-                  >
-                    {getCurrencyCode()}
-                    {price
-                      ? price.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,")
-                      : 0}
-                    &nbsp;
-                    <span style={{ fontSize: 12, marginLeft: 0 }}>
-                      {`/unit`}
-                    </span>
-                  </Typography>
-                )}
-                {props.pricingMechanism === "request-quote" && (
-                  <Typography
                     //variant="h6"
                     color="red"
                     component="p"
                     style={{ marginTop: 5, marginBottom: 15 }}
                   >
                     <span
-                      style={{ marginLeft: 30, color: "red", fontSize: 11 }}
+                      style={{ marginLeft: 50, color: "red", fontSize: 12 }}
                     >
-                      <strong>{props.priceLabel}</strong>
+                      <strong>{props.product.priceLabel}</strong>
                     </span>
                   </Typography>
                 )}
@@ -1626,6 +1781,46 @@ export default function ProductDetailCard(props) {
                     </span>
                   </Typography>
                 )}
+                {props.product.salesPreference === "deal" && (
+                  <Typography>
+                    <span style={{ fontSize: 14, marginLeft: 10 }}>
+                      <strong> Deal Code:</strong>
+                      <span>{props.product.dealCode}</span>
+                    </span>
+                  </Typography>
+                )}
+                {props.product.salesPreference === "deal" && (
+                  <Typography>
+                    <span style={{ fontSize: 14, marginLeft: 10 }}>
+                      <strong> Deal Expiry Date:</strong>
+                      <span>{props.product.dealExpiryDate}</span>
+                    </span>
+                  </Typography>
+                )}
+                {props.product.salesPreference === "deal" && (
+                  <Typography>
+                    <span style={{ fontSize: 14, marginLeft: 10 }}>
+                      <strong> Deal Type:</strong>
+                      <span>{props.product.dealType}</span>
+                    </span>
+                  </Typography>
+                )}
+                {props.product.salesPreference === "deal" && (
+                  <Typography>
+                    <span style={{ fontSize: 14, marginLeft: 10 }}>
+                      <strong> Deal Status:</strong>
+                      <span>{props.product.dealStatus}</span>
+                    </span>
+                  </Typography>
+                )}
+                {props.product.salesPreference === "deal" && (
+                  <Typography>
+                    <span style={{ fontSize: 14, marginLeft: 10 }}>
+                      <strong> Deal Direction:</strong>
+                      <span>{props.product.dealComment}</span>
+                    </span>
+                  </Typography>
+                )}
               </Box>
             </Grid>
             <Grid item className={classes.thirdRowMobile}>
@@ -1648,6 +1843,12 @@ export default function ProductDetailCard(props) {
                   salesPreference={props.product.salesPreference}
                   dealCode={props.product.dealCode}
                   dealExpiryDate={props.product.dealExpiryDate}
+                  showDealPricePerUnit={props.product.showDealPricePerUnit}
+                  allowDealQuantityChange={
+                    props.product.allowDealQuantityChange
+                  }
+                  dealStatus={props.product.dealStatus}
+                  allowPriceFreezing={props.product.allowPriceFreezing}
                   isVatable={props.product.isVatable}
                   revenueMargin={props.product.revenueMargin}
                   revenueMarginShouldPrevail={
