@@ -900,6 +900,11 @@ function ProductForm(props) {
   const [allowDealQuantityChange, setAllowDealQuantityChange] = useState(false);
   const [dealStatus, setDealStatus] = useState("inactive");
   const [dealType, setDealType] = useState("public");
+  const [productType, setProductType] = useState("single-product");
+  const [dealDeliveryMode, setDealDeliveryMode] = useState(
+    "centralized-at-no-cost"
+  );
+  const [showDealDeliveryCost, setShowDealDeliveryCost] = useState(false);
 
   const dispatch = useDispatch();
 
@@ -1168,6 +1173,18 @@ function ProductForm(props) {
 
   const handleAllowDealQuantityChange = (event) => {
     setAllowDealQuantityChange(event.target.value);
+  };
+
+  const handleProductTypeChange = (event) => {
+    setProductType(event.target.value);
+  };
+
+  const handleProductDealDeliveryModeChange = (event) => {
+    setDealDeliveryMode(event.target.value);
+  };
+
+  const handleShowDealDeliveryCostChange = (event) => {
+    setShowDealDeliveryCost(event.target.value);
   };
 
   const handleUploadFiles = (files) => {
@@ -1673,7 +1690,7 @@ function ProductForm(props) {
             style={{ width: 237, marginTop: 20, height: 38 }}
             //{...input}
           >
-            <MenuItem value={"inactive"}>In Active</MenuItem>
+            <MenuItem value={"inactive"}>Not Active</MenuItem>
             <MenuItem value={"active"}>Active</MenuItem>
           </Select>
           <FormHelperText>Select Deal Status</FormHelperText>
@@ -1739,6 +1756,117 @@ function ProductForm(props) {
             <MenuItem value={"true"}>Yes</MenuItem>
           </Select>
           <FormHelperText>Allow Deal Quantity Change?</FormHelperText>
+        </FormControl>
+      </Box>
+    );
+  };
+
+  const renderProductTypeField = ({
+    input,
+    label,
+    meta: { touched, error, invalid },
+    type,
+    id,
+    ...custom
+  }) => {
+    return (
+      <Box>
+        <FormControl variant="outlined">
+          {/* <InputLabel id="vendor_city">City</InputLabel> */}
+          <Select
+            labelId="productType"
+            id="productType"
+            value={productType}
+            onChange={handleProductTypeChange}
+            //label="Allow Price Freezing"
+
+            style={{ width: 500, marginTop: 20, height: 38 }}
+            //{...input}
+          >
+            <MenuItem value={"single-product"}>Single Product</MenuItem>
+            <MenuItem value={"multiple-but-same-product"}>
+              Multiple But Same Product
+            </MenuItem>
+            <MenuItem value={"multiple-but-different-products"}>
+              Multiple But Different Products
+            </MenuItem>
+          </Select>
+          <FormHelperText>Product Type</FormHelperText>
+        </FormControl>
+      </Box>
+    );
+  };
+
+  const renderProductDealDeliveryModeField = ({
+    input,
+    label,
+    meta: { touched, error, invalid },
+    type,
+    id,
+    ...custom
+  }) => {
+    return (
+      <Box>
+        <FormControl variant="outlined">
+          {/* <InputLabel id="vendor_city">City</InputLabel> */}
+          <Select
+            labelId="dealDeliveryMode"
+            id="dealDeliveryMode"
+            value={dealDeliveryMode}
+            onChange={handleProductDealDeliveryModeChange}
+            //label="Allow Price Freezing"
+
+            style={{ width: 237, marginTop: 0, height: 38 }}
+            //{...input}
+          >
+            <MenuItem value={"centralized-at-no-cost"}>
+              Centralized At No Cost
+            </MenuItem>
+            <MenuItem value={"centralized-at-agreed-cost"}>
+              Centralized At Agreed Cost
+            </MenuItem>
+            <MenuItem value={"decentralized-at-no-cost"}>
+              Decentralized At No Cost
+            </MenuItem>
+            <MenuItem value={"decentralized-at-agreed-cost"}>
+              Decentralized At Agreed Cost
+            </MenuItem>
+            <MenuItem value={"managed-by-each-beneficiary"}>
+              Managed By Each Beneficiary
+            </MenuItem>
+          </Select>
+          <FormHelperText>Product Deal Delivery Mode</FormHelperText>
+        </FormControl>
+      </Box>
+    );
+  };
+
+  const renderShowDealDeliveryCostField = ({
+    input,
+    label,
+    meta: { touched, error, invalid },
+    type,
+    id,
+    ...custom
+  }) => {
+    return (
+      <Box>
+        <FormControl variant="outlined">
+          {/* <InputLabel id="vendor_city">City</InputLabel> */}
+          <Select
+            labelId="showDealDeliveryCost"
+            id="showDealDeliveryCost"
+            value={showDealDeliveryCost}
+            onChange={handleShowDealDeliveryCostChange}
+            //label="Allow Price Freezing"
+
+            style={{ width: 237, marginTop: 0, height: 38 }}
+            //{...input}
+          >
+            <MenuItem value={"false"}>No</MenuItem>
+            <MenuItem value={"true"}>Yes</MenuItem>
+          </Select>
+          <FormHelperText>Show Deal Delivery Cost?</FormHelperText>
         </FormControl>
       </Box>
     );
@@ -1951,6 +2079,34 @@ function ProductForm(props) {
       "dealComment",
       formValues.dealComment ? formValues.dealComment : null
     );
+    form.append("productType", productType);
+    form.append("dealDeliveryMode", dealDeliveryMode);
+    form.append(
+      "dealCentralizedDeliveryLocation",
+      formValues.dealCentralizedDeliveryLocation
+        ? formValues.dealCentralizedDeliveryLocation
+        : null
+    );
+    form.append(
+      "dealCentralizedAgreedDeliveryCost",
+      formValues.dealCentralizedAgreedDeliveryCost
+        ? formValues.dealCentralizedAgreedDeliveryCost
+        : 0
+    );
+    form.append(
+      "dealDecentralizedDeliveryLocation",
+      formValues.dealDecentralizedDeliveryLocation
+        ? formValues.dealDecentralizedDeliveryLocation
+        : null
+    );
+    form.append(
+      "dealDecentralizedAgreedDeliveryCost",
+      formValues.dealDecentralizedAgreedDeliveryCost
+        ? formValues.dealDecentralizedAgreedDeliveryCost
+        : 0
+    );
+
+    form.append("showDealDeliveryCost", showDealDeliveryCost);
 
     // if (!formValues["sku"]) {
     //   const sku =
@@ -2079,6 +2235,15 @@ function ProductForm(props) {
             name="configuration"
             type="text"
             component={renderProductConfigurationField}
+            autoComplete="off"
+            style={{ marginTop: 20 }}
+          />
+          <Field
+            label=""
+            id="productType"
+            name="productType"
+            type="text"
+            component={renderProductTypeField}
             autoComplete="off"
             style={{ marginTop: 20 }}
           />
@@ -2577,6 +2742,75 @@ function ProductForm(props) {
                   type="text"
                   //helperText="Allow the Customer to Change Deal Quantity"
                   component={renderDealStatusField}
+                />
+              </Grid>
+            </Grid>
+          )}
+
+          {salesPreference === "deal" && (
+            <Grid container direction="row" style={{ marginTop: 20 }}>
+              <Grid item style={{ width: "50%" }}>
+                <Field
+                  label=""
+                  id="dealDeliveryMode"
+                  name="dealDeliveryMode"
+                  // helperText="Show Deal's Price Per Unit"
+                  type="text"
+                  component={renderProductDealDeliveryModeField}
+                />
+              </Grid>
+              <Grid item style={{ marginLeft: 15, width: "47%" }}>
+                <Field
+                  label=""
+                  id="showDealDeliveryCost"
+                  name="showDealDeliveryCost"
+                  type="text"
+                  //helperText="Allow the Customer to Change Deal Quantity"
+                  component={renderShowDealDeliveryCostField}
+                />
+              </Grid>
+            </Grid>
+          )}
+          {salesPreference === "deal" && (
+            <Field
+              label=""
+              id="dealCentralizedDeliveryLocation"
+              name="dealCentralizedDeliveryLocation"
+              type="text"
+              helperText="Deal Centralized Delivery Location)"
+              component={renderEditableMultilineField}
+            />
+          )}
+          {salesPreference === "deal" && (
+            <Field
+              label=""
+              id="dealDecentralizedDeliveryLocation"
+              name="dealDecentralizedDeliveryLocation"
+              type="text"
+              helperText="Deal Decentralized Delivery Locations(Enter Each Location Per Line))"
+              component={renderEditableMultilineField}
+            />
+          )}
+          {salesPreference === "deal" && (
+            <Grid container direction="row" style={{ marginTop: 20 }}>
+              <Grid item style={{ width: "50%" }}>
+                <Field
+                  label=""
+                  id="dealCentralizedAgreedDeliveryCost"
+                  name="dealCentralizedAgreedDeliveryCost"
+                  helperText="Enter Deal Centralized Delivery Cost"
+                  type="number"
+                  component={renderEditableSingleLineField}
+                />
+              </Grid>
+              <Grid item style={{ marginLeft: 15, width: "47%" }}>
+                <Field
+                  label=""
+                  id="dealDecentralizedAgreedDeliveryCost"
+                  name="dealDecentralizedAgreedDeliveryCost"
+                  type="number"
+                  helperText="Enter Deal Decentralized Delivery Costy"
+                  component={renderEditableSingleLineField}
                 />
               </Grid>
             </Grid>

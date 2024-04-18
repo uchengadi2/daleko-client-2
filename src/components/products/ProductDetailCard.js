@@ -760,6 +760,12 @@ export default function ProductDetailCard(props) {
                   </span>
                 </Typography>
                 <Typography>
+                  <span style={{ fontSize: 14, marginLeft: 10, marginTop: 15 }}>
+                    <strong> Product Type:</strong>
+                    <span>{props.product.productType}</span>
+                  </span>
+                </Typography>
+                <Typography>
                   <span style={{ fontSize: 14, marginLeft: 10 }}>
                     <strong>Weight per Unit:</strong>
                     <span>
@@ -855,7 +861,7 @@ export default function ProductDetailCard(props) {
                 {props.product.salesPreference === "deal" && (
                   <Typography>
                     <span style={{ fontSize: 14, marginLeft: 10 }}>
-                      <strong> Deal Direction:</strong>
+                      <strong> Deal Instruction:</strong>
                       <span>{props.product.dealComment}</span>
                     </span>
                   </Typography>
@@ -888,6 +894,22 @@ export default function ProductDetailCard(props) {
                     props.product.allowDealQuantityChange
                   }
                   dealStatus={props.product.dealStatus}
+                  dealComment={props.product.dealComment}
+                  dealDeliveryMode={props.product.dealDeliveryMode}
+                  dealCentralizedDeliveryLocation={
+                    props.product.dealCentralizedDeliveryLocation
+                  }
+                  dealCentralizedAgreedDeliveryCost={
+                    props.product.dealCentralizedAgreedDeliveryCost
+                  }
+                  dealDecentralizedDeliveryLocation={
+                    props.product.dealDecentralizedDeliveryLocation
+                  }
+                  dealDecentralizedAgreedDeliveryCost={
+                    props.product.dealDecentralizedAgreedDeliveryCost
+                  }
+                  showDealDeliveryCost={props.product.showDealDeliveryCost}
+                  productType={props.product.productType}
                   allowPriceFreezing={props.product.allowPriceFreezing}
                   isVatable={props.product.isVatable}
                   revenueMargin={props.product.revenueMargin}
@@ -1719,6 +1741,12 @@ export default function ProductDetailCard(props) {
                   </span>
                 </Typography>
                 <Typography>
+                  <span style={{ fontSize: 14, marginLeft: 5, marginTop: 15 }}>
+                    <strong> Product Type:</strong>
+                    <span>{props.product.productType}</span>
+                  </span>
+                </Typography>
+                <Typography>
                   <span style={{ fontSize: 14, marginLeft: 5 }}>
                     <strong>Weight per Unit:</strong>
                     <span>
@@ -1816,7 +1844,7 @@ export default function ProductDetailCard(props) {
                 {props.product.salesPreference === "deal" && (
                   <Typography>
                     <span style={{ fontSize: 14, marginLeft: 10 }}>
-                      <strong> Deal Direction:</strong>
+                      <strong> Deal Instruction:</strong>
                       <span>{props.product.dealComment}</span>
                     </span>
                   </Typography>
@@ -1848,6 +1876,22 @@ export default function ProductDetailCard(props) {
                     props.product.allowDealQuantityChange
                   }
                   dealStatus={props.product.dealStatus}
+                  dealComment={props.product.dealComment}
+                  dealDeliveryMode={props.product.dealDeliveryMode}
+                  dealCentralizedDeliveryLocation={
+                    props.product.dealCentralizedDeliveryLocation
+                  }
+                  dealCentralizedAgreedDeliveryCost={
+                    props.product.dealCentralizedAgreedDeliveryCost
+                  }
+                  dealDecentralizedDeliveryLocation={
+                    props.product.dealDecentralizedDeliveryLocation
+                  }
+                  dealDecentralizedAgreedDeliveryCost={
+                    props.product.dealDecentralizedAgreedDeliveryCost
+                  }
+                  showDealDeliveryCost={props.product.showDealDeliveryCost}
+                  productType={props.product.productType}
                   allowPriceFreezing={props.product.allowPriceFreezing}
                   isVatable={props.product.isVatable}
                   revenueMargin={props.product.revenueMargin}

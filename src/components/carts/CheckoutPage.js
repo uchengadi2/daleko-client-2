@@ -223,6 +223,7 @@ function CheckoutPage(props) {
   const [policy, setPolicy] = useState([]);
   const [implementSalesTaxCollection, setImplementSalesTaxCollection] =
     useState();
+  const [numberOfProductsInCart, setNumberOfProductsInCart] = useState(0);
 
   const [alert, setAlert] = useState({
     open: false,
@@ -303,7 +304,7 @@ function CheckoutPage(props) {
         });
       });
 
-      if (allData.lenght === 0) {
+      if (allData.length === 0) {
         return;
       }
 
@@ -312,6 +313,7 @@ function CheckoutPage(props) {
       }
 
       setCartProductList(allData);
+      setNumberOfProductsInCart(allData.length);
       setIsLoading(false);
     };
 

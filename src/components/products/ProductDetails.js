@@ -258,39 +258,6 @@ function ProductDetails(props) {
     setBecomePartnerOpen(true);
   };
 
-  //confirm if product is on promp
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     let allData = [];
-  //     api.defaults.headers.common["Authorization"] = `Bearer ${props.token}`;
-  //     const response = await api.get(`/productsonsale`, {
-  //       params: {
-  //         course: courseId,
-  //         //status: "active",
-  //       },
-  //     });
-  //     const item = response.data.data.data;
-
-  //     allData.push({
-  //       id: item[0].id,
-  //       price: item[0].salesPricePerUnit,
-  //       minQuantity: item[0].minimumQuantity,
-  //     });
-
-  //     if (!allData) {
-  //       return;
-  //     }
-
-  //     setPromoPrice(allData[0].price);
-  //     setIsOnPromo(true);
-  //     setPromoMinQuantity(allData[0].minQuantity);
-  //   };
-
-  //   //call the function
-
-  //   fetchData().catch(console.error);
-  // }, []);
-
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
@@ -363,6 +330,17 @@ function ProductDetails(props) {
           allowDealQuantityChange: product[0].allowDealQuantityChange,
           dealStatus: product[0].dealStatus,
           dealComment: product[0].dealComment,
+          dealDeliveryMode: product[0].dealDeliveryMode,
+          dealCentralizedDeliveryLocation:
+            product[0].dealCentralizedDeliveryLocation,
+          dealCentralizedAgreedDeliveryCost:
+            product[0].dealCentralizedAgreedDeliveryCost,
+          dealDecentralizedDeliveryLocation:
+            product[0].dealDecentralizedDeliveryLocation,
+          dealDecentralizedAgreedDeliveryCost:
+            product[0].dealDecentralizedAgreedDeliveryCost,
+          showDealDeliveryCost: product[0].showDealDeliveryCost,
+          productType: product[0].productType,
         });
 
         setProduct({
@@ -426,6 +404,17 @@ function ProductDetails(props) {
           allowDealQuantityChange: allData[0].allowDealQuantityChange,
           dealStatus: allData[0].dealStatus,
           dealComment: allData[0].dealComment,
+          dealDeliveryMode: allData[0].dealDeliveryMode,
+          dealCentralizedDeliveryLocation:
+            allData[0].dealCentralizedDeliveryLocation,
+          dealCentralizedAgreedDeliveryCost:
+            allData[0].dealCentralizedAgreedDeliveryCost,
+          dealDecentralizedDeliveryLocation:
+            allData[0].dealDecentralizedDeliveryLocation,
+          dealDecentralizedAgreedDeliveryCost:
+            allData[0].dealDecentralizedAgreedDeliveryCost,
+          showDealDeliveryCost: allData[0].showDealDeliveryCost,
+          productType: allData[0].productType,
         });
 
         setIsLoading(false);
@@ -504,6 +493,21 @@ function ProductDetails(props) {
             allowDealQuantityChange={product.allowDealQuantityChange}
             dealStatus={product.dealStatus}
             dealComment={product.dealComment}
+            dealDeliveryMode={product.dealDeliveryMode}
+            dealCentralizedDeliveryLocation={
+              product.dealCentralizedDeliveryLocation
+            }
+            dealCentralizedAgreedDeliveryCost={
+              product.dealCentralizedAgreedDeliveryCost
+            }
+            dealDecentralizedDeliveryLocation={
+              product.dealDecentralizedDeliveryLocation
+            }
+            dealDecentralizedAgreedDeliveryCost={
+              product.dealDecentralizedAgreedDeliveryCost
+            }
+            showDealDeliveryCost={product.showDealDeliveryCost}
+            productType={product.productType}
             key={product.id}
             token={props.token}
             userId={props.userId}
@@ -588,6 +592,21 @@ function ProductDetails(props) {
             allowDealQuantityChange={product.allowDealQuantityChange}
             dealStatus={product.dealStatus}
             dealComment={product.dealComment}
+            dealDeliveryMode={product.dealDeliveryMode}
+            dealCentralizedDeliveryLocation={
+              product.dealCentralizedDeliveryLocation
+            }
+            dealCentralizedAgreedDeliveryCost={
+              product.dealCentralizedAgreedDeliveryCost
+            }
+            dealDecentralizedDeliveryLocation={
+              product.dealDecentralizedDeliveryLocation
+            }
+            dealDecentralizedAgreedDeliveryCost={
+              product.dealDecentralizedAgreedDeliveryCost
+            }
+            showDealDeliveryCost={product.showDealDeliveryCost}
+            productType={product.productType}
             key={product.id}
             token={props.token}
             userId={props.userId}

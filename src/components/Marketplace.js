@@ -419,6 +419,17 @@ const Marketplace = (props) => {
             allowDealQuantityChange: product.allowDealQuantityChange,
             dealStatus: product.dealStatus,
             dealComment: product.dealComment,
+            dealDeliveryMode: product.dealDeliveryMode,
+            dealCentralizedDeliveryLocation:
+              product.dealCentralizedDeliveryLocation,
+            dealCentralizedAgreedDeliveryCost:
+              product.dealCentralizedAgreedDeliveryCost,
+            dealDecentralizedDeliveryLocation:
+              product.dealDecentralizedDeliveryLocation,
+            dealDecentralizedAgreedDeliveryCost:
+              product.dealDecentralizedAgreedDeliveryCost,
+            showDealDeliveryCost: product.showDealDeliveryCost,
+            productType: product.productType,
           });
         });
         setProductsList(allData);
@@ -484,6 +495,17 @@ const Marketplace = (props) => {
             allowDealQuantityChange: product.allowDealQuantityChange,
             dealStatus: product.dealStatus,
             dealComment: product.dealComment,
+            dealDeliveryMode: product.dealDeliveryMode,
+            dealCentralizedDeliveryLocation:
+              product.dealCentralizedDeliveryLocation,
+            dealCentralizedAgreedDeliveryCost:
+              product.dealCentralizedAgreedDeliveryCost,
+            dealDecentralizedDeliveryLocation:
+              product.dealDecentralizedDeliveryLocation,
+            dealDecentralizedAgreedDeliveryCost:
+              product.dealDecentralizedAgreedDeliveryCost,
+            showDealDeliveryCost: product.showDealDeliveryCost,
+            productType: product.productType,
           });
         });
         setProductsList(allData);
@@ -549,6 +571,17 @@ const Marketplace = (props) => {
             allowDealQuantityChange: product.allowDealQuantityChange,
             dealStatus: product.dealStatus,
             dealComment: product.dealComment,
+            dealDeliveryMode: product.dealDeliveryMode,
+            dealCentralizedDeliveryLocation:
+              product.dealCentralizedDeliveryLocation,
+            dealCentralizedAgreedDeliveryCost:
+              product.dealCentralizedAgreedDeliveryCost,
+            dealDecentralizedDeliveryLocation:
+              product.dealDecentralizedDeliveryLocation,
+            dealDecentralizedAgreedDeliveryCost:
+              product.dealDecentralizedAgreedDeliveryCost,
+            showDealDeliveryCost: product.showDealDeliveryCost,
+            productType: product.productType,
           });
         });
         setProductsList(allData);
@@ -614,6 +647,17 @@ const Marketplace = (props) => {
             allowDealQuantityChange: product.allowDealQuantityChange,
             dealStatus: product.dealStatus,
             dealComment: product.dealComment,
+            dealDeliveryMode: product.dealDeliveryMode,
+            dealCentralizedDeliveryLocation:
+              product.dealCentralizedDeliveryLocation,
+            dealCentralizedAgreedDeliveryCost:
+              product.dealCentralizedAgreedDeliveryCost,
+            dealDecentralizedDeliveryLocation:
+              product.dealDecentralizedDeliveryLocation,
+            dealDecentralizedAgreedDeliveryCost:
+              product.dealDecentralizedAgreedDeliveryCost,
+            showDealDeliveryCost: product.showDealDeliveryCost,
+            productType: product.productType,
           });
         });
         setProductsList(allData);
@@ -679,6 +723,17 @@ const Marketplace = (props) => {
             allowDealQuantityChange: product.allowDealQuantityChange,
             dealStatus: product.dealStatus,
             dealComment: product.dealComment,
+            dealDeliveryMode: product.dealDeliveryMode,
+            dealCentralizedDeliveryLocation:
+              product.dealCentralizedDeliveryLocation,
+            dealCentralizedAgreedDeliveryCost:
+              product.dealCentralizedAgreedDeliveryCost,
+            dealDecentralizedDeliveryLocation:
+              product.dealDecentralizedDeliveryLocation,
+            dealDecentralizedAgreedDeliveryCost:
+              product.dealDecentralizedAgreedDeliveryCost,
+            showDealDeliveryCost: product.showDealDeliveryCost,
+            productType: product.productType,
           });
         });
         setProductsList(allData);
@@ -744,6 +799,17 @@ const Marketplace = (props) => {
             allowDealQuantityChange: product.allowDealQuantityChange,
             dealStatus: product.dealStatus,
             dealComment: product.dealComment,
+            dealDeliveryMode: product.dealDeliveryMode,
+            dealCentralizedDeliveryLocation:
+              product.dealCentralizedDeliveryLocation,
+            dealCentralizedAgreedDeliveryCost:
+              product.dealCentralizedAgreedDeliveryCost,
+            dealDecentralizedDeliveryLocation:
+              product.dealDecentralizedDeliveryLocation,
+            dealDecentralizedAgreedDeliveryCost:
+              product.dealDecentralizedAgreedDeliveryCost,
+            showDealDeliveryCost: product.showDealDeliveryCost,
+            productType: product.productType,
           });
         });
         setProductsList(allData);
@@ -859,6 +925,21 @@ const Marketplace = (props) => {
               allowDealQuantityChange={product.allowDealQuantityChange}
               dealStatus={product.dealStatus}
               dealComment={product.dealComment}
+              dealDeliveryMode={product.dealDeliveryMode}
+              dealCentralizedDeliveryLocation={
+                product.dealCentralizedDeliveryLocation
+              }
+              dealCentralizedAgreedDeliveryCost={
+                product.dealCentralizedAgreedDeliveryCost
+              }
+              dealDecentralizedDeliveryLocation={
+                product.dealDecentralizedDeliveryLocation
+              }
+              dealDecentralizedAgreedDeliveryCost={
+                product.dealDecentralizedAgreedDeliveryCost
+              }
+              showDealDeliveryCost={product.showDealDeliveryCost}
+              productType={product.productType}
             />
           ))}
         </Grid>
@@ -926,6 +1007,21 @@ const Marketplace = (props) => {
               allowDealQuantityChange={product.allowDealQuantityChange}
               dealStatus={product.dealStatus}
               dealComment={product.dealComment}
+              dealDeliveryMode={product.dealDeliveryMode}
+              dealCentralizedDeliveryLocation={
+                product.dealCentralizedDeliveryLocation
+              }
+              dealCentralizedAgreedDeliveryCost={
+                product.dealCentralizedAgreedDeliveryCost
+              }
+              dealDecentralizedDeliveryLocation={
+                product.dealDecentralizedDeliveryLocation
+              }
+              dealDecentralizedAgreedDeliveryCost={
+                product.dealDecentralizedAgreedDeliveryCost
+              }
+              showDealDeliveryCost={product.showDealDeliveryCost}
+              productType={product.productType}
             />
           ))}
         </Grid>

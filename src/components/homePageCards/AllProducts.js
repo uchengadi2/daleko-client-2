@@ -626,6 +626,12 @@ export default function AllProducts(props) {
                 </Typography>
                 <Typography>
                   <span style={{ fontSize: 14, marginLeft: 10 }}>
+                    <strong> Product Type:</strong>
+                    <span>{props.productType}</span>
+                  </span>
+                </Typography>
+                <Typography>
+                  <span style={{ fontSize: 14, marginLeft: 10 }}>
                     <strong>Weight per Unit:</strong>
                     <span>
                       {props.weightPerUnit} {props.unit}{" "}
@@ -928,6 +934,12 @@ export default function AllProducts(props) {
                     <span style={{ fontSize: 14, marginLeft: 10 }}>
                       <strong> Market Pricing Condition:</strong>
                       <span>{props.marketPricingCondition}</span>
+                    </span>
+                  </Typography>
+                  <Typography>
+                    <span style={{ fontSize: 14, marginLeft: 10 }}>
+                      <strong> Product Type:</strong>
+                      <span>{props.productType}</span>
                     </span>
                   </Typography>
                   <Typography>

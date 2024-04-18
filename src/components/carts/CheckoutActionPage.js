@@ -699,45 +699,6 @@ function CheckoutActionPage(props) {
     return <React.Fragment>Update</React.Fragment>;
   };
 
-  //function to remove product from cart
-
-  // const onItemRemovalSubmit = () => {
-  //   setLoadingRemoval(true);
-
-  //   let data = {};
-
-  //   data = {
-  //     isDeleted: true,
-  //   };
-
-  //   if (data) {
-  //     const createForm = async () => {
-  //       api.defaults.headers.common["Authorization"] = `Bearer ${props.token}`;
-  //       await api.delete(`/carts/${props.cartId}`);
-
-  //       //if (response.data.status === "success") {
-  //       dispatch({
-  //         type: DELETE_CART,
-  //         //payload: response.data.data.data,
-  //       });
-
-  //       props.handleSuccessfulCreateSnackbar(
-  //         `This item is removed successfully!!!`
-  //       );
-
-  //       setLoadingRemoval(false);
-  //       props.cartCounterHandler(-1);
-  //       props.renderCartUpdate(props.cartId);
-  //     };
-  //     createForm().catch((err) => {
-  //       props.handleFailedSnackbar();
-  //       console.log("err:", err.message);
-  //     });
-  //   } else {
-  //     props.handleFailedSnackbar("Something went wrong, please try again!!!");
-  //   }
-  // };
-
   //function to update product in cart
 
   const onItemRemovalSubmit = () => {
@@ -760,8 +721,6 @@ function CheckoutActionPage(props) {
       console.log("err:", err.message);
     });
   };
-
-  console.log("props:", props);
 
   const onSubmit = (formValues) => {
     setLoading(true);

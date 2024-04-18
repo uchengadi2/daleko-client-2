@@ -237,6 +237,15 @@ function SendCourseToCheckoutForm(props) {
     allowPriceFreezing,
     allowDealQuantityChange,
     showDealPricePerUnit,
+    dealStatus,
+    dealComment,
+    dealDeliveryMode,
+    dealCentralizedDeliveryLocation,
+    dealCentralizedAgreedDeliveryCost,
+    dealDecentralizedDeliveryLocation,
+    dealDecentralizedAgreedDeliveryCost,
+    showDealDeliveryCost,
+    productType,
   } = props;
   const [quantity, setQuantity] = useState(props.minQuantity);
   const [newQuantity, setNewQuantity] = useState(props.minQuantity);

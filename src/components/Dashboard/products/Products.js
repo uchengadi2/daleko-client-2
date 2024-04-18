@@ -146,6 +146,17 @@ function Products(props) {
           allowDealQuantityChange: product.allowDealQuantityChange,
           dealStatus: product.dealStatus,
           dealComment: product.dealComment,
+          productType: product.productType,
+          dealDeliveryMode: product.dealDeliveryMode,
+          dealCentralizedDeliveryLocation:
+            product.dealCentralizedDeliveryLocation,
+          dealCentralizedAgreedDeliveryCost:
+            product.dealCentralizedAgreedDeliveryCost,
+          dealDecentralizedDeliveryLocation:
+            product.dealDecentralizedDeliveryLocation,
+          dealDecentralizedAgreedDeliveryCost:
+            product.dealDecentralizedAgreedDeliveryCost,
+          showDealDeliveryCost: product.showDealDeliveryCost,
         });
       });
       setProductsList(allData);
@@ -442,6 +453,17 @@ function Products(props) {
         allowDealQuantityChange: product.allowDealQuantityChange,
         dealStatus: product.dealStatus,
         dealComment: product.dealComment,
+        productType: product.productType,
+        dealDeliveryMode: product.dealDeliveryMode,
+        dealCentralizedDeliveryLocation:
+          product.dealCentralizedDeliveryLocation,
+        dealCentralizedAgreedDeliveryCost:
+          product.dealCentralizedAgreedDeliveryCost,
+        dealDecentralizedDeliveryLocation:
+          product.dealDecentralizedDeliveryLocation,
+        dealDecentralizedAgreedDeliveryCost:
+          product.dealDecentralizedAgreedDeliveryCost,
+        showDealDeliveryCost: product.showDealDeliveryCost,
       };
       rows.push(row);
     });
