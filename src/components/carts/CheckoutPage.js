@@ -223,8 +223,26 @@ function CheckoutPage(props) {
   const [policy, setPolicy] = useState([]);
   const [implementSalesTaxCollection, setImplementSalesTaxCollection] =
     useState();
-  const [numberOfProductsInCart, setNumberOfProductsInCart] = useState(0);
-
+  const [salesPreference, setSalesPreference] = useState();
+  const [dealDeliveryMode, setDealDeliveryMode] = useState();
+  const [dealStatus, setDealStatus] = useState();
+  const [dealType, setDealType] = useState();
+  const [dealCode, setDealCode] = useState();
+  const [dealCentralizedDeliveryLocation, setDealCentralizedDeliveryLocation] =
+    useState();
+  const [
+    dealCentralizedAgreedDeliveryCost,
+    setDealCentralizedAgreedDeliveryCost,
+  ] = useState();
+  const [
+    dealDecentralizedDeliveryLocation,
+    setDealDecentralizedDeliveryLocation,
+  ] = useState([]);
+  const [
+    dealDecentralizedAgreedDeliveryCost,
+    setDealDecentralizedAgreedDeliveryCost,
+  ] = useState();
+  const [showDealDeliveryCost, setShowDealDeliveryCost] = useState();
   const [alert, setAlert] = useState({
     open: false,
     message: "",
@@ -240,7 +258,6 @@ function CheckoutPage(props) {
   };
 
   const renderCheckoutUpdate = (value) => {
-    console.log("the value of this removed cart is:", value);
     setUpdateCheckout(value);
   };
 
@@ -301,6 +318,24 @@ function CheckoutPage(props) {
           weightInKg: cart.weightInKg,
           unit: cart.unit,
           weightPerUnit: cart.weightPerUnit,
+          salesPreference: cart.salesPreference,
+          dealCode: cart.dealCode,
+          dealExpiryDate: cart.dealExpiryDate,
+          allowDealQuantityChange: cart.allowDealQuantityChange,
+          showDealPricePerUnit: cart.showDealPricePerUnit,
+          dealStatus: cart.dealStatus,
+          dealType: cart.dealType,
+          dealComment: cart.dealComment,
+          dealDeliveryMode: cart.dealDeliveryMode,
+          dealCentralizedDeliveryLocation: cart.dealCentralizedDeliveryLocation,
+          dealCentralizedAgreedDeliveryCost:
+            cart.dealCentralizedAgreedDeliveryCost,
+          dealDecentralizedDeliveryLocation:
+            cart.dealDecentralizedDeliveryLocation,
+          dealDecentralizedAgreedDeliveryCost:
+            cart.dealDecentralizedAgreedDeliveryCost,
+          showDealDeliveryCost: cart.showDealDeliveryCost,
+          productType: cart.productType,
         });
       });
 
@@ -313,7 +348,23 @@ function CheckoutPage(props) {
       }
 
       setCartProductList(allData);
-      setNumberOfProductsInCart(allData.length);
+      setSalesPreference(allData[0].salesPreference);
+      setDealDeliveryMode(allData[0].dealDeliveryMode);
+      setDealStatus(allData[0].dealStatus);
+      setDealCode(allData[0].dealCode);
+      setDealType(allData[0].dealType);
+      setDealCentralizedDeliveryLocation(
+        allData[0].dealCentralizedDeliveryLocation
+      );
+      setDealCentralizedAgreedDeliveryCost(
+        allData[0].dealCentralizedAgreedDeliveryCost
+      );
+      setDealDecentralizedDeliveryLocation(
+        allData[0].dealDecentralizedDeliveryLocation
+      );
+      setDealDecentralizedAgreedDeliveryCost(
+        allData[0].dealDecentralizedAgreedDeliveryCost
+      );
       setIsLoading(false);
     };
 
@@ -382,6 +433,30 @@ function CheckoutPage(props) {
               weightPerUnit={cart.weightPerUnit}
               weightInKg={cart.weightInKg}
               price={cart.price}
+              dealCode={cart.dealCode}
+              dealExpiryDate={cart.dealExpiryDate}
+              allowDealQuantityChange={cart.allowDealQuantityChange}
+              showDealPricePerUnit={cart.showDealPricePerUnit}
+              dealStatus={cart.dealStatus}
+              dealType={cart.dealType}
+              dealComment={cart.dealComment}
+              dealDeliveryMode={cart.dealDeliveryMode}
+              dealCentralizedDeliveryLocation={
+                cart.dealCentralizedDeliveryLocation
+              }
+              dealCentralizedAgreedDeliveryCost={
+                cart.dealCentralizedAgreedDeliveryCost
+              }
+              dealDecentralizedDeliveryLocation={
+                cart.dealDecentralizedDeliveryLocation
+              }
+              dealDecentralizedAgreedDeliveryCost={
+                cart.dealDecentralizedAgreedDeliveryCost
+              }
+              showDealDeliveryCost={cart.showDealDeliveryCost}
+              productType={cart.productType}
+              salesPreference={cart.salesPreference}
+              productSalesPreference={salesPreference}
               isVatable={cart.isVatable}
               revenueMargin={cart.revenueMargin}
               revenueMarginShouldPrevail={cart.revenueMarginShouldPrevail}
@@ -426,6 +501,30 @@ function CheckoutPage(props) {
               weightInKg={cart.weightInKg}
               unit={cart.unit}
               weightPerUnit={cart.weightPerUnit}
+              dealCode={cart.dealCode}
+              dealExpiryDate={cart.dealExpiryDate}
+              allowDealQuantityChange={cart.allowDealQuantityChange}
+              showDealPricePerUnit={cart.showDealPricePerUnit}
+              dealStatus={cart.dealStatus}
+              dealType={cart.dealType}
+              dealComment={cart.dealComment}
+              dealDeliveryMode={cart.dealDeliveryMode}
+              dealCentralizedDeliveryLocation={
+                cart.dealCentralizedDeliveryLocation
+              }
+              dealCentralizedAgreedDeliveryCost={
+                cart.dealCentralizedAgreedDeliveryCost
+              }
+              dealDecentralizedDeliveryLocation={
+                cart.dealDecentralizedDeliveryLocation
+              }
+              dealDecentralizedAgreedDeliveryCost={
+                cart.dealDecentralizedAgreedDeliveryCost
+              }
+              showDealDeliveryCost={cart.showDealDeliveryCost}
+              productType={cart.productType}
+              salesPreference={cart.salesPreference}
+              productSalesPreference={salesPreference}
               preferredStartDate={cart.preferredStartDate}
               currency={currency}
               revenueMargin={cart.revenueMargin}
@@ -505,6 +604,21 @@ function CheckoutPage(props) {
               vat={prevailingVat}
               vatRate={vat}
               policy={policy}
+              salesPreference={salesPreference}
+              dealDeliveryMode={dealDeliveryMode}
+              dealStatus={dealStatus}
+              dealCode={dealCode}
+              dealType={dealType}
+              dealCentralizedDeliveryLocation={dealCentralizedDeliveryLocation}
+              dealCentralizedAgreedDeliveryCost={
+                dealCentralizedAgreedDeliveryCost
+              }
+              dealDecentralizedDeliveryLocation={
+                dealDecentralizedDeliveryLocation
+              }
+              dealDecentralizedAgreedDeliveryCost={
+                dealDecentralizedAgreedDeliveryCost
+              }
               implementSalesTaxCollection={implementSalesTaxCollection}
               implementVatCollection={implementVatCollection}
               currency={currency}

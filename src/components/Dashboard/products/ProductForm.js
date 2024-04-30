@@ -2793,7 +2793,7 @@ function ProductForm(props) {
           )}
           {salesPreference === "deal" && (
             <Grid container direction="row" style={{ marginTop: 20 }}>
-              <Grid item style={{ width: "50%" }}>
+              <Grid item style={{ width: "100%" }}>
                 <Field
                   label=""
                   id="dealCentralizedAgreedDeliveryCost"
@@ -2803,7 +2803,7 @@ function ProductForm(props) {
                   component={renderEditableSingleLineField}
                 />
               </Grid>
-              <Grid item style={{ marginLeft: 15, width: "47%" }}>
+              {/* <Grid item style={{ marginLeft: 15, width: "47%" }}>
                 <Field
                   label=""
                   id="dealDecentralizedAgreedDeliveryCost"
@@ -2812,7 +2812,7 @@ function ProductForm(props) {
                   helperText="Enter Deal Decentralized Delivery Costy"
                   component={renderEditableSingleLineField}
                 />
-              </Grid>
+              </Grid> */}
             </Grid>
           )}
 

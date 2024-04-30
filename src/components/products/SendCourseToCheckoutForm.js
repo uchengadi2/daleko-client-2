@@ -13,7 +13,7 @@ import Box from "@material-ui/core/Box";
 import FormControl from "@material-ui/core/FormControl";
 import FormLabel from "@material-ui/core/FormLabel";
 import api from "../../apis/local";
-import { CREATE_CART, EDIT_CART } from "../../actions/types";
+import { CREATE_CART, EDIT_CART, DELETE_CART } from "../../actions/types";
 import history from "../../history";
 import RequestQuote from "../quote/RequestQuote";
 import FreezePriceForm from "../freeze/FreezePriceForm";
@@ -235,6 +235,8 @@ function SendCourseToCheckoutForm(props) {
     userId,
     salesPreference,
     allowPriceFreezing,
+    dealCode,
+    dealExpiryDate,
     allowDealQuantityChange,
     showDealPricePerUnit,
     dealStatus,
@@ -246,6 +248,7 @@ function SendCourseToCheckoutForm(props) {
     dealDecentralizedAgreedDeliveryCost,
     showDealDeliveryCost,
     productType,
+    dealType,
   } = props;
   const [quantity, setQuantity] = useState(props.minQuantity);
   const [newQuantity, setNewQuantity] = useState(props.minQuantity);
@@ -256,6 +259,9 @@ function SendCourseToCheckoutForm(props) {
   const [cartHolder, setCartHolder] = useState();
   const [minimumQuantity, setMinimumQuantity] = useState(props.minQuantity);
   const [cartId, setCartId] = useState();
+  const [cartList, setCartList] = useState([]);
+  const [cartForCheckoutList, setCartForCheckoutList] = useState([]);
+  const [allUserCartList, setAllUserCartList] = useState([]);
   const [total, setTotal] = useState();
   const [sameProductAlreadyInCart, setSameProductAlreadyInCart] =
     useState(false);
@@ -311,9 +317,8 @@ function SendCourseToCheckoutForm(props) {
       allData.push({
         id: item[0]._id,
         quantity: item[0].quantity,
-        // location: item[0].productLocation,
-        // locationCountry: item[0].locationCountry,
         cartHolder: item[0].cartHolder,
+        salesPreference: item[0].salesPreference,
       });
 
       if (allData[0].quantity) {
@@ -324,16 +329,79 @@ function SendCourseToCheckoutForm(props) {
         setCartHolder(allData[0].cartHolder);
       }
 
-      setSameProductAlreadyInCart(true);
+      if (salesPreference !== "deal") {
+        setSameProductAlreadyInCart(true);
+      }
+
       if (allData[0].id) {
         setCartId(allData[0].id);
       }
+
+      setAllUserCartList(allData);
     };
 
     //call the function
 
     fetchData().catch(console.error);
   }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      let allData = [];
+      api.defaults.headers.common["Authorization"] = `Bearer ${props.token}`;
+      const response = await api.get(`/carts`, {
+        params: {
+          cartHolder: userId,
+          status: "marked-for-checkout",
+        },
+      });
+
+      const item = response.data.data.data;
+      item.map((product) => {
+        allData.push({
+          id: product._id,
+          quantity: product.quantity,
+          cartHolder: product.cartHolder,
+          salesPreference: product.salesPreference,
+        });
+      });
+
+      setCartForCheckoutList(allData);
+    };
+
+    //call the function
+
+    fetchData().catch(console.error);
+  }, [userId]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      let allData = [];
+      api.defaults.headers.common["Authorization"] = `Bearer ${props.token}`;
+      const response = await api.get(`/carts`, {
+        params: {
+          cartHolder: userId,
+          status: "unmarked-for-checkout",
+        },
+      });
+
+      const item = response.data.data.data;
+      item.map((product) => {
+        allData.push({
+          id: product._id,
+          quantity: product.quantity,
+          cartHolder: product.cartHolder,
+          salesPreference: product.salesPreference,
+        });
+      });
+
+      setCartList(allData);
+    };
+
+    //call the function
+
+    fetchData().catch(console.error);
+  }, [userId]);
 
   const onQuantityChange = (e) => {
     const newQuantity = parseFloat(e.target.value);
@@ -510,9 +578,65 @@ function SendCourseToCheckoutForm(props) {
       isVatable: props.isVatable,
       revenueMargin: props.revenueMargin,
       revenueMarginShouldPrevail: props.revenueMarginShouldPrevail,
+      dealCode,
+      dealExpiryDate,
+      allowDealQuantityChange,
+      showDealPricePerUnit,
+      dealStatus,
+      dealComment,
+      dealDeliveryMode,
+      dealCentralizedDeliveryLocation,
+      dealCentralizedAgreedDeliveryCost,
+      dealDecentralizedDeliveryLocation,
+      dealDecentralizedAgreedDeliveryCost,
+      showDealDeliveryCost,
+      productType,
+      salesPreference,
+      dealType,
     };
 
+    if (salesPreference === "deal") {
+      //delete all items in this user's cart
+      cartForCheckoutList.map((cart, index) => {
+        const createForm = async () => {
+          api.defaults.headers.common[
+            "Authorization"
+          ] = `Bearer ${props.token}`;
+          await api.delete(`/carts/${cart.id}`);
+          dispatch({
+            type: DELETE_CART,
+            //payload: response2.data.data.data,
+          });
+          //props.cartCounterHandler(-1);
+        };
+        createForm().catch((err) => {
+          //props.handleFailedSnackbar();
+          console.log("err:", err.message);
+        });
+      });
+    }
+
+    // if (salesPreference !== "deal") {
     if (sameProductAlreadyInCart === false) {
+      cartForCheckoutList.map((cart, index) => {
+        if (cart.salesPreference === "deal") {
+          const createCartForm = async () => {
+            api.defaults.headers.common[
+              "Authorization"
+            ] = `Bearer ${props.token}`;
+            await api.delete(`/carts/${cart.id}`);
+            dispatch({
+              type: DELETE_CART,
+              //payload: response2.data.data.data,
+            });
+            //props.cartCounterHandler(-1);
+          };
+          createCartForm().catch((err) => {
+            //props.handleFailedSnackbar();
+            console.log("err:", err.message);
+          });
+        }
+      });
       //create a new cart and add the product
       if (data) {
         const createForm = async () => {
@@ -547,13 +671,17 @@ function SendCourseToCheckoutForm(props) {
         props.handleFailedSnackbar("Something went wrong, please try again!!!");
       }
     } else {
-      //update existing cart
       let totalProductQuantity = 0;
-      if (!productQuantityInCart) {
-        totalProductQuantity = quantity;
-      } else {
-        totalProductQuantity =
-          parseFloat(productQuantityInCart) + parseFloat(quantity);
+
+      if (salesPreference !== "deal") {
+        //update existing cart
+
+        if (!productQuantityInCart) {
+          totalProductQuantity = quantity;
+        } else {
+          totalProductQuantity =
+            parseFloat(productQuantityInCart) + parseFloat(quantity);
+        }
       }
 
       const data = {
@@ -567,6 +695,21 @@ function SendCourseToCheckoutForm(props) {
         isVatable: props.isVatable,
         revenueMargin: props.revenueMargin,
         revenueMarginShouldPrevail: props.revenueMarginShouldPrevail,
+        dealCode,
+        dealExpiryDate,
+        allowDealQuantityChange,
+        showDealPricePerUnit,
+        dealStatus,
+        dealComment,
+        dealDeliveryMode,
+        dealCentralizedDeliveryLocation,
+        dealCentralizedAgreedDeliveryCost,
+        dealDecentralizedDeliveryLocation,
+        dealDecentralizedAgreedDeliveryCost,
+        showDealDeliveryCost,
+        productType,
+        salesPreference,
+        dealType,
       };
 
       //update the exist
@@ -604,6 +747,9 @@ function SendCourseToCheckoutForm(props) {
       }
       // } //end of the no cartholder
     }
+    // } else {
+    //   //add come code here
+    // }
   };
 
   //calculate the Weight per kg of this product
@@ -659,9 +805,68 @@ function SendCourseToCheckoutForm(props) {
       isVatable: props.isVatable,
       revenueMargin: props.revenueMargin,
       revenueMarginShouldPrevail: props.revenueMarginShouldPrevail,
+      dealCode,
+      dealExpiryDate,
+      allowDealQuantityChange,
+      showDealPricePerUnit,
+      dealStatus,
+      dealComment,
+      dealDeliveryMode,
+      dealCentralizedDeliveryLocation,
+      dealCentralizedAgreedDeliveryCost,
+      dealDecentralizedDeliveryLocation,
+      dealDecentralizedAgreedDeliveryCost,
+      showDealDeliveryCost,
+      productType,
+      salesPreference,
+      dealType,
     };
 
+    if (salesPreference === "deal") {
+      //delete all items in this user's cart
+      cartList.map((cart, index) => {
+        const createForm = async () => {
+          api.defaults.headers.common[
+            "Authorization"
+          ] = `Bearer ${props.token}`;
+          await api.delete(`/carts/${cart.id}`);
+          dispatch({
+            type: DELETE_CART,
+            //payload: response2.data.data.data,
+          });
+          props.cartCounterHandler(-1);
+        };
+        createForm().catch((err) => {
+          //props.handleFailedSnackbar();
+          console.log("err:", err.message);
+        });
+      });
+    }
+
+    // if (salesPreference !== "deal") {
     if (sameProductAlreadyInCart === false) {
+      //delete all deals in cart
+
+      cartList.map((cart, index) => {
+        if (cart.salesPreference === "deal") {
+          const createCartForm = async () => {
+            api.defaults.headers.common[
+              "Authorization"
+            ] = `Bearer ${props.token}`;
+            await api.delete(`/carts/${cart.id}`);
+            dispatch({
+              type: DELETE_CART,
+              //payload: response2.data.data.data,
+            });
+            props.cartCounterHandler(-1);
+          };
+          createCartForm().catch((err) => {
+            //props.handleFailedSnackbar();
+            console.log("err:", err.message);
+          });
+        }
+      });
+
       //create a new cart and add the product
       if (data) {
         const createForm = async () => {
@@ -696,24 +901,27 @@ function SendCourseToCheckoutForm(props) {
         props.handleFailedSnackbar("Something went wrong, please try again!!!");
       }
     } else {
-      //update existing cart
       let totalProductQuantity = 0;
       let newWeightInKg = 0;
-      if (!productQuantityInCart) {
-        totalProductQuantity = quantity;
-        newWeightInKg = weightInKg;
-      } else {
-        totalProductQuantity =
-          parseFloat(productQuantityInCart) + parseFloat(quantity);
-        if (props.unit === "kg") {
-          newWeightInKg = props.weightPerUnit * totalProductQuantity;
-        } else if (props.unit === "g") {
-          newWeightInKg = (props.weightPerUnit / 1000) * totalProductQuantity;
-        } else if (props.unit === "ibs") {
-          newWeightInKg =
-            props.weightPerUnit * 0.45359237 * totalProductQuantity;
-        } else if (props.unit === "tonnes") {
-          newWeightInKg = props.weightPerUnit * 1000 * totalProductQuantity;
+      if (salesPreference !== "deal") {
+        //update existing cart
+
+        if (!productQuantityInCart) {
+          totalProductQuantity = quantity;
+          newWeightInKg = weightInKg;
+        } else {
+          totalProductQuantity =
+            parseFloat(productQuantityInCart) + parseFloat(quantity);
+          if (props.unit === "kg") {
+            newWeightInKg = props.weightPerUnit * totalProductQuantity;
+          } else if (props.unit === "g") {
+            newWeightInKg = (props.weightPerUnit / 1000) * totalProductQuantity;
+          } else if (props.unit === "ibs") {
+            newWeightInKg =
+              props.weightPerUnit * 0.45359237 * totalProductQuantity;
+          } else if (props.unit === "tonnes") {
+            newWeightInKg = props.weightPerUnit * 1000 * totalProductQuantity;
+          }
         }
       }
 
@@ -728,6 +936,21 @@ function SendCourseToCheckoutForm(props) {
         isVatable: props.isVatable,
         revenueMargin: props.revenueMargin,
         revenueMarginShouldPrevail: props.revenueMarginShouldPrevail,
+        dealExpiryDate,
+        allowDealQuantityChange,
+        showDealPricePerUnit,
+        dealCode,
+        dealStatus,
+        dealComment,
+        dealDeliveryMode,
+        dealCentralizedDeliveryLocation,
+        dealCentralizedAgreedDeliveryCost,
+        dealDecentralizedDeliveryLocation,
+        dealDecentralizedAgreedDeliveryCost,
+        showDealDeliveryCost,
+        productType,
+        salesPreference,
+        dealType,
       };
 
       //update the exist
@@ -764,6 +987,9 @@ function SendCourseToCheckoutForm(props) {
         props.handleFailedSnackbar("Something went wrong, please try again!!!");
       }
     } //end of the no cartholder
+    // } else {
+    //   //add come code here
+    // }
   };
 
   const onSubmitForSubscription = (formValues) => {};

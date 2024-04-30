@@ -56,7 +56,7 @@ const renderNameField = ({
   return (
     <TextField
       //error={touched && invalid}
-      helperText="Enter the name of the city"
+      helperText="Enter the name of the city/place"
       variant="outlined"
       label={label}
       id={input.name}
@@ -86,7 +86,7 @@ const renderCityCodeField = ({
   return (
     <TextField
       //error={touched && invalid}
-      helperText="Enter the code for this City"
+      helperText="Enter the code for this City/place"
       variant="outlined"
       label={label}
       id={input.name}
@@ -118,7 +118,7 @@ const renderDescriptionField = ({
       error={touched && invalid}
       //placeholder="category description"
       variant="outlined"
-      helperText="Describe the city"
+      helperText="Describe the city/place"
       label={label}
       id={input.name}
       // value={formInput.description}
@@ -144,6 +144,7 @@ function CityEditForm(props) {
   const [country, setCountry] = useState(params[0].country);
   const [countryList, setCountryList] = useState([]);
   const [stateList, setStateList] = useState([]);
+  const [placeType, setPlaceType] = useState(params[0].placeType);
   const [loading, setLoading] = useState(false);
 
   const dispatch = useDispatch();
@@ -191,6 +192,10 @@ function CityEditForm(props) {
   const handleCountryChange = (event) => {
     setCountryId(event.target.value);
     setStateList([]);
+  };
+
+  const handlePlaceTypeChange = (event) => {
+    setPlaceType(event.target.value);
   };
 
   //get the state list
@@ -273,6 +278,35 @@ function CityEditForm(props) {
     );
   };
 
+  const renderPlaceTypeField = ({
+    input,
+    label,
+    meta: { touched, error, invalid },
+    type,
+    id,
+    ...custom
+  }) => {
+    return (
+      <Box>
+        <FormControl variant="outlined">
+          {/* <InputLabel id="vendor_city">City</InputLabel> */}
+          <Select
+            labelId="placeType"
+            id="placeType"
+            value={placeType}
+            onChange={handlePlaceTypeChange}
+            //label="Country Region"
+            style={{ width: 500, height: 38, marginTop: 20 }}
+          >
+            <MenuItem value={"conventional"}>Conventional</MenuItem>
+            <MenuItem value={"organizational"}>Organizational</MenuItem>
+          </Select>
+          <FormHelperText>Select City/Place Type</FormHelperText>
+        </FormControl>
+      </Box>
+    );
+  };
+
   const buttonContent = () => {
     return <React.Fragment> Submit</React.Fragment>;
   };
@@ -282,6 +316,7 @@ function CityEditForm(props) {
     const data = {
       name: formValues.name ? formValues.name : params[0].name,
       code: formValues.code ? formValues.code : params[0].code,
+      placeType: placeType ? placeType : params[0].placeType,
 
       description: formValues.description
         ? formValues.description
@@ -302,7 +337,7 @@ function CityEditForm(props) {
           });
 
           props.handleSuccessfulEditSnackbar(
-            `${response.data.data.data.name} City is updated successfully!!!`
+            `${response.data.data.data.name} City/Place is updated successfully!!!`
           );
           props.renderCityEdittedUpdateCounter();
           props.handleEditDialogOpenStatus();
@@ -345,7 +380,7 @@ function CityEditForm(props) {
           style={{ color: "grey", fontSize: "1.3em" }}
           component="legend"
         >
-          City Details
+          City/Place Details
         </FormLabel>
       </Grid>
       <Box
@@ -361,7 +396,7 @@ function CityEditForm(props) {
         style={{ marginTop: 20 }}
       >
         <Grid container direction="row">
-          <Grid item style={{ width: "65%" }}>
+          <Grid item style={{ width: "55%" }}>
             <Field
               label=""
               id="name"
@@ -371,7 +406,7 @@ function CityEditForm(props) {
               component={renderNameField}
             />
           </Grid>
-          <Grid item style={{ width: "33%", marginLeft: 10 }}>
+          <Grid item style={{ width: "43%", marginLeft: 10 }}>
             <Field
               label=""
               id="code"
@@ -397,6 +432,14 @@ function CityEditForm(props) {
           name="state"
           type="text"
           component={renderStateField}
+        />
+
+        <Field
+          label=""
+          id="placeType"
+          name="placeType"
+          type="text"
+          component={renderPlaceTypeField}
         />
 
         <Field

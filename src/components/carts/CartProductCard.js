@@ -226,6 +226,17 @@ export default function CartProductCard(props) {
         allowDealQuantityChange: product.allowDealQuantityChange,
         dealStatus: product.dealStatus,
         dealComment: product.dealComment,
+        dealDeliveryMode: product.dealDeliveryMode,
+        dealCentralizedDeliveryLocation:
+          product.dealCentralizedDeliveryLocation,
+        dealCentralizedAgreedDeliveryCost:
+          product.dealCentralizedAgreedDeliveryCost,
+        dealDecentralizedDeliveryLocation:
+          product.dealDecentralizedDeliveryLocation,
+        dealDecentralizedAgreedDeliveryCost:
+          product.dealDecentralizedAgreedDeliveryCost,
+        showDealDeliveryCost: product.showDealDeliveryCost,
+        dealPaymentPreference: product.dealPaymentPreference,
       });
 
       if (!allData) {
@@ -294,6 +305,17 @@ export default function CartProductCard(props) {
         allowDealQuantityChange: allData[0].allowDealQuantityChange,
         dealStatus: allData[0].dealStatus,
         dealComment: allData[0].dealComment,
+        dealDeliveryMode: allData[0].dealDeliveryMode,
+        dealCentralizedDeliveryLocation:
+          allData[0].dealCentralizedDeliveryLocation,
+        dealCentralizedAgreedDeliveryCost:
+          allData[0].dealCentralizedAgreedDeliveryCost,
+        dealDecentralizedDeliveryLocation:
+          allData[0].dealDecentralizedDeliveryLocation,
+        dealDecentralizedAgreedDeliveryCost:
+          allData[0].dealDecentralizedAgreedDeliveryCost,
+        showDealDeliveryCost: allData[0].showDealDeliveryCost,
+        dealPaymentPreference: allData[0].dealPaymentPreference,
       });
       setCurrency(allData[0].currency);
     };

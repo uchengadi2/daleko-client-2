@@ -27,8 +27,8 @@ const useStyles = makeStyles((theme) => ({
   submitButton: {
     borderRadius: 10,
     height: 40,
-    width: 120,
-    marginLeft: 190,
+    width: 180,
+    marginLeft: 150,
     marginTop: 30,
     color: "white",
     backgroundColor: theme.palette.common.blue,
@@ -49,7 +49,7 @@ const renderStateNameField = ({
   return (
     <TextField
       //error={touched && invalid}
-      helperText="Enter State Name"
+      helperText="Enter State/Entity Name"
       variant="outlined"
       //label={label}
       id={input.name}
@@ -79,7 +79,7 @@ const renderStateCodeField = ({
   return (
     <TextField
       //error={touched && invalid}
-      helperText="Enter State Code"
+      helperText="Enter State/Entity Code"
       variant="outlined"
       //label={label}
       id={input.name}
@@ -109,7 +109,7 @@ const renderStateDescriptionField = ({
   return (
     <TextField
       //error={touched && invalid}
-      helperText="Provide a description of this state"
+      helperText="Provide a description of this state/entity"
       variant="outlined"
       //label={label}
       id={input.name}
@@ -125,11 +125,43 @@ const renderStateDescriptionField = ({
   );
 };
 
+const renderEntityDealCodeField = ({
+  input,
+  label,
+  meta: { touched, error, invalid },
+  type,
+  id,
+  helperText,
+  ...custom
+}) => {
+  return (
+    <TextField
+      //error={touched && invalid}
+      helperText={helperText}
+      variant="outlined"
+      //label={label}
+      id={input.name}
+      //value={formInput.name}
+      fullWidth
+      //required
+      type={type}
+      {...custom}
+      onChange={input.onChange}
+      inputProps={{
+        style: {
+          height: 1,
+        },
+      }}
+    />
+  );
+};
+
 function AddStateForm(props) {
   const classes = useStyles();
 
   const [country, setCountry] = useState();
   const [region, setRegion] = useState();
+  const [entityType, setEntityType] = useState("conventional");
   const [countryList, setCountryList] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -141,6 +173,10 @@ function AddStateForm(props) {
 
   const handleRegionChange = (event) => {
     setRegion(event.target.value);
+  };
+
+  const handleEntityTypeChange = (event) => {
+    setEntityType(event.target.value);
   };
 
   useEffect(() => {
@@ -239,8 +275,37 @@ function AddStateForm(props) {
     );
   };
 
+  const renderEntityTypeField = ({
+    input,
+    label,
+    meta: { touched, error, invalid },
+    type,
+    id,
+    ...custom
+  }) => {
+    return (
+      <Box>
+        <FormControl variant="outlined">
+          {/* <InputLabel id="vendor_city">City</InputLabel> */}
+          <Select
+            labelId="entityType"
+            id="entityType"
+            value={entityType}
+            onChange={handleEntityTypeChange}
+            //label="Country Region"
+            style={{ width: 500, height: 38, marginTop: 20 }}
+          >
+            <MenuItem value={"conventional"}>Conventional</MenuItem>
+            <MenuItem value={"organizational"}>Organizational</MenuItem>
+          </Select>
+          <FormHelperText>Select State/Entity Type</FormHelperText>
+        </FormControl>
+      </Box>
+    );
+  };
+
   const buttonContent = () => {
-    return <React.Fragment> Add State</React.Fragment>;
+    return <React.Fragment> Add State/Entity</React.Fragment>;
   };
 
   const onSubmit = (formValues) => {
@@ -248,7 +313,11 @@ function AddStateForm(props) {
     const data = {
       name: formValues.name,
       region: region,
+      entityType: entityType,
       description: formValues.description,
+      entityDealCode: formValues.entityDealCode
+        ? formValues.entityDealCode
+        : null,
       country: country,
       code: formValues.code
         ? formValues.code
@@ -311,7 +380,7 @@ function AddStateForm(props) {
           style={{ color: "blue", fontSize: "1.5em" }}
           component="legend"
         >
-          <Typography variant="h5">Add State</Typography>
+          <Typography variant="h5">Add State/Entity</Typography>
         </FormLabel>
       </Grid>
       <Box
@@ -326,7 +395,7 @@ function AddStateForm(props) {
         style={{ marginTop: 10 }}
       >
         <Grid container direction="row" style={{ marginTop: 10 }}>
-          <Grid item style={{ width: "70%" }}>
+          <Grid item style={{ width: "65%" }}>
             <Field
               label=""
               id="name"
@@ -335,7 +404,7 @@ function AddStateForm(props) {
               component={renderStateNameField}
             />
           </Grid>
-          <Grid item style={{ width: "28%", marginLeft: 10 }}>
+          <Grid item style={{ width: "33%", marginLeft: 10 }}>
             <Field
               label=""
               id="code"
@@ -365,6 +434,23 @@ function AddStateForm(props) {
             />
           </Grid>
         </Grid>
+        <Field
+          label=""
+          id="entityType"
+          name="entityType"
+          type="text"
+          component={renderEntityTypeField}
+        />
+        <Field
+          label=""
+          id="entityDealCode"
+          name="entityDealCode"
+          type="text"
+          helperText="Enter Entity Deal Code(Optional)"
+          component={renderEntityDealCodeField}
+          style={{ marginTop: 10 }}
+        />
+
         <Field
           label=""
           id="description"

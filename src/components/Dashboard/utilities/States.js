@@ -82,6 +82,8 @@ function States(props) {
           region: state.region,
           code: state.code,
           description: state.description,
+          entityType: state.entityType,
+          entityDealCode: state.entityDealCode,
         });
       });
       setStateList(allData);
@@ -255,6 +257,8 @@ function States(props) {
               (_, m1, m2) => m1.toUpperCase() + m2.toLowerCase()
             )
           : "",
+        entityType: state.entityType,
+        entityDealCode: state.entityDealCode,
       };
       rows.push(row);
     });

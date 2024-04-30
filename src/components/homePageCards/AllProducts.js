@@ -725,7 +725,7 @@ export default function AllProducts(props) {
                 {props.salesPreference === "deal" && (
                   <Typography>
                     <span style={{ fontSize: 14, marginLeft: 10 }}>
-                      <strong> Deal Direction:</strong>
+                      <strong> Deal Instruction:</strong>
                       <span>{props.dealComment}</span>
                     </span>
                   </Typography>
@@ -1041,7 +1041,7 @@ export default function AllProducts(props) {
                   {props.salesPreference === "deal" && (
                     <Typography>
                       <span style={{ fontSize: 14, marginLeft: 10 }}>
-                        <strong> Deal Direction:</strong>
+                        <strong> Deal Instruction:</strong>
                         <span>{props.dealComment}</span>
                       </span>
                     </Typography>

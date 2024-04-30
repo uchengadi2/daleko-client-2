@@ -185,6 +185,7 @@ const renderRecipientAddressField = ({
   label,
   meta: { touched, error, invalid },
   type,
+  defaultValue,
   id,
   ...custom
 }) => {
@@ -199,10 +200,46 @@ const renderRecipientAddressField = ({
       name={input.name}
       fullWidth
       type={type}
+      defaultValue={defaultValue}
       //style={{ marginTop: 10, width: 300 }}
       onChange={input.onChange}
       multiline
       minRows={4}
+    />
+  );
+};
+
+const renderDisabledRecipientAddressField = ({
+  input,
+  label,
+  meta: { touched, error, invalid },
+  type,
+  defaultValue,
+  helperText,
+  id,
+  ...custom
+}) => {
+  return (
+    <TextField
+      error={touched && invalid}
+      //placeholder="category description"
+      variant="outlined"
+      helperText={helperText}
+      label={label}
+      id={input.name}
+      name={input.name}
+      fullWidth
+      type={type}
+      defaultValue={defaultValue}
+      //style={{ marginTop: 10, width: 300 }}
+      onChange={input.onChange}
+      multiline
+      minRows={4}
+      InputProps={{
+        inputProps: {
+          readOnly: true,
+        },
+      }}
     />
   );
 };
@@ -322,6 +359,15 @@ function CheckoutDeliveryAndPayment(props) {
     implementVatCollection,
     policy,
     implementSalesTaxCollection,
+    salesPreference,
+    dealDeliveryMode,
+    dealStatus,
+    dealCode,
+    dealType,
+    dealCentralizedDeliveryLocation,
+    dealCentralizedAgreedDeliveryCost,
+    dealDecentralizedDeliveryLocation,
+    dealDecentralizedAgreedDeliveryCost,
   } = props;
   const [quantity, setQuantity] = useState(+props.quantity);
   const [productQuantityInCart, setProductQuantityInCart] = useState();
@@ -338,6 +384,7 @@ function CheckoutDeliveryAndPayment(props) {
   const matchesXS = useMediaQuery(theme.breakpoints.down("xs"));
   const matchesMD = useMediaQuery(theme.breakpoints.up("md"));
   const [isVisible, setIsVisible] = useState(true);
+  const [isBtnVisible, setIsBtnVisible] = useState(true);
   const [paymentMethod, setPaymentMethod] = useState("card");
   const [isCheckoutVisible, setIsCheckoutVisible] = useState(false);
   const [provideDeliveryCost, setProvideDeliveryCost] = useState(false);
@@ -392,6 +439,11 @@ function CheckoutDeliveryAndPayment(props) {
   const [countryName, setCountryName] = useState();
   const [stateName, setStateName] = useState();
   const [cityName, setCityName] = useState();
+  const [entityList, setEntityList] = useState([]);
+  const [placeList, setPlaceList] = useState([]);
+  const [entity, setEntity] = useState();
+  const [place, setPlace] = useState();
+  const [entityLocation, setEntityLocation] = useState();
 
   const dispatch = useDispatch();
 
@@ -431,6 +483,8 @@ function CheckoutDeliveryAndPayment(props) {
 
     fetchData().catch(console.error);
   }, [props]);
+
+  const destinations = ["destination1", "destination2", "destination3"];
 
   useEffect(() => {
     const fetchData = async () => {
@@ -498,7 +552,7 @@ function CheckoutDeliveryAndPayment(props) {
       let allData = [];
       api.defaults.headers.common["Authorization"] = `Bearer ${props.token}`;
       const response = await api.get(`/states`, {
-        params: { country: country },
+        params: { country: country, entityType: "conventional" },
       });
       const workingData = response.data.data.data;
       workingData.map((state) => {
@@ -511,6 +565,29 @@ function CheckoutDeliveryAndPayment(props) {
 
     fetchData().catch(console.error);
   }, [country]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      let allData = [];
+      api.defaults.headers.common["Authorization"] = `Bearer ${props.token}`;
+      const response = await api.get(`/states`, {
+        params: {
+          country: country,
+          entityType: "organizational",
+          entityDealCode: dealCode,
+        },
+      });
+      const workingData = response.data.data.data;
+      workingData.map((state) => {
+        allData.push({ id: state._id, name: state.name });
+      });
+      setEntityList(allData);
+    };
+
+    //call the function
+
+    fetchData().catch(console.error);
+  }, [country, dealCode]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -530,6 +607,25 @@ function CheckoutDeliveryAndPayment(props) {
 
     fetchData().catch(console.error);
   }, [state]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      let allData = [];
+      api.defaults.headers.common["Authorization"] = `Bearer ${props.token}`;
+      const response = await api.get(`/cities`, {
+        params: { state: entity },
+      });
+      const workingData = response.data.data.data;
+      workingData.map((city) => {
+        allData.push({ id: city._id, name: city.name });
+      });
+      setPlaceList(allData);
+    };
+
+    //call the function
+
+    fetchData().catch(console.error);
+  }, [entity]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -588,6 +684,64 @@ function CheckoutDeliveryAndPayment(props) {
 
     fetchData().catch(console.error);
   }, [city]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      let allData = [];
+      api.defaults.headers.common["Authorization"] = `Bearer ${props.token}`;
+      const response = await api.get(`/cities/${place}`);
+      const items = response.data.data.data;
+
+      allData.push({
+        id: items._id,
+        allowPayOnDelivery: items.allowPayOnDelivery,
+        allowSameDayDelivery: items.allowSameDayDelivery,
+        allowStandardDelivery: items.allowStandardDelivery,
+        allowPriorityDelivery: items.allowPriorityDelivery,
+        baseDeliveryWeight: items.baseDeliveryWeight,
+        daysToStandardDelivery: items.daysToStandardDelivery,
+        daysToPriorityDelivery: items.daysToPriorityDelivery,
+        daysToSameDayDelivery: items.daysToSameDayDelivery,
+        baseDeliveryStandardRate: items.baseDeliveryStandardRate,
+        baseDeliveryPriorityRate: items.baseDeliveryPriorityRate,
+        baseDeliverySameDayRate: items.baseDeliverySameDayRate,
+        extraKgDeliveryStandardRate: items.extraKgDeliveryStandardRate,
+        extraKgDeliveryPriorityRate: items.extraKgDeliveryPriorityRate,
+        extraKgDeliverySameDayRate: items.extraKgDeliverySameDayRate,
+        payOnDeliveryMaxWeightInKg: items.payOnDeliveryMaxWeightInKg,
+        name: items.name,
+        allowPickUpDelivery: items.allowPickUpDelivery,
+      });
+      // workingData.map((city) => {
+      //   allData.push({ id: city._id, name: city.deliveryMode });
+      // });
+      setAllowPayOnDelivery(allData[0].allowPayOnDelivery);
+      setAllowSameDayDelivery(allData[0].allowSameDayDelivery);
+      setAllowStandardDelivery(allData[0].allowStandardDelivery);
+      setAllowPriorityDelivery(allData[0].allowPriorityDelivery);
+      setAllowPickUpDelivery(allData[0].allowPickUpDelivery);
+
+      setDaysToStandardDelivery(allData[0].daysToStandardDelivery);
+      setDaysToPriorityDelivery(allData[0].daysToPriorityDelivery);
+      setDaysToSameDayDelivery(allData[0].daysToSameDayDelivery);
+
+      setBaseDeliveryWeight(allData[0].baseDeliveryWeight);
+      setBaseDeliveryStandardRate(allData[0].baseDeliveryStandardRate);
+      setBaseDeliveryPriorityRate(allData[0].baseDeliveryPriorityRate);
+      setBaseDeliverySameDayRate(allData[0].baseDeliverySameDayRate);
+
+      setExtraKgDeliveryStandardRate(allData[0].extraKgDeliveryStandardRate);
+      setExtraKgDeliveryPriorityRate(allData[0].extraKgDeliveryPriorityRate);
+      setExtraKgDeliverySameDayRate(allData[0].extraKgDeliverySameDayRate);
+      setPayOnDeliveryMaxWeightInKg(allData[0].payOnDeliveryMaxWeightInKg);
+
+      setCityName(allData[0].name);
+    };
+
+    //call the function
+
+    fetchData().catch(console.error);
+  }, [place]);
 
   //origin sales tax
 
@@ -667,10 +821,79 @@ function CheckoutDeliveryAndPayment(props) {
 
   const onRecipientNameChange = (e) => {
     setRecipientName(e.target.value);
+    if (
+      dealType === "private" &&
+      dealDeliveryMode === "centralized-at-no-cost"
+    ) {
+      if (recipientPhoneNumber) {
+        setIsBtnVisible(false);
+      }
+    }
+
+    if (
+      dealType === "private" &&
+      dealDeliveryMode === "centralized-at-agreed-cost"
+    ) {
+      if (recipientPhoneNumber) {
+        setIsBtnVisible(false);
+      }
+    }
+
+    if (
+      dealType === "public" &&
+      dealDeliveryMode === "centralized-at-no-cost"
+    ) {
+      if (recipientPhoneNumber) {
+        setIsBtnVisible(false);
+      }
+    }
+
+    if (
+      dealType === "public" &&
+      dealDeliveryMode === "centralized-at-agreed-cost"
+    ) {
+      if (recipientPhoneNumber) {
+        setIsBtnVisible(false);
+      }
+    }
   };
 
   const onRecipientPhoneNumberChange = (e) => {
     setRecipientPhoneNumber(e.target.value);
+    if (
+      dealType === "private" &&
+      dealDeliveryMode === "centralized-at-no-cost"
+    ) {
+      if (recipientName) {
+        setIsBtnVisible(false);
+      }
+    }
+    if (
+      dealType === "private" &&
+      dealDeliveryMode === "centralized-at-agreed-cost"
+    ) {
+      if (recipientName) {
+        setIsBtnVisible(false);
+      }
+    }
+
+    if (
+      dealType === "public" &&
+      dealDeliveryMode === "centralized-at-no-cost"
+    ) {
+      if (recipientName) {
+        setIsBtnVisible(false);
+      }
+    }
+
+    if (
+      dealType === "public" &&
+      dealDeliveryMode === "centralized-at-agreed-cost"
+    ) {
+      if (recipientName) {
+        setIsBtnVisible(false);
+      }
+    }
   };
 
   const onRecipientAddressChange = (e) => {
@@ -717,13 +940,58 @@ function CheckoutDeliveryAndPayment(props) {
     setCity(event.target.value);
   };
 
+  const handlePlaceChange = (event) => {
+    setPlace(event.target.value);
+  };
+
   const handleDeliveryModeChange = (event) => {
     setDeliveryMode(event.target.value);
+  };
+
+  const handleEntityChange = (event) => {
+    setEntity(event.target.value);
+  };
+
+  const handleDecentralizedEntityLocationChange = (event) => {
+    setEntityLocation(event.target.value);
+  };
+
+  //get the destination list
+  const renderDecentralizedEntityLocationsList = () => {
+    return destinations.map((item) => {
+      return (
+        <MenuItem key={item} value={item}>
+          {item}
+        </MenuItem>
+      );
+    });
   };
 
   //get the state list
   const renderStateList = () => {
     return stateList.map((item) => {
+      return (
+        <MenuItem key={item.id} value={item.id}>
+          {item.name}
+        </MenuItem>
+      );
+    });
+  };
+
+  //get the entity list
+  const renderEntityList = () => {
+    return entityList.map((item) => {
+      return (
+        <MenuItem key={item.id} value={item.id}>
+          {item.name}
+        </MenuItem>
+      );
+    });
+  };
+
+  //get the place list
+  const renderPlaceList = () => {
+    return placeList.map((item) => {
       return (
         <MenuItem key={item.id} value={item.id}>
           {item.name}
@@ -830,6 +1098,39 @@ function CheckoutDeliveryAndPayment(props) {
     );
   };
 
+  const renderEntityField = ({
+    input,
+    label,
+    meta: { touched, error, invalid },
+    type,
+    id,
+    ...custom
+  }) => {
+    return (
+      <Box>
+        <FormControl variant="outlined">
+          {/* <InputLabel id="vendor_city">City</InputLabel> */}
+          <Select
+            labelId="entity"
+            id="entity"
+            value={entity}
+            onChange={handleEntityChange}
+            //label="State"
+            style={
+              matchesMD
+                ? { width: 770, marginLeft: 0, height: 38 }
+                : { width: 350, height: 38, marginTop: 10 }
+            }
+            //{...input}
+          >
+            {renderEntityList()}
+          </Select>
+          <FormHelperText>State/Entity</FormHelperText>
+        </FormControl>
+      </Box>
+    );
+  };
+
   const renderCityField = ({
     input,
     label,
@@ -857,7 +1158,40 @@ function CheckoutDeliveryAndPayment(props) {
           >
             {renderCityList()}
           </Select>
-          <FormHelperText>City</FormHelperText>
+          <FormHelperText>Select City</FormHelperText>
+        </FormControl>
+      </Box>
+    );
+  };
+
+  const renderPlaceField = ({
+    input,
+    label,
+    meta: { touched, error, invalid },
+    type,
+    id,
+    ...custom
+  }) => {
+    return (
+      <Box>
+        <FormControl variant="outlined">
+          {/* <InputLabel id="vendor_city">City</InputLabel> */}
+          <Select
+            labelId="place"
+            id="place"
+            value={place}
+            onChange={handlePlaceChange}
+            label="City"
+            style={
+              matchesMD
+                ? { width: 770, marginLeft: 0, height: 38 }
+                : { width: 350, height: 38, marginTop: 10 }
+            }
+            //{...input}
+          >
+            {renderPlaceList()}
+          </Select>
+          <FormHelperText>Select Location/Place</FormHelperText>
         </FormControl>
       </Box>
     );
@@ -880,7 +1214,7 @@ function CheckoutDeliveryAndPayment(props) {
             id="deliveryMode"
             value={deliveryMode}
             onChange={handleDeliveryModeChange}
-            label="Delivery Mode"
+            // label="Delivery Mode"
             style={
               matchesMD
                 ? { width: 770, marginLeft: 0, height: 38 }
@@ -938,7 +1272,105 @@ function CheckoutDeliveryAndPayment(props) {
     );
   };
 
-  let totalDeliveryCost = deliveryCost ? deliveryCost : 0;
+  const renderDecentralizedEntityLocationsField = ({
+    input,
+    label,
+    meta: { touched, error, invalid },
+    type,
+    id,
+    ...custom
+  }) => {
+    return (
+      <Box>
+        <FormControl variant="outlined">
+          {/* <InputLabel id="vendor_city">City</InputLabel> */}
+          <Select
+            labelId="entityLocation"
+            id="entityLocation"
+            value={entityLocation}
+            onChange={handleDecentralizedEntityLocationChange}
+            //label="Country"
+            style={
+              matchesMD
+                ? { width: 770, marginLeft: 0, height: 38 }
+                : { width: 350, height: 38, marginTop: 10 }
+            }
+            //{...input}
+          >
+            {renderDecentralizedEntityLocationsList()}
+          </Select>
+          <FormHelperText>Select Place Of Delivery</FormHelperText>
+        </FormControl>
+      </Box>
+    );
+  };
+
+  //let totalDeliveryCost = deliveryCost ? deliveryCost : 0;
+  let totalDeliveryCost = 0;
+
+  if (salesPreference !== "deal") {
+    totalDeliveryCost = deliveryCost;
+  } else if (
+    salesPreference === "deal" &&
+    dealType === "public" &&
+    dealDeliveryMode === "managed-by-each-beneficiary"
+  ) {
+    totalDeliveryCost = deliveryCost;
+  } else if (
+    salesPreference === "deal" &&
+    dealType === "public" &&
+    dealDeliveryMode === "centralized-at-no-cost"
+  ) {
+    totalDeliveryCost = deliveryCost;
+  } else if (
+    salesPreference === "deal" &&
+    dealType === "public" &&
+    dealDeliveryMode === "decentralized-at-no-cost"
+  ) {
+    totalDeliveryCost = deliveryCost;
+  } else if (
+    salesPreference === "deal" &&
+    dealType === "public" &&
+    dealDeliveryMode === "decentralized-at-agreed-cost"
+  ) {
+    totalDeliveryCost = deliveryCost;
+  } else if (
+    salesPreference === "deal" &&
+    dealType === "public" &&
+    dealDeliveryMode === "centralized-at-agreed-cost"
+  ) {
+    totalDeliveryCost = dealCentralizedAgreedDeliveryCost;
+  } else if (
+    salesPreference === "deal" &&
+    dealType === "private" &&
+    dealDeliveryMode === "centralized-at-agreed-cost"
+  ) {
+    totalDeliveryCost = dealCentralizedAgreedDeliveryCost;
+  } else if (
+    salesPreference === "deal" &&
+    dealType === "private" &&
+    dealDeliveryMode === "managed-by-each-beneficiary"
+  ) {
+    totalDeliveryCost = deliveryCost;
+  } else if (
+    salesPreference === "deal" &&
+    dealType === "private" &&
+    dealDeliveryMode === "decentralized-at-no-cost"
+  ) {
+    totalDeliveryCost = deliveryCost;
+  } else if (
+    salesPreference === "deal" &&
+    dealType === "private" &&
+    dealDeliveryMode === "centralized-at-no-cost"
+  ) {
+    totalDeliveryCost = deliveryCost;
+  } else if (
+    salesPreference === "deal" &&
+    dealType === "private" &&
+    dealDeliveryMode === "decentralized-at-agreed-cost"
+  ) {
+    totalDeliveryCost = deliveryCost;
+  }
 
   const totalProductCost = parseFloat(totalCost);
   const totalProductCostForUk = totalProductCost / +ukRate;
@@ -956,7 +1388,8 @@ function CheckoutDeliveryAndPayment(props) {
     .toFixed(2)
     .replace(/\d(?=(\d{3})+\.)/g, "$&,");
 
-  let totalOrderCost = totalProductCost + deliveryCost;
+  // let totalOrderCost = totalProductCost + deliveryCost;
+  let totalOrderCost = totalProductCost + totalDeliveryCost;
 
   if (implementVatCollection) {
     totalOrderCost = totalOrderCost + vat;
@@ -975,7 +1408,7 @@ function CheckoutDeliveryAndPayment(props) {
   };
 
   const buttonEmptyFieldsContent = () => {
-    return <React.Fragment>Make Payment</React.Fragment>;
+    return <React.Fragment>Make Payment2</React.Fragment>;
   };
 
   const renderThankYou = () => {
@@ -1061,7 +1494,235 @@ function CheckoutDeliveryAndPayment(props) {
     }
 
     if (!city) {
-      props.handleFailedSnackbar("the state field cannot be empty");
+      props.handleFailedSnackbar("the city field cannot be empty");
+      setLoading(false);
+      return;
+    }
+
+    if (!deliveryMode) {
+      props.handleFailedSnackbar(
+        "Please select your delivery mode/shipping preference"
+      );
+      setLoading(false);
+      return;
+    }
+  };
+
+  //when sales preference is  a deal and dealType === "private" && dealDeliveryMode === "centralized-at-no-cost"
+  const onPrivateDealCentralizedAtNoCostEmptyFieldSubmit = () => {
+    setLoading(true);
+    if (!recipientName) {
+      props.handleFailedSnackbar("the recipient name field cannot be empty");
+      setLoading(false);
+      return;
+    }
+
+    if (!recipientPhoneNumber) {
+      props.handleFailedSnackbar(
+        "the recipient phone number field cannot be empty"
+      );
+      setLoading(false);
+
+      return;
+    }
+    setIsBtnVisible(false);
+    return;
+  };
+
+  //when sales preference is  a deal and dealType === "public" && dealDeliveryMode === "centralized-at-no-cost"
+  const onPublicDealCentralizedAtNoCostEmptyFieldSubmit = () => {
+    setLoading(true);
+    if (!recipientName) {
+      props.handleFailedSnackbar("the recipient name field cannot be empty");
+      setLoading(false);
+      return;
+    }
+
+    if (!recipientPhoneNumber) {
+      props.handleFailedSnackbar(
+        "the recipient phone number field cannot be empty"
+      );
+      setLoading(false);
+
+      return;
+    }
+    setIsBtnVisible(false);
+    return;
+  };
+
+  //when sales preference is  a deal and dealType === "private" && dealDeliveryMode === "centralized-at-agreed-cost"
+  const onPrivateDealCentralizedAtAgreedCostEmptyFieldSubmit = () => {
+    setLoading(true);
+    if (!recipientName) {
+      props.handleFailedSnackbar("the recipient name field cannot be empty");
+      setLoading(false);
+      return;
+    }
+
+    if (!recipientPhoneNumber) {
+      props.handleFailedSnackbar(
+        "the recipient phone number field cannot be empty"
+      );
+      setLoading(false);
+
+      return;
+    }
+    setIsBtnVisible(false);
+    return;
+  };
+
+  //when sales preference is  a deal and dealType === "public" && dealDeliveryMode === "centralized-at-agreed-cost"
+  const onPublicDealCentralizedAtAgreedCostEmptyFieldSubmit = () => {
+    setLoading(true);
+    if (!recipientName) {
+      props.handleFailedSnackbar("the recipient name field cannot be empty");
+      setLoading(false);
+      return;
+    }
+
+    if (!recipientPhoneNumber) {
+      props.handleFailedSnackbar(
+        "the recipient phone number field cannot be empty"
+      );
+      setLoading(false);
+
+      return;
+    }
+    setIsBtnVisible(false);
+    return;
+  };
+
+  //when sales preference is  a deal and dealType === "private" && dealDeliveryMode === "decentralized-at-no-cost"
+  const onPrivateDealDecentralizedAtNoCostEmptyFieldSubmit = () => {
+    setLoading(true);
+    if (!recipientName) {
+      props.handleFailedSnackbar("the recipient name field cannot be empty");
+      setLoading(false);
+      return;
+    }
+
+    if (!recipientPhoneNumber) {
+      props.handleFailedSnackbar(
+        "the recipient phone number field cannot be empty"
+      );
+      setLoading(false);
+
+      return;
+    }
+
+    if (!entityLocation) {
+      props.handleFailedSnackbar(
+        "Please select your preferred delivery location"
+      );
+      setLoading(false);
+
+      return;
+    }
+  };
+
+  //when sales preference is  a deal and dealType === "public" && dealDeliveryMode === "decentralized-at-no-cost"
+  const onPublicDealDecentralizedAtNoCostEmptyFieldSubmit = () => {
+    setLoading(true);
+    if (!recipientName) {
+      props.handleFailedSnackbar("the recipient name field cannot be empty");
+      setLoading(false);
+      return;
+    }
+
+    if (!recipientPhoneNumber) {
+      props.handleFailedSnackbar(
+        "the recipient phone number field cannot be empty"
+      );
+      setLoading(false);
+
+      return;
+    }
+
+    if (!entityLocation) {
+      props.handleFailedSnackbar(
+        "Please select your preferred delivery location"
+      );
+      setLoading(false);
+
+      return;
+    }
+  };
+
+  //when sales preference is  a deal and dealType === "private" && dealDeliveryMode === "decentralized-at-agreed-cost"
+  const onPrivateDealDecentralizedAtCostEmptyFieldSubmit = () => {
+    setLoading(true);
+    if (!recipientName) {
+      props.handleFailedSnackbar("the recipient name field cannot be empty");
+      setLoading(false);
+      return;
+    }
+
+    if (!recipientPhoneNumber) {
+      props.handleFailedSnackbar(
+        "the recipient phone number field cannot be empty"
+      );
+      setLoading(false);
+      return;
+    }
+
+    if (!country) {
+      props.handleFailedSnackbar("the country field cannot be empty");
+      setLoading(false);
+      return;
+    }
+
+    if (!entity) {
+      props.handleFailedSnackbar("the entity field cannot be empty");
+      setLoading(false);
+      return;
+    }
+
+    if (!place) {
+      props.handleFailedSnackbar("the place field cannot be empty");
+      setLoading(false);
+      return;
+    }
+
+    if (!deliveryMode) {
+      props.handleFailedSnackbar(
+        "Please select your delivery mode/shipping preference"
+      );
+      setLoading(false);
+      return;
+    }
+  };
+
+  //when sales preference is  a deal and dealType === "public" && dealDeliveryMode === "decentralized-at-agreed-cost"
+  const onPublicDealDecentralizedAtCostEmptyFieldSubmit = () => {
+    setLoading(true);
+    if (!recipientName) {
+      props.handleFailedSnackbar("the recipient name field cannot be empty");
+      setLoading(false);
+      return;
+    }
+
+    if (!recipientPhoneNumber) {
+      props.handleFailedSnackbar(
+        "the recipient phone number field cannot be empty"
+      );
+      setLoading(false);
+      return;
+    }
+
+    if (!country) {
+      props.handleFailedSnackbar("the country field cannot be empty");
+      setLoading(false);
+      return;
+    }
+
+    if (!entity) {
+      props.handleFailedSnackbar("the entity field cannot be empty");
+      setLoading(false);
+      return;
+    }
+
+    if (!place) {
+      props.handleFailedSnackbar("the place field cannot be empty");
       setLoading(false);
       return;
     }
@@ -1371,279 +2032,2536 @@ function CheckoutDeliveryAndPayment(props) {
               justifyContent="center"
             >
               <form id="checkoutDeliveryAndPayment">
-                <Box
-                  sx={{
-                    //width: 1200,
-                    //height: 450,
-                    width: "100%",
-                  }}
-                  noValidate
-                  autoComplete="off"
-                >
-                  <Field
-                    label=""
-                    id="recipientName"
-                    name="recipientName"
-                    type="text"
-                    onChange={onRecipientNameChange}
-                    component={renderRecipientNameField}
-                    style={{ width: 300 }}
-                  />
-                  <Field
-                    label=""
-                    id="recipientPhoneNumber"
-                    name="recipientPhoneNumber"
-                    onChange={onRecipientPhoneNumberChange}
-                    type="text"
-                    component={renderRecipientPhoneNumberField}
-                    style={{ width: 300 }}
-                  />
-                  <Field
-                    label=""
-                    id="recipientAddress"
-                    name="recipientAddress"
-                    //defaultValue={quantity}
-                    type="text"
-                    onChange={onRecipientAddressChange}
-                    component={renderRecipientAddressField}
-                    style={{ width: 300, marginTop: 10 }}
-                  />
-                  <Grid item container direction="column">
-                    <Grid item>
-                      <Field
-                        label=""
-                        id="recipientCountry"
-                        name="recipientCountry"
-                        //defaultValue={quantity}
-                        type="text"
-                        //onChange={onChange}
-                        component={renderCountryField}
-                        //style={{ width: 300, marginTop: 10 }}
-                      />
-                    </Grid>
-                    <Grid item>
-                      <Field
-                        label=""
-                        id="recipientState"
-                        name="recipientState"
-                        //defaultValue={quantity}
-                        type="text"
-                        //onChange={onChange}
-                        component={renderStateField}
-                        //style={{ width: 300, marginTop: 10 }}
-                      />
-                    </Grid>
-                    <Grid item>
-                      <Field
-                        label=""
-                        id="recipientCity"
-                        name="recipientCity"
-                        //defaultValue={quantity}
-                        type="text"
-                        //onChange={onChange}
-                        component={renderCityField}
-                        //style={{ width: 300, marginTop: 10 }}
-                      />
-                    </Grid>
+                {salesPreference !== "deal" && (
+                  <Box
+                    sx={{
+                      //width: 1200,
+                      //height: 450,
+                      width: "100%",
+                    }}
+                    noValidate
+                    autoComplete="off"
+                  >
+                    <Field
+                      label=""
+                      id="recipientName"
+                      name="recipientName"
+                      type="text"
+                      onChange={onRecipientNameChange}
+                      component={renderRecipientNameField}
+                      style={{ width: 300 }}
+                    />
+                    <Field
+                      label=""
+                      id="recipientPhoneNumber"
+                      name="recipientPhoneNumber"
+                      onChange={onRecipientPhoneNumberChange}
+                      type="text"
+                      component={renderRecipientPhoneNumberField}
+                      style={{ width: 300 }}
+                    />
+                    <Field
+                      label=""
+                      id="recipientAddress"
+                      name="recipientAddress"
+                      //defaultValue={quantity}
+                      type="text"
+                      onChange={onRecipientAddressChange}
+                      component={renderRecipientAddressField}
+                      style={{ width: 300, marginTop: 10 }}
+                    />
+                    <Grid item container direction="column">
+                      <Grid item>
+                        <Field
+                          label=""
+                          id="recipientCountry"
+                          name="recipientCountry"
+                          //defaultValue={quantity}
+                          type="text"
+                          //onChange={onChange}
+                          component={renderCountryField}
+                          //style={{ width: 300, marginTop: 10 }}
+                        />
+                      </Grid>
+                      <Grid item>
+                        <Field
+                          label=""
+                          id="recipientState"
+                          name="recipientState"
+                          //defaultValue={quantity}
+                          type="text"
+                          //onChange={onChange}
+                          component={renderStateField}
+                          //style={{ width: 300, marginTop: 10 }}
+                        />
+                      </Grid>
+                      <Grid item>
+                        <Field
+                          label=""
+                          id="recipientCity"
+                          name="recipientCity"
+                          //defaultValue={quantity}
+                          type="text"
+                          //onChange={onChange}
+                          component={renderCityField}
+                          //style={{ width: 300, marginTop: 10 }}
+                        />
+                      </Grid>
 
-                    <Grid item>
+                      <Grid item>
+                        <Field
+                          label=""
+                          id="nearestBusstop"
+                          name="nearestBusstop"
+                          //defaultValue={quantity}
+                          type="text"
+                          onChange={onNearestBusStopChange}
+                          component={renderNearestBusstopField}
+                          //style={{ width: 300, marginTop: 10 }}
+                        />
+                      </Grid>
+                      <Grid item>
+                        <Field
+                          label=""
+                          id="postalCode"
+                          name="postalCode"
+                          //defaultValue={quantity}
+                          type="text"
+                          onChange={onPostalCodeChange}
+                          component={renderPostalCodeField}
+                          //style={{ width: 300, marginTop: 10 }}
+                        />
+                      </Grid>
+                      <Grid item>
+                        <Field
+                          label=""
+                          id="deliveryMode"
+                          name="deliveryMode"
+                          //defaultValue={quantity}
+                          type="text"
+                          //onChange={onChange}
+                          component={renderDeliveryModeField}
+                          //style={{ width: 300, marginTop: 10 }}
+                        />
+                      </Grid>
+                    </Grid>
+                  </Box>
+                )}
+
+                {/**Public deals start here */}
+
+                {salesPreference === "deal" &&
+                  dealType === "public" &&
+                  dealDeliveryMode === "managed-by-each-beneficiary" && (
+                    <Box
+                      sx={{
+                        //width: 1200,
+                        //height: 450,
+                        width: "100%",
+                      }}
+                      noValidate
+                      autoComplete="off"
+                    >
                       <Field
                         label=""
-                        id="nearestBusstop"
-                        name="nearestBusstop"
-                        //defaultValue={quantity}
+                        id="recipientName"
+                        name="recipientName"
                         type="text"
-                        onChange={onNearestBusStopChange}
-                        component={renderNearestBusstopField}
-                        //style={{ width: 300, marginTop: 10 }}
+                        onChange={onRecipientNameChange}
+                        component={renderRecipientNameField}
+                        style={{ width: 300 }}
                       />
-                    </Grid>
-                    <Grid item>
                       <Field
                         label=""
-                        id="postalCode"
-                        name="postalCode"
-                        //defaultValue={quantity}
+                        id="recipientPhoneNumber"
+                        name="recipientPhoneNumber"
+                        onChange={onRecipientPhoneNumberChange}
                         type="text"
-                        onChange={onPostalCodeChange}
-                        component={renderPostalCodeField}
-                        //style={{ width: 300, marginTop: 10 }}
+                        component={renderRecipientPhoneNumberField}
+                        style={{ width: 300 }}
                       />
-                    </Grid>
-                    <Grid item>
                       <Field
                         label=""
-                        id="deliveryMode"
-                        name="deliveryMode"
+                        id="recipientAddress"
+                        name="recipientAddress"
                         //defaultValue={quantity}
                         type="text"
-                        //onChange={onChange}
-                        component={renderDeliveryModeField}
-                        //style={{ width: 300, marginTop: 10 }}
+                        onChange={onRecipientAddressChange}
+                        component={renderRecipientAddressField}
+                        style={{ width: 300, marginTop: 10 }}
                       />
-                    </Grid>
-                  </Grid>
-                </Box>
+                      <Grid item container direction="column">
+                        <Grid item>
+                          <Field
+                            label=""
+                            id="recipientCountry"
+                            name="recipientCountry"
+                            //defaultValue={quantity}
+                            type="text"
+                            //onChange={onChange}
+                            component={renderCountryField}
+                            //style={{ width: 300, marginTop: 10 }}
+                          />
+                        </Grid>
+                        <Grid item>
+                          <Field
+                            label=""
+                            id="recipientState"
+                            name="recipientState"
+                            //defaultValue={quantity}
+                            type="text"
+                            //onChange={onChange}
+                            component={renderStateField}
+                            //style={{ width: 300, marginTop: 10 }}
+                          />
+                        </Grid>
+                        <Grid item>
+                          <Field
+                            label=""
+                            id="recipientCity"
+                            name="recipientCity"
+                            //defaultValue={quantity}
+                            type="text"
+                            //onChange={onChange}
+                            component={renderCityField}
+                            //style={{ width: 300, marginTop: 10 }}
+                          />
+                        </Grid>
+
+                        <Grid item>
+                          <Field
+                            label=""
+                            id="nearestBusstop"
+                            name="nearestBusstop"
+                            //defaultValue={quantity}
+                            type="text"
+                            onChange={onNearestBusStopChange}
+                            component={renderNearestBusstopField}
+                            //style={{ width: 300, marginTop: 10 }}
+                          />
+                        </Grid>
+                        <Grid item>
+                          <Field
+                            label=""
+                            id="postalCode"
+                            name="postalCode"
+                            //defaultValue={quantity}
+                            type="text"
+                            onChange={onPostalCodeChange}
+                            component={renderPostalCodeField}
+                            //style={{ width: 300, marginTop: 10 }}
+                          />
+                        </Grid>
+                        <Grid item>
+                          <Field
+                            label=""
+                            id="deliveryMode"
+                            name="deliveryMode"
+                            //defaultValue={quantity}
+                            type="text"
+                            //onChange={onChange}
+                            component={renderDeliveryModeField}
+                            //style={{ width: 300, marginTop: 10 }}
+                          />
+                        </Grid>
+                      </Grid>
+                    </Box>
+                  )}
+                {salesPreference === "deal" &&
+                  dealType === "public" &&
+                  dealDeliveryMode === "centralized-at-no-cost" && (
+                    <Box
+                      sx={{
+                        //width: 1200,
+                        //height: 450,
+                        width: "100%",
+                      }}
+                      noValidate
+                      autoComplete="off"
+                    >
+                      <Field
+                        label=""
+                        id="recipientName"
+                        name="recipientName"
+                        type="text"
+                        onChange={onRecipientNameChange}
+                        component={renderRecipientNameField}
+                        style={{ width: 300 }}
+                      />
+                      <Field
+                        label=""
+                        id="recipientPhoneNumber"
+                        name="recipientPhoneNumber"
+                        onChange={onRecipientPhoneNumberChange}
+                        type="text"
+                        component={renderRecipientPhoneNumberField}
+                        style={{ width: 300 }}
+                      />
+                      <Field
+                        label=""
+                        id="recipientAddress"
+                        name="recipientAddress"
+                        defaultValue={dealCentralizedDeliveryLocation}
+                        type="text"
+                        onChange={onRecipientAddressChange}
+                        component={renderDisabledRecipientAddressField}
+                        style={{ width: 300, marginTop: 10 }}
+                        helperText="Place of Delivery"
+                      />
+                    </Box>
+                  )}
+                {salesPreference === "deal" &&
+                  dealType === "public" &&
+                  dealDeliveryMode === "centralized-at-agreed-cost" && (
+                    <Box
+                      sx={{
+                        //width: 1200,
+                        //height: 450,
+                        width: "100%",
+                      }}
+                      noValidate
+                      autoComplete="off"
+                    >
+                      <Field
+                        label=""
+                        id="recipientName"
+                        name="recipientName"
+                        type="text"
+                        onChange={onRecipientNameChange}
+                        component={renderRecipientNameField}
+                        style={{ width: 300 }}
+                      />
+                      <Field
+                        label=""
+                        id="recipientPhoneNumber"
+                        name="recipientPhoneNumber"
+                        onChange={onRecipientPhoneNumberChange}
+                        type="text"
+                        component={renderRecipientPhoneNumberField}
+                        style={{ width: 300 }}
+                      />
+                      <Field
+                        label=""
+                        id="recipientAddress"
+                        name="recipientAddress"
+                        defaultValue={dealCentralizedDeliveryLocation}
+                        type="text"
+                        onChange={onRecipientAddressChange}
+                        component={renderDisabledRecipientAddressField}
+                        style={{ width: 300, marginTop: 10 }}
+                        helperText="Place of Delivery"
+                      />
+                    </Box>
+                  )}
+                {salesPreference === "deal" &&
+                  dealType === "public" &&
+                  dealDeliveryMode === "decentralized-at-no-cost" && (
+                    <Box
+                      sx={{
+                        //width: 1200,
+                        //height: 450,
+                        width: "100%",
+                      }}
+                      noValidate
+                      autoComplete="off"
+                    >
+                      <Field
+                        label=""
+                        id="recipientName"
+                        name="recipientName"
+                        type="text"
+                        onChange={onRecipientNameChange}
+                        component={renderRecipientNameField}
+                        style={{ width: 300 }}
+                      />
+                      <Field
+                        label=""
+                        id="recipientPhoneNumber"
+                        name="recipientPhoneNumber"
+                        onChange={onRecipientPhoneNumberChange}
+                        type="text"
+                        component={renderRecipientPhoneNumberField}
+                        style={{ width: 300 }}
+                      />
+                      <Field
+                        label=""
+                        id="recipientAddress"
+                        name="recipientAddress"
+                        type="text"
+                        component={renderDecentralizedEntityLocationsField}
+                        style={{ marginTop: 10 }}
+                        //helperText="Place of Delivery"
+                      />
+                    </Box>
+                  )}
+                {salesPreference === "deal" &&
+                  dealType === "public" &&
+                  dealDeliveryMode === "decentralized-at-agreed-cost" && (
+                    <Box
+                      sx={{
+                        //width: 1200,
+                        //height: 450,
+                        width: "100%",
+                      }}
+                      noValidate
+                      autoComplete="off"
+                    >
+                      <Field
+                        label=""
+                        id="recipientName"
+                        name="recipientName"
+                        type="text"
+                        onChange={onRecipientNameChange}
+                        component={renderRecipientNameField}
+                        style={{ width: 300 }}
+                      />
+                      <Field
+                        label=""
+                        id="recipientPhoneNumber"
+                        name="recipientPhoneNumber"
+                        onChange={onRecipientPhoneNumberChange}
+                        type="text"
+                        component={renderRecipientPhoneNumberField}
+                        style={{ width: 300 }}
+                      />
+
+                      <Grid item container direction="column">
+                        <Grid item>
+                          <Field
+                            label=""
+                            id="recipientCountry"
+                            name="recipientCountry"
+                            //defaultValue={quantity}
+                            type="text"
+                            //onChange={onChange}
+                            component={renderCountryField}
+                            //style={{ width: 300, marginTop: 10 }}
+                          />
+                        </Grid>
+                        <Grid item>
+                          <Field
+                            label=""
+                            id="recipientState"
+                            name="recipientState"
+                            //defaultValue={quantity}
+                            type="text"
+                            //onChange={onChange}
+                            component={renderEntityField}
+                            //style={{ width: 300, marginTop: 10 }}
+                          />
+                        </Grid>
+                        <Grid item>
+                          <Field
+                            label=""
+                            id="recipientCity"
+                            name="recipientCity"
+                            //defaultValue={quantity}
+                            type="text"
+                            //onChange={onChange}
+                            component={renderPlaceField}
+                            //style={{ width: 300, marginTop: 10 }}
+                          />
+                        </Grid>
+
+                        <Grid item>
+                          <Field
+                            label=""
+                            id="deliveryMode"
+                            name="deliveryMode"
+                            //defaultValue={quantity}
+                            type="text"
+                            //onChange={onChange}
+                            component={renderDeliveryModeField}
+                            //style={{ width: 300, marginTop: 10 }}
+                          />
+                        </Grid>
+                      </Grid>
+                    </Box>
+                  )}
+
+                {/** Private deals start here */}
+                {salesPreference === "deal" &&
+                  dealType === "private" &&
+                  dealDeliveryMode === "managed-by-each-beneficiary" && (
+                    <Box
+                      sx={{
+                        //width: 1200,
+                        //height: 450,
+                        width: "100%",
+                      }}
+                      noValidate
+                      autoComplete="off"
+                    >
+                      <Field
+                        label=""
+                        id="recipientName"
+                        name="recipientName"
+                        type="text"
+                        onChange={onRecipientNameChange}
+                        component={renderRecipientNameField}
+                        style={{ width: 300 }}
+                      />
+                      <Field
+                        label=""
+                        id="recipientPhoneNumber"
+                        name="recipientPhoneNumber"
+                        onChange={onRecipientPhoneNumberChange}
+                        type="text"
+                        component={renderRecipientPhoneNumberField}
+                        style={{ width: 300 }}
+                      />
+                      <Field
+                        label=""
+                        id="recipientAddress"
+                        name="recipientAddress"
+                        //defaultValue={quantity}
+                        type="text"
+                        onChange={onRecipientAddressChange}
+                        component={renderRecipientAddressField}
+                        style={{ width: 300, marginTop: 10 }}
+                      />
+                      <Grid item container direction="column">
+                        <Grid item>
+                          <Field
+                            label=""
+                            id="recipientCountry"
+                            name="recipientCountry"
+                            //defaultValue={quantity}
+                            type="text"
+                            //onChange={onChange}
+                            component={renderCountryField}
+                            //style={{ width: 300, marginTop: 10 }}
+                          />
+                        </Grid>
+                        <Grid item>
+                          <Field
+                            label=""
+                            id="recipientState"
+                            name="recipientState"
+                            //defaultValue={quantity}
+                            type="text"
+                            //onChange={onChange}
+                            component={renderStateField}
+                            //style={{ width: 300, marginTop: 10 }}
+                          />
+                        </Grid>
+                        <Grid item>
+                          <Field
+                            label=""
+                            id="recipientCity"
+                            name="recipientCity"
+                            //defaultValue={quantity}
+                            type="text"
+                            //onChange={onChange}
+                            component={renderCityField}
+                            //style={{ width: 300, marginTop: 10 }}
+                          />
+                        </Grid>
+
+                        <Grid item>
+                          <Field
+                            label=""
+                            id="nearestBusstop"
+                            name="nearestBusstop"
+                            //defaultValue={quantity}
+                            type="text"
+                            onChange={onNearestBusStopChange}
+                            component={renderNearestBusstopField}
+                            //style={{ width: 300, marginTop: 10 }}
+                          />
+                        </Grid>
+                        <Grid item>
+                          <Field
+                            label=""
+                            id="postalCode"
+                            name="postalCode"
+                            //defaultValue={quantity}
+                            type="text"
+                            onChange={onPostalCodeChange}
+                            component={renderPostalCodeField}
+                            //style={{ width: 300, marginTop: 10 }}
+                          />
+                        </Grid>
+                        <Grid item>
+                          <Field
+                            label=""
+                            id="deliveryMode"
+                            name="deliveryMode"
+                            //defaultValue={quantity}
+                            type="text"
+                            //onChange={onChange}
+                            component={renderDeliveryModeField}
+                            //style={{ width: 300, marginTop: 10 }}
+                          />
+                        </Grid>
+                      </Grid>
+                    </Box>
+                  )}
+                {salesPreference === "deal" &&
+                  dealType === "private" &&
+                  dealDeliveryMode === "centralized-at-no-cost" && (
+                    <Box
+                      sx={{
+                        //width: 1200,
+                        //height: 450,
+                        width: "100%",
+                      }}
+                      noValidate
+                      autoComplete="off"
+                    >
+                      <Field
+                        label=""
+                        id="recipientName"
+                        name="recipientName"
+                        type="text"
+                        onChange={onRecipientNameChange}
+                        component={renderRecipientNameField}
+                        style={{ width: 300 }}
+                      />
+                      <Field
+                        label=""
+                        id="recipientPhoneNumber"
+                        name="recipientPhoneNumber"
+                        onChange={onRecipientPhoneNumberChange}
+                        type="text"
+                        component={renderRecipientPhoneNumberField}
+                        style={{ width: 300 }}
+                      />
+                      <Field
+                        label=""
+                        id="recipientAddress"
+                        name="recipientAddress"
+                        defaultValue={dealCentralizedDeliveryLocation}
+                        type="text"
+                        onChange={onRecipientAddressChange}
+                        component={renderDisabledRecipientAddressField}
+                        style={{ width: 300, marginTop: 10 }}
+                        helperText="Place of Delivery"
+                      />
+                    </Box>
+                  )}
+                {salesPreference === "deal" &&
+                  dealType === "private" &&
+                  dealDeliveryMode === "centralized-at-agreed-cost" && (
+                    <Box
+                      sx={{
+                        //width: 1200,
+                        //height: 450,
+                        width: "100%",
+                      }}
+                      noValidate
+                      autoComplete="off"
+                    >
+                      <Field
+                        label=""
+                        id="recipientName"
+                        name="recipientName"
+                        type="text"
+                        onChange={onRecipientNameChange}
+                        component={renderRecipientNameField}
+                        style={{ width: 300 }}
+                      />
+                      <Field
+                        label=""
+                        id="recipientPhoneNumber"
+                        name="recipientPhoneNumber"
+                        onChange={onRecipientPhoneNumberChange}
+                        type="text"
+                        component={renderRecipientPhoneNumberField}
+                        style={{ width: 300 }}
+                      />
+                      <Field
+                        label=""
+                        id="recipientAddress"
+                        name="recipientAddress"
+                        defaultValue={dealCentralizedDeliveryLocation}
+                        type="text"
+                        onChange={onRecipientAddressChange}
+                        component={renderDisabledRecipientAddressField}
+                        style={{ width: 300, marginTop: 10 }}
+                        helperText="Place of Delivery"
+                      />
+                    </Box>
+                  )}
+                {salesPreference === "deal" &&
+                  dealType === "private" &&
+                  dealDeliveryMode === "decentralized-at-no-cost" && (
+                    <Box
+                      sx={{
+                        //width: 1200,
+                        //height: 450,
+                        width: "100%",
+                      }}
+                      noValidate
+                      autoComplete="off"
+                    >
+                      <Field
+                        label=""
+                        id="recipientName"
+                        name="recipientName"
+                        type="text"
+                        onChange={onRecipientNameChange}
+                        component={renderRecipientNameField}
+                        style={{ width: 300 }}
+                      />
+                      <Field
+                        label=""
+                        id="recipientPhoneNumber"
+                        name="recipientPhoneNumber"
+                        onChange={onRecipientPhoneNumberChange}
+                        type="text"
+                        component={renderRecipientPhoneNumberField}
+                        style={{ width: 300 }}
+                      />
+                      <Field
+                        label=""
+                        id="recipientAddress"
+                        name="recipientAddress"
+                        type="text"
+                        component={renderDecentralizedEntityLocationsField}
+                        style={{ marginTop: 10 }}
+                        //helperText="Place of Delivery"
+                      />
+                    </Box>
+                  )}
+                {salesPreference === "deal" &&
+                  dealType === "private" &&
+                  dealDeliveryMode === "decentralized-at-agreed-cost" && (
+                    <Box
+                      sx={{
+                        //width: 1200,
+                        //height: 450,
+                        width: "100%",
+                      }}
+                      noValidate
+                      autoComplete="off"
+                    >
+                      <Field
+                        label=""
+                        id="recipientName"
+                        name="recipientName"
+                        type="text"
+                        onChange={onRecipientNameChange}
+                        component={renderRecipientNameField}
+                        style={{ width: 300 }}
+                      />
+                      <Field
+                        label=""
+                        id="recipientPhoneNumber"
+                        name="recipientPhoneNumber"
+                        onChange={onRecipientPhoneNumberChange}
+                        type="text"
+                        component={renderRecipientPhoneNumberField}
+                        style={{ width: 300 }}
+                      />
+                      {/* <Field
+                        label=""
+                        id="recipientAddress"
+                        name="recipientAddress"
+                        //defaultValue={quantity}
+                        type="text"
+                        onChange={onRecipientAddressChange}
+                        component={renderRecipientAddressField}
+                        style={{ width: 300, marginTop: 10 }}
+                      /> */}
+                      <Grid item container direction="column">
+                        <Grid item>
+                          <Field
+                            label=""
+                            id="recipientCountry"
+                            name="recipientCountry"
+                            //defaultValue={quantity}
+                            type="text"
+                            //onChange={onChange}
+                            component={renderCountryField}
+                            //style={{ width: 300, marginTop: 10 }}
+                          />
+                        </Grid>
+                        <Grid item>
+                          <Field
+                            label=""
+                            id="recipientState"
+                            name="recipientState"
+                            //defaultValue={quantity}
+                            type="text"
+                            //onChange={onChange}
+                            component={renderEntityField}
+                            //style={{ width: 300, marginTop: 10 }}
+                          />
+                        </Grid>
+                        <Grid item>
+                          <Field
+                            label=""
+                            id="recipientCity"
+                            name="recipientCity"
+                            //defaultValue={quantity}
+                            type="text"
+                            //onChange={onChange}
+                            component={renderPlaceField}
+                            //style={{ width: 300, marginTop: 10 }}
+                          />
+                        </Grid>
+
+                        <Grid item>
+                          <Field
+                            label=""
+                            id="deliveryMode"
+                            name="deliveryMode"
+                            //defaultValue={quantity}
+                            type="text"
+                            //onChange={onChange}
+                            component={renderDeliveryModeField}
+                            //style={{ width: 300, marginTop: 10 }}
+                          />
+                        </Grid>
+                      </Grid>
+                    </Box>
+                  )}
               </form>
             </Grid>
           </Grid>
 
-          <Grid
-            item
-            container
-            style={{
-              width: "35%",
-              marginLeft: 15,
-              border: "1px dashed grey",
-              padding: 15,
-              height: 400,
-            }}
-          >
-            <Typography
+          {/** Sales Preference not a deal */}
+
+          {salesPreference !== "deal" && (
+            <Grid
+              item
+              container
               style={{
-                //width: 250,
-                fontSize: 20,
-                fontWeight: 300,
-                marginTop: 2,
-                marginLeft: 10,
+                width: "35%",
+                marginLeft: 15,
+                border: "1px dashed grey",
+                padding: 15,
+                height: 400,
               }}
             >
-              Total Cost of Product(s):{getCurrencyCode()}
-              {totalProductCostForDisplay}
-            </Typography>
-            <br />
-            <br />
-            {implementVatCollection && (
               <Typography
                 style={{
-                  width: 350,
+                  //width: 250,
                   fontSize: 20,
                   fontWeight: 300,
                   marginTop: 2,
                   marginLeft: 10,
                 }}
               >
-                {`VAT(${vatRate}%)`}:{getCurrencyCode()}
-                {vatForDispplay}
+                Total Cost of Product(s):{getCurrencyCode()}
+                {totalProductCostForDisplay}
               </Typography>
-            )}
-
-            {deliveryMode && (
-              <Typography
-                style={{
-                  width: 350,
-                  fontSize: 20,
-                  fontWeight: 300,
-                  marginTop: 2,
-                  marginLeft: 10,
-                }}
-              >
-                {deliveryMode === "sameday"
-                  ? "Same Day Delivery Cost"
-                  : deliveryMode === "priority"
-                  ? "Priority Delivery Cost"
-                  : deliveryMode === "standard"
-                  ? "Standard Delivery Cost"
-                  : "Delivery Cost"}
-                :{getCurrencyCode()}
-                {totalDeliveryCostForDisplay}
-              </Typography>
-            )}
-
-            <Typography
-              style={{
-                //width: 200,
-                fontSize: 23,
-                fontWeight: 700,
-                marginTop: 2,
-                marginLeft: 10,
-              }}
-            >
-              Total Cost:{getCurrencyCode()}
-              {totalOrderCostForDisplay}
-            </Typography>
-
-            {deliveryMode === "standard" && (
-              <Typography className={classes.bankDetails}>
-                {`Your order will be delivered in ${daysToStandardDelivery} from the day it was placed`}
-              </Typography>
-            )}
-            {deliveryMode === "sameday" && (
-              <Typography className={classes.bankDetails}>
-                {`Your order will be delivered same day if the order was placed before noon or  ${daysToSameDayDelivery} from the time it was placed`}
-              </Typography>
-            )}
-            {deliveryMode === "priority" && (
-              <Typography className={classes.bankDetails}>
-                {`Your order will be delivered in ${daysToPriorityDelivery} from the time it was placed`}
-              </Typography>
-            )}
-            {deliveryMode === "pickup" && (
-              <Typography className={classes.bankDetails}>
-                {`Your can pick up your order from any of our locations that is nearest to you. Call our contact numbers for guidance `}
-              </Typography>
-            )}
-
-            {renderPaymentMethodField()}
-
-            {!isOnlinePayment && paymentMethod === "payOnDelivery" && (
-              <Button
-                variant="contained"
-                className={classes.submitButton}
-                onClick={onSubmit}
-              >
-                {loading ? (
-                  <CircularProgress size={30} color="inherit" />
-                ) : (
-                  buttonContent()
-                )}
-              </Button>
-            )}
-
-            {!isOnlinePayment && paymentMethod === "pickup" && (
-              <Button
-                variant="contained"
-                className={classes.submitButton}
-                onClick={onSubmit}
-              >
-                {loading ? (
-                  <CircularProgress size={30} color="inherit" />
-                ) : (
-                  buttonContent()
-                )}
-              </Button>
-            )}
-
-            {isOnlinePayment && !deliveryMode && (
-              <Button
-                variant="contained"
-                className={classes.submitEmptyFieldButton}
-                onClick={onEmptyFieldSubmit}
-              >
-                {loading ? (
-                  <CircularProgress size={30} color="inherit" />
-                ) : (
-                  buttonEmptyFieldsContent()
-                )}
-              </Button>
-            )}
-            {isOnlinePayment &&
-              recipientName &&
-              recipientPhoneNumber &&
-              recipientAddress &&
-              country &&
-              state &&
-              city &&
-              deliveryMode &&
-              renderOnlinePayment(
-                customerEmail,
-                amountForPayment,
-                orderNumber,
-                customerPhoneNumber,
-                customerName
+              <br />
+              <br />
+              {implementVatCollection && (
+                <Typography
+                  style={{
+                    width: 350,
+                    fontSize: 20,
+                    fontWeight: 300,
+                    marginTop: 2,
+                    marginLeft: 10,
+                  }}
+                >
+                  {`VAT(${vatRate}%)`}:{getCurrencyCode()}
+                  {vatForDispplay}
+                </Typography>
               )}
-          </Grid>
-          <Grid item></Grid>
+
+              {deliveryMode && (
+                <Typography
+                  style={{
+                    width: 350,
+                    fontSize: 20,
+                    fontWeight: 300,
+                    marginTop: 2,
+                    marginLeft: 10,
+                  }}
+                >
+                  {deliveryMode === "sameday"
+                    ? "Same Day Delivery Cost"
+                    : deliveryMode === "priority"
+                    ? "Priority Delivery Cost"
+                    : deliveryMode === "standard"
+                    ? "Standard Delivery Cost"
+                    : "Delivery Cost"}
+                  :{getCurrencyCode()}
+                  {totalDeliveryCostForDisplay}
+                </Typography>
+              )}
+
+              <Typography
+                style={{
+                  //width: 200,
+                  fontSize: 23,
+                  fontWeight: 700,
+                  marginTop: 2,
+                  marginLeft: 10,
+                }}
+              >
+                Total Cost:{getCurrencyCode()}
+                {totalOrderCostForDisplay}
+              </Typography>
+
+              {deliveryMode === "standard" && (
+                <Typography className={classes.bankDetails}>
+                  {`Your order will be delivered in ${daysToStandardDelivery} from the day it was placed`}
+                </Typography>
+              )}
+              {deliveryMode === "sameday" && (
+                <Typography className={classes.bankDetails}>
+                  {`Your order will be delivered same day if the order was placed before noon or  ${daysToSameDayDelivery} from the time it was placed`}
+                </Typography>
+              )}
+              {deliveryMode === "priority" && (
+                <Typography className={classes.bankDetails}>
+                  {`Your order will be delivered in ${daysToPriorityDelivery} from the time it was placed`}
+                </Typography>
+              )}
+              {deliveryMode === "pickup" && (
+                <Typography className={classes.bankDetails}>
+                  {`Your can pick up your order from any of our locations that is nearest to you. Call our contact numbers for guidance `}
+                </Typography>
+              )}
+
+              {renderPaymentMethodField()}
+
+              {!isOnlinePayment && paymentMethod === "payOnDelivery" && (
+                <Button
+                  variant="contained"
+                  className={classes.submitButton}
+                  onClick={onSubmit}
+                >
+                  {loading ? (
+                    <CircularProgress size={30} color="inherit" />
+                  ) : (
+                    buttonContent()
+                  )}
+                </Button>
+              )}
+
+              {!isOnlinePayment && paymentMethod === "pickup" && (
+                <Button
+                  variant="contained"
+                  className={classes.submitButton}
+                  onClick={onSubmit}
+                >
+                  {loading ? (
+                    <CircularProgress size={30} color="inherit" />
+                  ) : (
+                    buttonContent()
+                  )}
+                </Button>
+              )}
+
+              {isOnlinePayment && !deliveryMode && (
+                <Button
+                  variant="contained"
+                  className={classes.submitEmptyFieldButton}
+                  onClick={onEmptyFieldSubmit}
+                >
+                  {loading ? (
+                    <CircularProgress size={30} color="inherit" />
+                  ) : (
+                    buttonEmptyFieldsContent()
+                  )}
+                </Button>
+              )}
+              {isOnlinePayment &&
+                recipientName &&
+                recipientPhoneNumber &&
+                recipientAddress &&
+                country &&
+                state &&
+                city &&
+                deliveryMode &&
+                renderOnlinePayment(
+                  customerEmail,
+                  amountForPayment,
+                  orderNumber,
+                  customerPhoneNumber,
+                  customerName
+                )}
+            </Grid>
+          )}
+          {salesPreference === "deal" &&
+            dealType === "public" &&
+            dealDeliveryMode === "managed-by-each-beneficiary" && (
+              <Grid
+                item
+                container
+                style={{
+                  width: "35%",
+                  marginLeft: 15,
+                  border: "1px dashed grey",
+                  padding: 15,
+                  height: 400,
+                }}
+              >
+                <Typography
+                  style={{
+                    //width: 250,
+                    fontSize: 20,
+                    fontWeight: 300,
+                    marginTop: 2,
+                    marginLeft: 10,
+                  }}
+                >
+                  Total Cost of Product(s):{getCurrencyCode()}
+                  {totalProductCostForDisplay}
+                </Typography>
+                <br />
+                <br />
+                {implementVatCollection && (
+                  <Typography
+                    style={{
+                      width: 350,
+                      fontSize: 20,
+                      fontWeight: 300,
+                      marginTop: 2,
+                      marginLeft: 10,
+                    }}
+                  >
+                    {`VAT(${vatRate}%)`}:{getCurrencyCode()}
+                    {vatForDispplay}
+                  </Typography>
+                )}
+
+                {deliveryMode && (
+                  <Typography
+                    style={{
+                      width: 350,
+                      fontSize: 20,
+                      fontWeight: 300,
+                      marginTop: 2,
+                      marginLeft: 10,
+                    }}
+                  >
+                    {deliveryMode === "sameday"
+                      ? "Same Day Delivery Cost"
+                      : deliveryMode === "priority"
+                      ? "Priority Delivery Cost"
+                      : deliveryMode === "standard"
+                      ? "Standard Delivery Cost"
+                      : "Delivery Cost"}
+                    :{getCurrencyCode()}
+                    {totalDeliveryCostForDisplay}
+                  </Typography>
+                )}
+
+                <Typography
+                  style={{
+                    //width: 200,
+                    fontSize: 23,
+                    fontWeight: 700,
+                    marginTop: 2,
+                    marginLeft: 10,
+                  }}
+                >
+                  Total Cost:{getCurrencyCode()}
+                  {totalOrderCostForDisplay}
+                </Typography>
+
+                {deliveryMode === "standard" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your order will be delivered in ${daysToStandardDelivery} from the day it was placed`}
+                  </Typography>
+                )}
+                {deliveryMode === "sameday" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your order will be delivered same day if the order was placed before noon or  ${daysToSameDayDelivery} from the time it was placed`}
+                  </Typography>
+                )}
+                {deliveryMode === "priority" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your order will be delivered in ${daysToPriorityDelivery} from the time it was placed`}
+                  </Typography>
+                )}
+                {deliveryMode === "pickup" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your can pick up your order from any of our locations that is nearest to you. Call our contact numbers for guidance `}
+                  </Typography>
+                )}
+
+                {renderPaymentMethodField()}
+
+                {!isOnlinePayment && paymentMethod === "payOnDelivery" && (
+                  <Button
+                    variant="contained"
+                    className={classes.submitButton}
+                    onClick={onSubmit}
+                  >
+                    {loading ? (
+                      <CircularProgress size={30} color="inherit" />
+                    ) : (
+                      buttonContent()
+                    )}
+                  </Button>
+                )}
+
+                {!isOnlinePayment && paymentMethod === "pickup" && (
+                  <Button
+                    variant="contained"
+                    className={classes.submitButton}
+                    onClick={onSubmit}
+                  >
+                    {loading ? (
+                      <CircularProgress size={30} color="inherit" />
+                    ) : (
+                      buttonContent()
+                    )}
+                  </Button>
+                )}
+
+                {isOnlinePayment && !deliveryMode && (
+                  <Button
+                    variant="contained"
+                    className={classes.submitEmptyFieldButton}
+                    onClick={onEmptyFieldSubmit}
+                  >
+                    {loading ? (
+                      <CircularProgress size={30} color="inherit" />
+                    ) : (
+                      buttonEmptyFieldsContent()
+                    )}
+                  </Button>
+                )}
+                {isOnlinePayment &&
+                  recipientName &&
+                  recipientPhoneNumber &&
+                  recipientAddress &&
+                  country &&
+                  state &&
+                  city &&
+                  deliveryMode &&
+                  renderOnlinePayment(
+                    customerEmail,
+                    amountForPayment,
+                    orderNumber,
+                    customerPhoneNumber,
+                    customerName
+                  )}
+              </Grid>
+            )}
+          {salesPreference === "deal" &&
+            dealType === "public" &&
+            dealDeliveryMode === "centralized-at-no-cost" && (
+              <Grid
+                item
+                container
+                style={{
+                  width: "35%",
+                  marginLeft: 15,
+                  border: "1px dashed grey",
+                  padding: 15,
+                  height: 400,
+                }}
+              >
+                <Typography
+                  style={{
+                    //width: 250,
+                    fontSize: 20,
+                    fontWeight: 300,
+                    marginTop: 2,
+                    marginLeft: 10,
+                  }}
+                >
+                  Total Cost of Product(s):{getCurrencyCode()}
+                  {totalProductCostForDisplay}
+                </Typography>
+                <br />
+                <br />
+                {implementVatCollection && (
+                  <Typography
+                    style={{
+                      width: 350,
+                      fontSize: 20,
+                      fontWeight: 300,
+                      marginTop: 2,
+                      marginLeft: 10,
+                    }}
+                  >
+                    {`VAT(${vatRate}%)`}:{getCurrencyCode()}
+                    {vatForDispplay}
+                  </Typography>
+                )}
+
+                {deliveryMode && (
+                  <Typography
+                    style={{
+                      width: 350,
+                      fontSize: 20,
+                      fontWeight: 300,
+                      marginTop: 2,
+                      marginLeft: 10,
+                    }}
+                  >
+                    {deliveryMode === "sameday"
+                      ? "Same Day Delivery Cost"
+                      : deliveryMode === "priority"
+                      ? "Priority Delivery Cost"
+                      : deliveryMode === "standard"
+                      ? "Standard Delivery Cost"
+                      : "Delivery Cost"}
+                    :{getCurrencyCode()}
+                    {totalDeliveryCostForDisplay}
+                  </Typography>
+                )}
+
+                <Typography
+                  style={{
+                    //width: 200,
+                    fontSize: 23,
+                    fontWeight: 700,
+                    marginTop: 2,
+                    marginLeft: 10,
+                  }}
+                >
+                  Total Cost:{getCurrencyCode()}
+                  {totalOrderCostForDisplay}
+                </Typography>
+
+                {deliveryMode === "standard" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your order will be delivered in ${daysToStandardDelivery} from the day it was placed`}
+                  </Typography>
+                )}
+                {deliveryMode === "sameday" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your order will be delivered same day if the order was placed before noon or  ${daysToSameDayDelivery} from the time it was placed`}
+                  </Typography>
+                )}
+                {deliveryMode === "priority" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your order will be delivered in ${daysToPriorityDelivery} from the time it was placed`}
+                  </Typography>
+                )}
+                {deliveryMode === "pickup" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your can pick up your order from any of our locations that is nearest to you. Call our contact numbers for guidance `}
+                  </Typography>
+                )}
+
+                {renderPaymentMethodField()}
+
+                {!isOnlinePayment && paymentMethod === "payOnDelivery" && (
+                  <Button
+                    variant="contained"
+                    className={classes.submitButton}
+                    onClick={onSubmit}
+                  >
+                    {loading ? (
+                      <CircularProgress size={30} color="inherit" />
+                    ) : (
+                      buttonContent()
+                    )}
+                  </Button>
+                )}
+
+                {!isOnlinePayment && paymentMethod === "pickup" && (
+                  <Button
+                    variant="contained"
+                    className={classes.submitButton}
+                    onClick={onSubmit}
+                  >
+                    {loading ? (
+                      <CircularProgress size={30} color="inherit" />
+                    ) : (
+                      buttonContent()
+                    )}
+                  </Button>
+                )}
+
+                {isOnlinePayment && isBtnVisible && (
+                  <Button
+                    variant="contained"
+                    className={classes.submitEmptyFieldButton}
+                    onClick={onPublicDealCentralizedAtNoCostEmptyFieldSubmit}
+                  >
+                    {loading ? (
+                      <CircularProgress size={30} color="inherit" />
+                    ) : (
+                      buttonEmptyFieldsContent()
+                    )}
+                  </Button>
+                )}
+                {isOnlinePayment &&
+                  recipientName &&
+                  recipientPhoneNumber &&
+                  // recipientAddress &&
+                  // country &&
+                  // (state || entity) &&
+                  // (city || place) &&
+                  // deliveryMode &&
+                  renderOnlinePayment(
+                    customerEmail,
+                    amountForPayment,
+                    orderNumber,
+                    customerPhoneNumber,
+                    customerName
+                  )}
+              </Grid>
+            )}
+          {salesPreference === "deal" &&
+            dealType === "public" &&
+            dealDeliveryMode === "centralized-at-agreed-cost" && (
+              <Grid
+                item
+                container
+                style={{
+                  width: "35%",
+                  marginLeft: 15,
+                  border: "1px dashed grey",
+                  padding: 15,
+                  height: 400,
+                }}
+              >
+                <Typography
+                  style={{
+                    //width: 250,
+                    fontSize: 20,
+                    fontWeight: 300,
+                    marginTop: 2,
+                    marginLeft: 10,
+                  }}
+                >
+                  Total Cost of Product(s):{getCurrencyCode()}
+                  {totalProductCostForDisplay}
+                </Typography>
+                <br />
+                <br />
+                {implementVatCollection && (
+                  <Typography
+                    style={{
+                      width: 350,
+                      fontSize: 20,
+                      fontWeight: 300,
+                      marginTop: 2,
+                      marginLeft: 10,
+                    }}
+                  >
+                    {`VAT(${vatRate}%)`}:{getCurrencyCode()}
+                    {vatForDispplay}
+                  </Typography>
+                )}
+
+                <Typography
+                  style={{
+                    width: 350,
+                    fontSize: 20,
+                    fontWeight: 300,
+                    marginTop: 2,
+                    marginLeft: 10,
+                  }}
+                >
+                  {/* {deliveryMode === "sameday"
+                      ? "Same Day Delivery Cost"
+                      : deliveryMode === "priority"
+                      ? "Priority Delivery Cost"
+                      : deliveryMode === "standard"
+                      ? "Standard Delivery Cost"
+                      : "Delivery Cost"} */}
+                  Delivery Cost :{getCurrencyCode()}
+                  {totalDeliveryCostForDisplay}
+                </Typography>
+
+                <Typography
+                  style={{
+                    //width: 200,
+                    fontSize: 23,
+                    fontWeight: 700,
+                    marginTop: 2,
+                    marginLeft: 10,
+                  }}
+                >
+                  Total Cost:{getCurrencyCode()}
+                  {totalOrderCostForDisplay}
+                </Typography>
+
+                {deliveryMode === "standard" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your order will be delivered in ${daysToStandardDelivery} from the day it was placed`}
+                  </Typography>
+                )}
+                {deliveryMode === "sameday" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your order will be delivered same day if the order was placed before noon or  ${daysToSameDayDelivery} from the time it was placed`}
+                  </Typography>
+                )}
+                {deliveryMode === "priority" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your order will be delivered in ${daysToPriorityDelivery} from the time it was placed`}
+                  </Typography>
+                )}
+                {deliveryMode === "pickup" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your can pick up your order from any of our locations that is nearest to you. Call our contact numbers for guidance `}
+                  </Typography>
+                )}
+
+                {renderPaymentMethodField()}
+
+                {!isOnlinePayment && paymentMethod === "payOnDelivery" && (
+                  <Button
+                    variant="contained"
+                    className={classes.submitButton}
+                    onClick={onSubmit}
+                  >
+                    {loading ? (
+                      <CircularProgress size={30} color="inherit" />
+                    ) : (
+                      buttonContent()
+                    )}
+                  </Button>
+                )}
+
+                {!isOnlinePayment && paymentMethod === "pickup" && (
+                  <Button
+                    variant="contained"
+                    className={classes.submitButton}
+                    onClick={onSubmit}
+                  >
+                    {loading ? (
+                      <CircularProgress size={30} color="inherit" />
+                    ) : (
+                      buttonContent()
+                    )}
+                  </Button>
+                )}
+
+                {isOnlinePayment && isBtnVisible && (
+                  <Button
+                    variant="contained"
+                    className={classes.submitEmptyFieldButton}
+                    onClick={
+                      onPublicDealCentralizedAtAgreedCostEmptyFieldSubmit
+                    }
+                  >
+                    {loading ? (
+                      <CircularProgress size={30} color="inherit" />
+                    ) : (
+                      buttonEmptyFieldsContent()
+                    )}
+                  </Button>
+                )}
+                {isOnlinePayment &&
+                  recipientName &&
+                  recipientPhoneNumber &&
+                  // recipientAddress &&
+                  // country &&
+                  // (state || entity) &&
+                  // (city || place) &&
+                  // deliveryMode &&
+                  renderOnlinePayment(
+                    customerEmail,
+                    amountForPayment,
+                    orderNumber,
+                    customerPhoneNumber,
+                    customerName
+                  )}
+              </Grid>
+            )}
+
+          {salesPreference === "deal" &&
+            dealType === "public" &&
+            dealDeliveryMode === "decentralized-at-no-cost" && (
+              <Grid
+                item
+                container
+                style={{
+                  width: "35%",
+                  marginLeft: 15,
+                  border: "1px dashed grey",
+                  padding: 15,
+                  height: 400,
+                }}
+              >
+                <Typography
+                  style={{
+                    //width: 250,
+                    fontSize: 20,
+                    fontWeight: 300,
+                    marginTop: 2,
+                    marginLeft: 10,
+                  }}
+                >
+                  Total Cost of Product(s):{getCurrencyCode()}
+                  {totalProductCostForDisplay}
+                </Typography>
+                <br />
+                <br />
+                {implementVatCollection && (
+                  <Typography
+                    style={{
+                      width: 350,
+                      fontSize: 20,
+                      fontWeight: 300,
+                      marginTop: 2,
+                      marginLeft: 10,
+                    }}
+                  >
+                    {`VAT(${vatRate}%)`}:{getCurrencyCode()}
+                    {vatForDispplay}
+                  </Typography>
+                )}
+
+                {deliveryMode && (
+                  <Typography
+                    style={{
+                      width: 350,
+                      fontSize: 20,
+                      fontWeight: 300,
+                      marginTop: 2,
+                      marginLeft: 10,
+                    }}
+                  >
+                    {deliveryMode === "sameday"
+                      ? "Same Day Delivery Cost"
+                      : deliveryMode === "priority"
+                      ? "Priority Delivery Cost"
+                      : deliveryMode === "standard"
+                      ? "Standard Delivery Cost"
+                      : "Delivery Cost"}
+                    :{getCurrencyCode()}
+                    {totalDeliveryCostForDisplay}
+                  </Typography>
+                )}
+
+                <Typography
+                  style={{
+                    //width: 200,
+                    fontSize: 23,
+                    fontWeight: 700,
+                    marginTop: 2,
+                    marginLeft: 10,
+                  }}
+                >
+                  Total Cost:{getCurrencyCode()}
+                  {totalOrderCostForDisplay}
+                </Typography>
+
+                {deliveryMode === "standard" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your order will be delivered in ${daysToStandardDelivery} from the day it was placed`}
+                  </Typography>
+                )}
+                {deliveryMode === "sameday" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your order will be delivered same day if the order was placed before noon or  ${daysToSameDayDelivery} from the time it was placed`}
+                  </Typography>
+                )}
+                {deliveryMode === "priority" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your order will be delivered in ${daysToPriorityDelivery} from the time it was placed`}
+                  </Typography>
+                )}
+                {deliveryMode === "pickup" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your can pick up your order from any of our locations that is nearest to you. Call our contact numbers for guidance `}
+                  </Typography>
+                )}
+
+                {renderPaymentMethodField()}
+
+                {!isOnlinePayment && paymentMethod === "payOnDelivery" && (
+                  <Button
+                    variant="contained"
+                    className={classes.submitButton}
+                    onClick={onSubmit}
+                  >
+                    {loading ? (
+                      <CircularProgress size={30} color="inherit" />
+                    ) : (
+                      buttonContent()
+                    )}
+                  </Button>
+                )}
+
+                {!isOnlinePayment && paymentMethod === "pickup" && (
+                  <Button
+                    variant="contained"
+                    className={classes.submitButton}
+                    onClick={onSubmit}
+                  >
+                    {loading ? (
+                      <CircularProgress size={30} color="inherit" />
+                    ) : (
+                      buttonContent()
+                    )}
+                  </Button>
+                )}
+
+                {isOnlinePayment && !entityLocation && (
+                  <Button
+                    variant="contained"
+                    className={classes.submitEmptyFieldButton}
+                    onClick={onPublicDealDecentralizedAtNoCostEmptyFieldSubmit}
+                  >
+                    {loading ? (
+                      <CircularProgress size={30} color="inherit" />
+                    ) : (
+                      buttonEmptyFieldsContent()
+                    )}
+                  </Button>
+                )}
+                {isOnlinePayment &&
+                  recipientName &&
+                  recipientPhoneNumber &&
+                  entityLocation &&
+                  renderOnlinePayment(
+                    customerEmail,
+                    amountForPayment,
+                    orderNumber,
+                    customerPhoneNumber,
+                    customerName
+                  )}
+              </Grid>
+            )}
+
+          {salesPreference === "deal" &&
+            dealType === "public" &&
+            dealDeliveryMode === "decentralized-at-agreed-cost" && (
+              <Grid
+                item
+                container
+                style={{
+                  width: "35%",
+                  marginLeft: 15,
+                  border: "1px dashed grey",
+                  padding: 15,
+                  height: 400,
+                }}
+              >
+                <Typography
+                  style={{
+                    //width: 250,
+                    fontSize: 20,
+                    fontWeight: 300,
+                    marginTop: 2,
+                    marginLeft: 10,
+                  }}
+                >
+                  Total Cost of Product(s):{getCurrencyCode()}
+                  {totalProductCostForDisplay}
+                </Typography>
+                <br />
+                <br />
+                {implementVatCollection && (
+                  <Typography
+                    style={{
+                      width: 350,
+                      fontSize: 20,
+                      fontWeight: 300,
+                      marginTop: 2,
+                      marginLeft: 10,
+                    }}
+                  >
+                    {`VAT(${vatRate}%)`}:{getCurrencyCode()}
+                    {vatForDispplay}
+                  </Typography>
+                )}
+
+                {deliveryMode && (
+                  <Typography
+                    style={{
+                      width: 350,
+                      fontSize: 20,
+                      fontWeight: 300,
+                      marginTop: 2,
+                      marginLeft: 10,
+                    }}
+                  >
+                    {deliveryMode === "sameday"
+                      ? "Same Day Delivery Cost"
+                      : deliveryMode === "priority"
+                      ? "Priority Delivery Cost"
+                      : deliveryMode === "standard"
+                      ? "Standard Delivery Cost"
+                      : "Delivery Cost"}
+                    :{getCurrencyCode()}
+                    {totalDeliveryCostForDisplay}
+                  </Typography>
+                )}
+
+                <Typography
+                  style={{
+                    //width: 200,
+                    fontSize: 23,
+                    fontWeight: 700,
+                    marginTop: 2,
+                    marginLeft: 10,
+                  }}
+                >
+                  Total Cost:{getCurrencyCode()}
+                  {totalOrderCostForDisplay}
+                </Typography>
+
+                {deliveryMode === "standard" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your order will be delivered in ${daysToStandardDelivery} from the day it was placed`}
+                  </Typography>
+                )}
+                {deliveryMode === "sameday" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your order will be delivered same day if the order was placed before noon or  ${daysToSameDayDelivery} from the time it was placed`}
+                  </Typography>
+                )}
+                {deliveryMode === "priority" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your order will be delivered in ${daysToPriorityDelivery} from the time it was placed`}
+                  </Typography>
+                )}
+                {deliveryMode === "pickup" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your can pick up your order from any of our locations that is nearest to you. Call our contact numbers for guidance `}
+                  </Typography>
+                )}
+
+                {renderPaymentMethodField()}
+
+                {!isOnlinePayment && paymentMethod === "payOnDelivery" && (
+                  <Button
+                    variant="contained"
+                    className={classes.submitButton}
+                    onClick={onSubmit}
+                  >
+                    {loading ? (
+                      <CircularProgress size={30} color="inherit" />
+                    ) : (
+                      buttonContent()
+                    )}
+                  </Button>
+                )}
+
+                {!isOnlinePayment && paymentMethod === "pickup" && (
+                  <Button
+                    variant="contained"
+                    className={classes.submitButton}
+                    onClick={onSubmit}
+                  >
+                    {loading ? (
+                      <CircularProgress size={30} color="inherit" />
+                    ) : (
+                      buttonContent()
+                    )}
+                  </Button>
+                )}
+
+                {isOnlinePayment && !deliveryMode && (
+                  <Button
+                    variant="contained"
+                    className={classes.submitEmptyFieldButton}
+                    onClick={onPublicDealDecentralizedAtCostEmptyFieldSubmit}
+                  >
+                    {loading ? (
+                      <CircularProgress size={30} color="inherit" />
+                    ) : (
+                      buttonEmptyFieldsContent()
+                    )}
+                  </Button>
+                )}
+                {isOnlinePayment &&
+                  recipientName &&
+                  recipientPhoneNumber &&
+                  country &&
+                  entity &&
+                  place &&
+                  deliveryMode &&
+                  renderOnlinePayment(
+                    customerEmail,
+                    amountForPayment,
+                    orderNumber,
+                    customerPhoneNumber,
+                    customerName
+                  )}
+              </Grid>
+            )}
+
+          {salesPreference === "deal" &&
+            dealType === "private" &&
+            dealDeliveryMode === "managed-by-each-beneficiary" && (
+              <Grid
+                item
+                container
+                style={{
+                  width: "35%",
+                  marginLeft: 15,
+                  border: "1px dashed grey",
+                  padding: 15,
+                  height: 400,
+                }}
+              >
+                <Typography
+                  style={{
+                    //width: 250,
+                    fontSize: 20,
+                    fontWeight: 300,
+                    marginTop: 2,
+                    marginLeft: 10,
+                  }}
+                >
+                  Total Cost of Product(s):{getCurrencyCode()}
+                  {totalProductCostForDisplay}
+                </Typography>
+                <br />
+                <br />
+                {implementVatCollection && (
+                  <Typography
+                    style={{
+                      width: 350,
+                      fontSize: 20,
+                      fontWeight: 300,
+                      marginTop: 2,
+                      marginLeft: 10,
+                    }}
+                  >
+                    {`VAT(${vatRate}%)`}:{getCurrencyCode()}
+                    {vatForDispplay}
+                  </Typography>
+                )}
+
+                {deliveryMode && (
+                  <Typography
+                    style={{
+                      width: 350,
+                      fontSize: 20,
+                      fontWeight: 300,
+                      marginTop: 2,
+                      marginLeft: 10,
+                    }}
+                  >
+                    {deliveryMode === "sameday"
+                      ? "Same Day Delivery Cost"
+                      : deliveryMode === "priority"
+                      ? "Priority Delivery Cost"
+                      : deliveryMode === "standard"
+                      ? "Standard Delivery Cost"
+                      : "Delivery Cost"}
+                    :{getCurrencyCode()}
+                    {totalDeliveryCostForDisplay}
+                  </Typography>
+                )}
+
+                <Typography
+                  style={{
+                    //width: 200,
+                    fontSize: 23,
+                    fontWeight: 700,
+                    marginTop: 2,
+                    marginLeft: 10,
+                  }}
+                >
+                  Total Cost:{getCurrencyCode()}
+                  {totalOrderCostForDisplay}
+                </Typography>
+
+                {deliveryMode === "standard" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your order will be delivered in ${daysToStandardDelivery} from the day it was placed`}
+                  </Typography>
+                )}
+                {deliveryMode === "sameday" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your order will be delivered same day if the order was placed before noon or  ${daysToSameDayDelivery} from the time it was placed`}
+                  </Typography>
+                )}
+                {deliveryMode === "priority" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your order will be delivered in ${daysToPriorityDelivery} from the time it was placed`}
+                  </Typography>
+                )}
+                {deliveryMode === "pickup" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your can pick up your order from any of our locations that is nearest to you. Call our contact numbers for guidance `}
+                  </Typography>
+                )}
+
+                {renderPaymentMethodField()}
+
+                {!isOnlinePayment && paymentMethod === "payOnDelivery" && (
+                  <Button
+                    variant="contained"
+                    className={classes.submitButton}
+                    onClick={onSubmit}
+                  >
+                    {loading ? (
+                      <CircularProgress size={30} color="inherit" />
+                    ) : (
+                      buttonContent()
+                    )}
+                  </Button>
+                )}
+
+                {!isOnlinePayment && paymentMethod === "pickup" && (
+                  <Button
+                    variant="contained"
+                    className={classes.submitButton}
+                    onClick={onSubmit}
+                  >
+                    {loading ? (
+                      <CircularProgress size={30} color="inherit" />
+                    ) : (
+                      buttonContent()
+                    )}
+                  </Button>
+                )}
+
+                {isOnlinePayment && !deliveryMode && (
+                  <Button
+                    variant="contained"
+                    className={classes.submitEmptyFieldButton}
+                    onClick={onEmptyFieldSubmit}
+                  >
+                    {loading ? (
+                      <CircularProgress size={30} color="inherit" />
+                    ) : (
+                      buttonEmptyFieldsContent()
+                    )}
+                  </Button>
+                )}
+                {isOnlinePayment &&
+                  recipientName &&
+                  recipientPhoneNumber &&
+                  recipientAddress &&
+                  country &&
+                  state &&
+                  city &&
+                  deliveryMode &&
+                  renderOnlinePayment(
+                    customerEmail,
+                    amountForPayment,
+                    orderNumber,
+                    customerPhoneNumber,
+                    customerName
+                  )}
+              </Grid>
+            )}
+
+          {salesPreference === "deal" &&
+            dealType === "private" &&
+            dealDeliveryMode === "centralized-at-no-cost" && (
+              <Grid
+                item
+                container
+                style={{
+                  width: "35%",
+                  marginLeft: 15,
+                  border: "1px dashed grey",
+                  padding: 15,
+                  height: 400,
+                }}
+              >
+                <Typography
+                  style={{
+                    //width: 250,
+                    fontSize: 20,
+                    fontWeight: 300,
+                    marginTop: 2,
+                    marginLeft: 10,
+                  }}
+                >
+                  Total Cost of Product(s):{getCurrencyCode()}
+                  {totalProductCostForDisplay}
+                </Typography>
+                <br />
+                <br />
+                {implementVatCollection && (
+                  <Typography
+                    style={{
+                      width: 350,
+                      fontSize: 20,
+                      fontWeight: 300,
+                      marginTop: 2,
+                      marginLeft: 10,
+                    }}
+                  >
+                    {`VAT(${vatRate}%)`}:{getCurrencyCode()}
+                    {vatForDispplay}
+                  </Typography>
+                )}
+
+                {deliveryMode && (
+                  <Typography
+                    style={{
+                      width: 350,
+                      fontSize: 20,
+                      fontWeight: 300,
+                      marginTop: 2,
+                      marginLeft: 10,
+                    }}
+                  >
+                    {deliveryMode === "sameday"
+                      ? "Same Day Delivery Cost"
+                      : deliveryMode === "priority"
+                      ? "Priority Delivery Cost"
+                      : deliveryMode === "standard"
+                      ? "Standard Delivery Cost"
+                      : "Delivery Cost"}
+                    :{getCurrencyCode()}
+                    {totalDeliveryCostForDisplay}
+                  </Typography>
+                )}
+
+                <Typography
+                  style={{
+                    //width: 200,
+                    fontSize: 23,
+                    fontWeight: 700,
+                    marginTop: 2,
+                    marginLeft: 10,
+                  }}
+                >
+                  Total Cost:{getCurrencyCode()}
+                  {totalOrderCostForDisplay}
+                </Typography>
+
+                {deliveryMode === "standard" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your order will be delivered in ${daysToStandardDelivery} from the day it was placed`}
+                  </Typography>
+                )}
+                {deliveryMode === "sameday" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your order will be delivered same day if the order was placed before noon or  ${daysToSameDayDelivery} from the time it was placed`}
+                  </Typography>
+                )}
+                {deliveryMode === "priority" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your order will be delivered in ${daysToPriorityDelivery} from the time it was placed`}
+                  </Typography>
+                )}
+                {deliveryMode === "pickup" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your can pick up your order from any of our locations that is nearest to you. Call our contact numbers for guidance `}
+                  </Typography>
+                )}
+
+                {renderPaymentMethodField()}
+
+                {!isOnlinePayment && paymentMethod === "payOnDelivery" && (
+                  <Button
+                    variant="contained"
+                    className={classes.submitButton}
+                    onClick={onSubmit}
+                  >
+                    {loading ? (
+                      <CircularProgress size={30} color="inherit" />
+                    ) : (
+                      buttonContent()
+                    )}
+                  </Button>
+                )}
+
+                {!isOnlinePayment && paymentMethod === "pickup" && (
+                  <Button
+                    variant="contained"
+                    className={classes.submitButton}
+                    onClick={onSubmit}
+                  >
+                    {loading ? (
+                      <CircularProgress size={30} color="inherit" />
+                    ) : (
+                      buttonContent()
+                    )}
+                  </Button>
+                )}
+
+                {isOnlinePayment && isBtnVisible && (
+                  <Button
+                    variant="contained"
+                    className={classes.submitEmptyFieldButton}
+                    onClick={onPrivateDealCentralizedAtNoCostEmptyFieldSubmit}
+                  >
+                    {loading ? (
+                      <CircularProgress size={30} color="inherit" />
+                    ) : (
+                      buttonEmptyFieldsContent()
+                    )}
+                  </Button>
+                )}
+                {isOnlinePayment &&
+                  recipientName &&
+                  recipientPhoneNumber &&
+                  renderOnlinePayment(
+                    customerEmail,
+                    amountForPayment,
+                    orderNumber,
+                    customerPhoneNumber,
+                    customerName
+                  )}
+              </Grid>
+            )}
+
+          {salesPreference === "deal" &&
+            dealType === "private" &&
+            dealDeliveryMode === "centralized-at-agreed-cost" && (
+              <Grid
+                item
+                container
+                style={{
+                  width: "35%",
+                  marginLeft: 15,
+                  border: "1px dashed grey",
+                  padding: 15,
+                  height: 400,
+                }}
+              >
+                <Typography
+                  style={{
+                    //width: 250,
+                    fontSize: 20,
+                    fontWeight: 300,
+                    marginTop: 2,
+                    marginLeft: 10,
+                  }}
+                >
+                  Total Cost of Product(s):{getCurrencyCode()}
+                  {totalProductCostForDisplay}
+                </Typography>
+                <br />
+                <br />
+                {implementVatCollection && (
+                  <Typography
+                    style={{
+                      width: 350,
+                      fontSize: 20,
+                      fontWeight: 300,
+                      marginTop: 2,
+                      marginLeft: 10,
+                    }}
+                  >
+                    {`VAT(${vatRate}%)`}:{getCurrencyCode()}
+                    {vatForDispplay}
+                  </Typography>
+                )}
+
+                <Typography
+                  style={{
+                    width: 350,
+                    fontSize: 20,
+                    fontWeight: 300,
+                    marginTop: 2,
+                    marginLeft: 10,
+                  }}
+                >
+                  {/* {deliveryMode === "sameday"
+                      ? "Same Day Delivery Cost"
+                      : deliveryMode === "priority"
+                      ? "Priority Delivery Cost"
+                      : deliveryMode === "standard"
+                      ? "Standard Delivery Cost"
+                      : "Delivery Cost"} */}
+                  Delivery Cost :{getCurrencyCode()}
+                  {totalDeliveryCostForDisplay}
+                </Typography>
+
+                <Typography
+                  style={{
+                    //width: 200,
+                    fontSize: 23,
+                    fontWeight: 700,
+                    marginTop: 2,
+                    marginLeft: 10,
+                  }}
+                >
+                  Total Cost:{getCurrencyCode()}
+                  {totalOrderCostForDisplay}
+                </Typography>
+
+                {deliveryMode === "standard" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your order will be delivered in ${daysToStandardDelivery} from the day it was placed`}
+                  </Typography>
+                )}
+                {deliveryMode === "sameday" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your order will be delivered same day if the order was placed before noon or  ${daysToSameDayDelivery} from the time it was placed`}
+                  </Typography>
+                )}
+                {deliveryMode === "priority" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your order will be delivered in ${daysToPriorityDelivery} from the time it was placed`}
+                  </Typography>
+                )}
+                {deliveryMode === "pickup" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your can pick up your order from any of our locations that is nearest to you. Call our contact numbers for guidance `}
+                  </Typography>
+                )}
+
+                {renderPaymentMethodField()}
+
+                {!isOnlinePayment && paymentMethod === "payOnDelivery" && (
+                  <Button
+                    variant="contained"
+                    className={classes.submitButton}
+                    onClick={onSubmit}
+                  >
+                    {loading ? (
+                      <CircularProgress size={30} color="inherit" />
+                    ) : (
+                      buttonContent()
+                    )}
+                  </Button>
+                )}
+
+                {!isOnlinePayment && paymentMethod === "pickup" && (
+                  <Button
+                    variant="contained"
+                    className={classes.submitButton}
+                    onClick={onSubmit}
+                  >
+                    {loading ? (
+                      <CircularProgress size={30} color="inherit" />
+                    ) : (
+                      buttonContent()
+                    )}
+                  </Button>
+                )}
+
+                {isOnlinePayment && isBtnVisible && (
+                  <Button
+                    variant="contained"
+                    className={classes.submitEmptyFieldButton}
+                    onClick={
+                      onPrivateDealCentralizedAtAgreedCostEmptyFieldSubmit
+                    }
+                  >
+                    {loading ? (
+                      <CircularProgress size={30} color="inherit" />
+                    ) : (
+                      buttonEmptyFieldsContent()
+                    )}
+                  </Button>
+                )}
+                {isOnlinePayment &&
+                  recipientName &&
+                  recipientPhoneNumber &&
+                  // recipientAddress &&
+                  // country &&
+                  // (state || entity) &&
+                  // (city || place) &&
+                  // deliveryMode &&
+                  renderOnlinePayment(
+                    customerEmail,
+                    amountForPayment,
+                    orderNumber,
+                    customerPhoneNumber,
+                    customerName
+                  )}
+              </Grid>
+            )}
+
+          {salesPreference === "deal" &&
+            dealType === "private" &&
+            dealDeliveryMode === "decentralized-at-no-cost" && (
+              <Grid
+                item
+                container
+                style={{
+                  width: "35%",
+                  marginLeft: 15,
+                  border: "1px dashed grey",
+                  padding: 15,
+                  height: 400,
+                }}
+              >
+                <Typography
+                  style={{
+                    //width: 250,
+                    fontSize: 20,
+                    fontWeight: 300,
+                    marginTop: 2,
+                    marginLeft: 10,
+                  }}
+                >
+                  Total Cost of Product(s):{getCurrencyCode()}
+                  {totalProductCostForDisplay}
+                </Typography>
+                <br />
+                <br />
+                {implementVatCollection && (
+                  <Typography
+                    style={{
+                      width: 350,
+                      fontSize: 20,
+                      fontWeight: 300,
+                      marginTop: 2,
+                      marginLeft: 10,
+                    }}
+                  >
+                    {`VAT(${vatRate}%)`}:{getCurrencyCode()}
+                    {vatForDispplay}
+                  </Typography>
+                )}
+
+                {deliveryMode && (
+                  <Typography
+                    style={{
+                      width: 350,
+                      fontSize: 20,
+                      fontWeight: 300,
+                      marginTop: 2,
+                      marginLeft: 10,
+                    }}
+                  >
+                    {deliveryMode === "sameday"
+                      ? "Same Day Delivery Cost"
+                      : deliveryMode === "priority"
+                      ? "Priority Delivery Cost"
+                      : deliveryMode === "standard"
+                      ? "Standard Delivery Cost"
+                      : "Delivery Cost"}
+                    :{getCurrencyCode()}
+                    {totalDeliveryCostForDisplay}
+                  </Typography>
+                )}
+
+                <Typography
+                  style={{
+                    //width: 200,
+                    fontSize: 23,
+                    fontWeight: 700,
+                    marginTop: 2,
+                    marginLeft: 10,
+                  }}
+                >
+                  Total Cost:{getCurrencyCode()}
+                  {totalOrderCostForDisplay}
+                </Typography>
+
+                {deliveryMode === "standard" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your order will be delivered in ${daysToStandardDelivery} from the day it was placed`}
+                  </Typography>
+                )}
+                {deliveryMode === "sameday" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your order will be delivered same day if the order was placed before noon or  ${daysToSameDayDelivery} from the time it was placed`}
+                  </Typography>
+                )}
+                {deliveryMode === "priority" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your order will be delivered in ${daysToPriorityDelivery} from the time it was placed`}
+                  </Typography>
+                )}
+                {deliveryMode === "pickup" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your can pick up your order from any of our locations that is nearest to you. Call our contact numbers for guidance `}
+                  </Typography>
+                )}
+
+                {renderPaymentMethodField()}
+
+                {!isOnlinePayment && paymentMethod === "payOnDelivery" && (
+                  <Button
+                    variant="contained"
+                    className={classes.submitButton}
+                    onClick={onSubmit}
+                  >
+                    {loading ? (
+                      <CircularProgress size={30} color="inherit" />
+                    ) : (
+                      buttonContent()
+                    )}
+                  </Button>
+                )}
+
+                {!isOnlinePayment && paymentMethod === "pickup" && (
+                  <Button
+                    variant="contained"
+                    className={classes.submitButton}
+                    onClick={onSubmit}
+                  >
+                    {loading ? (
+                      <CircularProgress size={30} color="inherit" />
+                    ) : (
+                      buttonContent()
+                    )}
+                  </Button>
+                )}
+
+                {isOnlinePayment && !entityLocation && (
+                  <Button
+                    variant="contained"
+                    className={classes.submitEmptyFieldButton}
+                    onClick={onPrivateDealDecentralizedAtNoCostEmptyFieldSubmit}
+                  >
+                    {loading ? (
+                      <CircularProgress size={30} color="inherit" />
+                    ) : (
+                      buttonEmptyFieldsContent()
+                    )}
+                  </Button>
+                )}
+                {isOnlinePayment &&
+                  recipientName &&
+                  recipientPhoneNumber &&
+                  entityLocation &&
+                  renderOnlinePayment(
+                    customerEmail,
+                    amountForPayment,
+                    orderNumber,
+                    customerPhoneNumber,
+                    customerName
+                  )}
+              </Grid>
+            )}
+
+          {salesPreference === "deal" &&
+            dealType === "private" &&
+            dealDeliveryMode === "decentralized-at-agreed-cost" && (
+              <Grid
+                item
+                container
+                style={{
+                  width: "35%",
+                  marginLeft: 15,
+                  border: "1px dashed grey",
+                  padding: 15,
+                  height: 400,
+                }}
+              >
+                <Typography
+                  style={{
+                    //width: 250,
+                    fontSize: 20,
+                    fontWeight: 300,
+                    marginTop: 2,
+                    marginLeft: 10,
+                  }}
+                >
+                  Total Cost of Product(s):{getCurrencyCode()}
+                  {totalProductCostForDisplay}
+                </Typography>
+                <br />
+                <br />
+                {implementVatCollection && (
+                  <Typography
+                    style={{
+                      width: 350,
+                      fontSize: 20,
+                      fontWeight: 300,
+                      marginTop: 2,
+                      marginLeft: 10,
+                    }}
+                  >
+                    {`VAT(${vatRate}%)`}:{getCurrencyCode()}
+                    {vatForDispplay}
+                  </Typography>
+                )}
+
+                {deliveryMode && (
+                  <Typography
+                    style={{
+                      width: 350,
+                      fontSize: 20,
+                      fontWeight: 300,
+                      marginTop: 2,
+                      marginLeft: 10,
+                    }}
+                  >
+                    {deliveryMode === "sameday"
+                      ? "Same Day Delivery Cost"
+                      : deliveryMode === "priority"
+                      ? "Priority Delivery Cost"
+                      : deliveryMode === "standard"
+                      ? "Standard Delivery Cost"
+                      : "Delivery Cost"}
+                    :{getCurrencyCode()}
+                    {totalDeliveryCostForDisplay}
+                  </Typography>
+                )}
+
+                <Typography
+                  style={{
+                    //width: 200,
+                    fontSize: 23,
+                    fontWeight: 700,
+                    marginTop: 2,
+                    marginLeft: 10,
+                  }}
+                >
+                  Total Cost:{getCurrencyCode()}
+                  {totalOrderCostForDisplay}
+                </Typography>
+
+                {deliveryMode === "standard" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your order will be delivered in ${daysToStandardDelivery} from the day it was placed`}
+                  </Typography>
+                )}
+                {deliveryMode === "sameday" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your order will be delivered same day if the order was placed before noon or  ${daysToSameDayDelivery} from the time it was placed`}
+                  </Typography>
+                )}
+                {deliveryMode === "priority" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your order will be delivered in ${daysToPriorityDelivery} from the time it was placed`}
+                  </Typography>
+                )}
+                {deliveryMode === "pickup" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your can pick up your order from any of our locations that is nearest to you. Call our contact numbers for guidance `}
+                  </Typography>
+                )}
+
+                {renderPaymentMethodField()}
+
+                {!isOnlinePayment && paymentMethod === "payOnDelivery" && (
+                  <Button
+                    variant="contained"
+                    className={classes.submitButton}
+                    onClick={onSubmit}
+                  >
+                    {loading ? (
+                      <CircularProgress size={30} color="inherit" />
+                    ) : (
+                      buttonContent()
+                    )}
+                  </Button>
+                )}
+
+                {!isOnlinePayment && paymentMethod === "pickup" && (
+                  <Button
+                    variant="contained"
+                    className={classes.submitButton}
+                    onClick={onSubmit}
+                  >
+                    {loading ? (
+                      <CircularProgress size={30} color="inherit" />
+                    ) : (
+                      buttonContent()
+                    )}
+                  </Button>
+                )}
+
+                {isOnlinePayment && !deliveryMode && (
+                  <Button
+                    variant="contained"
+                    className={classes.submitEmptyFieldButton}
+                    onClick={onPrivateDealDecentralizedAtCostEmptyFieldSubmit}
+                  >
+                    {loading ? (
+                      <CircularProgress size={30} color="inherit" />
+                    ) : (
+                      buttonEmptyFieldsContent()
+                    )}
+                  </Button>
+                )}
+                {isOnlinePayment &&
+                  recipientName &&
+                  recipientPhoneNumber &&
+                  country &&
+                  entity &&
+                  place &&
+                  deliveryMode &&
+                  renderOnlinePayment(
+                    customerEmail,
+                    amountForPayment,
+                    orderNumber,
+                    customerPhoneNumber,
+                    customerName
+                  )}
+              </Grid>
+            )}
         </Grid>
       ) : (
         <Grid container direction="row" className={classes.rootMobile}>
@@ -1665,311 +4583,2372 @@ function CheckoutDeliveryAndPayment(props) {
               justifyContent="center"
             >
               <form id="checkoutDeliveryAndPayment">
-                <Box
-                  sx={{
-                    //width: 1200,
-                    //height: 450,
-                    width: "100%",
-                  }}
-                  noValidate
-                  autoComplete="off"
-                >
-                  <Field
-                    label=""
-                    id="recipientName"
-                    name="recipientName"
-                    type="text"
-                    onChange={onRecipientNameChange}
-                    component={renderRecipientNameField}
-                    style={{ width: 300 }}
-                  />
-                  <Field
-                    label=""
-                    id="recipientPhoneNumber"
-                    name="recipientPhoneNumber"
-                    onChange={onRecipientPhoneNumberChange}
-                    type="text"
-                    component={renderRecipientPhoneNumberField}
-                    style={{ width: 300 }}
-                  />
-                  <Field
-                    label=""
-                    id="recipientAddress"
-                    name="recipientAddress"
-                    //defaultValue={quantity}
-                    type="text"
-                    onChange={onRecipientAddressChange}
-                    component={renderRecipientAddressField}
-                    style={{ width: 300, marginTop: 10 }}
-                  />
-                  <Grid item container direction="column">
-                    <Grid item>
-                      <Field
-                        label=""
-                        id="recipientCountry"
-                        name="recipientCountry"
-                        //defaultValue={quantity}
-                        type="text"
-                        //onChange={onChange}
-                        component={renderCountryField}
-                        //style={{ width: 300, marginTop: 10 }}
-                      />
-                    </Grid>
-                    <Grid item>
-                      <Field
-                        label=""
-                        id="recipientState"
-                        name="recipientState"
-                        //defaultValue={quantity}
-                        type="text"
-                        //onChange={onChange}
-                        component={renderStateField}
-                        //style={{ width: 300, marginTop: 10 }}
-                      />
-                    </Grid>
-                    <Grid item>
-                      <Field
-                        label=""
-                        id="recipientCity"
-                        name="recipientCity"
-                        //defaultValue={quantity}
-                        type="text"
-                        //onChange={onChange}
-                        component={renderCityField}
-                        //style={{ width: 300, marginTop: 10 }}
-                      />
-                    </Grid>
+                {salesPreference !== "deal" && (
+                  <Box
+                    sx={{
+                      //width: 1200,
+                      //height: 450,
+                      width: "100%",
+                    }}
+                    noValidate
+                    autoComplete="off"
+                  >
+                    <Field
+                      label=""
+                      id="recipientName"
+                      name="recipientName"
+                      type="text"
+                      onChange={onRecipientNameChange}
+                      component={renderRecipientNameField}
+                      style={{ width: 300 }}
+                    />
+                    <Field
+                      label=""
+                      id="recipientPhoneNumber"
+                      name="recipientPhoneNumber"
+                      onChange={onRecipientPhoneNumberChange}
+                      type="text"
+                      component={renderRecipientPhoneNumberField}
+                      style={{ width: 300 }}
+                    />
+                    <Field
+                      label=""
+                      id="recipientAddress"
+                      name="recipientAddress"
+                      //defaultValue={quantity}
+                      type="text"
+                      onChange={onRecipientAddressChange}
+                      component={renderRecipientAddressField}
+                      style={{ width: 300, marginTop: 10 }}
+                    />
+                    <Grid item container direction="column">
+                      <Grid item>
+                        <Field
+                          label=""
+                          id="recipientCountry"
+                          name="recipientCountry"
+                          //defaultValue={quantity}
+                          type="text"
+                          //onChange={onChange}
+                          component={renderCountryField}
+                          //style={{ width: 300, marginTop: 10 }}
+                        />
+                      </Grid>
+                      <Grid item>
+                        <Field
+                          label=""
+                          id="recipientState"
+                          name="recipientState"
+                          //defaultValue={quantity}
+                          type="text"
+                          //onChange={onChange}
+                          component={renderStateField}
+                          //style={{ width: 300, marginTop: 10 }}
+                        />
+                      </Grid>
+                      <Grid item>
+                        <Field
+                          label=""
+                          id="recipientCity"
+                          name="recipientCity"
+                          //defaultValue={quantity}
+                          type="text"
+                          //onChange={onChange}
+                          component={renderCityField}
+                          //style={{ width: 300, marginTop: 10 }}
+                        />
+                      </Grid>
 
-                    <Grid item>
+                      <Grid item>
+                        <Field
+                          label=""
+                          id="nearestBusstop"
+                          name="nearestBusstop"
+                          //defaultValue={quantity}
+                          type="text"
+                          onChange={onNearestBusStopChange}
+                          component={renderNearestBusstopField}
+                          //style={{ width: 300, marginTop: 10 }}
+                        />
+                      </Grid>
+                      <Grid item>
+                        <Field
+                          label=""
+                          id="postalCode"
+                          name="postalCode"
+                          //defaultValue={quantity}
+                          type="text"
+                          onChange={onPostalCodeChange}
+                          component={renderPostalCodeField}
+                          //style={{ width: 300, marginTop: 10 }}
+                        />
+                      </Grid>
+                      <Grid item>
+                        <Field
+                          label=""
+                          id="deliveryMode"
+                          name="deliveryMode"
+                          //defaultValue={quantity}
+                          type="text"
+                          //onChange={onChange}
+                          component={renderDeliveryModeField}
+                          //style={{ width: 300, marginTop: 10 }}
+                        />
+                      </Grid>
+                    </Grid>
+                  </Box>
+                )}
+
+                {/**Public Deals start here */}
+
+                {salesPreference === "deal" &&
+                  dealType === "public" &&
+                  dealDeliveryMode === "managed-by-each-beneficiary" && (
+                    <Box
+                      sx={{
+                        //width: 1200,
+                        //height: 450,
+                        width: "100%",
+                      }}
+                      noValidate
+                      autoComplete="off"
+                    >
                       <Field
                         label=""
-                        id="nearestBusstop"
-                        name="nearestBusstop"
-                        //defaultValue={quantity}
+                        id="recipientName"
+                        name="recipientName"
                         type="text"
-                        onChange={onNearestBusStopChange}
-                        component={renderNearestBusstopField}
-                        //style={{ width: 300, marginTop: 10 }}
+                        onChange={onRecipientNameChange}
+                        component={renderRecipientNameField}
+                        style={{ width: 300 }}
                       />
-                    </Grid>
-                    <Grid item>
                       <Field
                         label=""
-                        id="postalCode"
-                        name="postalCode"
-                        //defaultValue={quantity}
+                        id="recipientPhoneNumber"
+                        name="recipientPhoneNumber"
+                        onChange={onRecipientPhoneNumberChange}
                         type="text"
-                        onChange={onPostalCodeChange}
-                        component={renderPostalCodeField}
-                        //style={{ width: 300, marginTop: 10 }}
+                        component={renderRecipientPhoneNumberField}
+                        style={{ width: 300 }}
                       />
-                    </Grid>
-                    <Grid item>
                       <Field
                         label=""
-                        id="deliveryMode"
-                        name="deliveryMode"
+                        id="recipientAddress"
+                        name="recipientAddress"
                         //defaultValue={quantity}
                         type="text"
-                        //onChange={onChange}
-                        component={renderDeliveryModeField}
-                        //style={{ width: 300, marginTop: 10 }}
+                        onChange={onRecipientAddressChange}
+                        component={renderRecipientAddressField}
+                        style={{ width: 300, marginTop: 10 }}
                       />
-                    </Grid>
-                  </Grid>
-                </Box>
+                      <Grid item container direction="column">
+                        <Grid item>
+                          <Field
+                            label=""
+                            id="recipientCountry"
+                            name="recipientCountry"
+                            //defaultValue={quantity}
+                            type="text"
+                            //onChange={onChange}
+                            component={renderCountryField}
+                            //style={{ width: 300, marginTop: 10 }}
+                          />
+                        </Grid>
+                        <Grid item>
+                          <Field
+                            label=""
+                            id="recipientState"
+                            name="recipientState"
+                            //defaultValue={quantity}
+                            type="text"
+                            //onChange={onChange}
+                            component={renderStateField}
+                            //style={{ width: 300, marginTop: 10 }}
+                          />
+                        </Grid>
+                        <Grid item>
+                          <Field
+                            label=""
+                            id="recipientCity"
+                            name="recipientCity"
+                            //defaultValue={quantity}
+                            type="text"
+                            //onChange={onChange}
+                            component={renderCityField}
+                            //style={{ width: 300, marginTop: 10 }}
+                          />
+                        </Grid>
+
+                        <Grid item>
+                          <Field
+                            label=""
+                            id="nearestBusstop"
+                            name="nearestBusstop"
+                            //defaultValue={quantity}
+                            type="text"
+                            onChange={onNearestBusStopChange}
+                            component={renderNearestBusstopField}
+                            //style={{ width: 300, marginTop: 10 }}
+                          />
+                        </Grid>
+                        <Grid item>
+                          <Field
+                            label=""
+                            id="postalCode"
+                            name="postalCode"
+                            //defaultValue={quantity}
+                            type="text"
+                            onChange={onPostalCodeChange}
+                            component={renderPostalCodeField}
+                            //style={{ width: 300, marginTop: 10 }}
+                          />
+                        </Grid>
+                        <Grid item>
+                          <Field
+                            label=""
+                            id="deliveryMode"
+                            name="deliveryMode"
+                            //defaultValue={quantity}
+                            type="text"
+                            //onChange={onChange}
+                            component={renderDeliveryModeField}
+                            //style={{ width: 300, marginTop: 10 }}
+                          />
+                        </Grid>
+                      </Grid>
+                    </Box>
+                  )}
+                {salesPreference === "deal" &&
+                  dealType === "public" &&
+                  dealDeliveryMode === "centralized-at-no-cost" && (
+                    <Box
+                      sx={{
+                        //width: 1200,
+                        //height: 450,
+                        width: "100%",
+                      }}
+                      noValidate
+                      autoComplete="off"
+                    >
+                      <Field
+                        label=""
+                        id="recipientName"
+                        name="recipientName"
+                        type="text"
+                        onChange={onRecipientNameChange}
+                        component={renderRecipientNameField}
+                        style={{ width: 300 }}
+                      />
+                      <Field
+                        label=""
+                        id="recipientPhoneNumber"
+                        name="recipientPhoneNumber"
+                        onChange={onRecipientPhoneNumberChange}
+                        type="text"
+                        component={renderRecipientPhoneNumberField}
+                        style={{ width: 300 }}
+                      />
+                      <Field
+                        label=""
+                        id="recipientAddress"
+                        name="recipientAddress"
+                        defaultValue={dealCentralizedDeliveryLocation}
+                        type="text"
+                        onChange={onRecipientAddressChange}
+                        component={renderDisabledRecipientAddressField}
+                        style={{ width: 300, marginTop: 10 }}
+                        helperText="Place of Delivery"
+                      />
+                    </Box>
+                  )}
+                {salesPreference === "deal" &&
+                  dealType === "public" &&
+                  dealDeliveryMode === "centralized-at-agreed-cost" && (
+                    <Box
+                      sx={{
+                        //width: 1200,
+                        //height: 450,
+                        width: "100%",
+                      }}
+                      noValidate
+                      autoComplete="off"
+                    >
+                      <Field
+                        label=""
+                        id="recipientName"
+                        name="recipientName"
+                        type="text"
+                        onChange={onRecipientNameChange}
+                        component={renderRecipientNameField}
+                        style={{ width: 300 }}
+                      />
+                      <Field
+                        label=""
+                        id="recipientPhoneNumber"
+                        name="recipientPhoneNumber"
+                        onChange={onRecipientPhoneNumberChange}
+                        type="text"
+                        component={renderRecipientPhoneNumberField}
+                        style={{ width: 300 }}
+                      />
+                      <Field
+                        label=""
+                        id="recipientAddress"
+                        name="recipientAddress"
+                        defaultValue={dealCentralizedDeliveryLocation}
+                        type="text"
+                        onChange={onRecipientAddressChange}
+                        component={renderDisabledRecipientAddressField}
+                        style={{ width: 300, marginTop: 10 }}
+                        helperText="Place of Delivery"
+                      />
+                    </Box>
+                  )}
+                {salesPreference === "deal" &&
+                  dealType === "public" &&
+                  dealDeliveryMode === "decentralized-at-no-cost" && (
+                    <Box
+                      sx={{
+                        //width: 1200,
+                        //height: 450,
+                        width: "100%",
+                      }}
+                      noValidate
+                      autoComplete="off"
+                    >
+                      <Field
+                        label=""
+                        id="recipientName"
+                        name="recipientName"
+                        type="text"
+                        onChange={onRecipientNameChange}
+                        component={renderRecipientNameField}
+                        style={{ width: 300 }}
+                      />
+                      <Field
+                        label=""
+                        id="recipientPhoneNumber"
+                        name="recipientPhoneNumber"
+                        onChange={onRecipientPhoneNumberChange}
+                        type="text"
+                        component={renderRecipientPhoneNumberField}
+                        style={{ width: 300 }}
+                      />
+                      <Field
+                        label=""
+                        id="recipientAddress"
+                        name="recipientAddress"
+                        type="text"
+                        component={renderDecentralizedEntityLocationsField}
+                        style={{ width: 300, marginTop: 10 }}
+                      />
+                    </Box>
+                  )}
+                {salesPreference === "deal" &&
+                  dealType === "public" &&
+                  dealDeliveryMode === "decentralized-at-agreed-cost" && (
+                    <Box
+                      sx={{
+                        //width: 1200,
+                        //height: 450,
+                        width: "100%",
+                      }}
+                      noValidate
+                      autoComplete="off"
+                    >
+                      <Field
+                        label=""
+                        id="recipientName"
+                        name="recipientName"
+                        type="text"
+                        onChange={onRecipientNameChange}
+                        component={renderRecipientNameField}
+                        style={{ width: 300 }}
+                      />
+                      <Field
+                        label=""
+                        id="recipientPhoneNumber"
+                        name="recipientPhoneNumber"
+                        onChange={onRecipientPhoneNumberChange}
+                        type="text"
+                        component={renderRecipientPhoneNumberField}
+                        style={{ width: 300 }}
+                      />
+
+                      <Grid item container direction="column">
+                        <Grid item>
+                          <Field
+                            label=""
+                            id="recipientCountry"
+                            name="recipientCountry"
+                            //defaultValue={quantity}
+                            type="text"
+                            //onChange={onChange}
+                            component={renderCountryField}
+                            //style={{ width: 300, marginTop: 10 }}
+                          />
+                        </Grid>
+                        <Grid item>
+                          <Field
+                            label=""
+                            id="recipientState"
+                            name="recipientState"
+                            //defaultValue={quantity}
+                            type="text"
+                            //onChange={onChange}
+                            component={renderEntityField}
+                            //style={{ width: 300, marginTop: 10 }}
+                          />
+                        </Grid>
+                        <Grid item>
+                          <Field
+                            label=""
+                            id="recipientCity"
+                            name="recipientCity"
+                            //defaultValue={quantity}
+                            type="text"
+                            //onChange={onChange}
+                            component={renderPlaceField}
+                            //style={{ width: 300, marginTop: 10 }}
+                          />
+                        </Grid>
+
+                        <Grid item>
+                          <Field
+                            label=""
+                            id="deliveryMode"
+                            name="deliveryMode"
+                            //defaultValue={quantity}
+                            type="text"
+                            //onChange={onChange}
+                            component={renderDeliveryModeField}
+                            //style={{ width: 300, marginTop: 10 }}
+                          />
+                        </Grid>
+                      </Grid>
+                    </Box>
+                  )}
+
+                {/**private deals start here */}
+                {salesPreference === "deal" &&
+                  dealType === "private" &&
+                  dealDeliveryMode === "managed-by-each-beneficiary" && (
+                    <Box
+                      sx={{
+                        //width: 1200,
+                        //height: 450,
+                        width: "100%",
+                      }}
+                      noValidate
+                      autoComplete="off"
+                    >
+                      <Field
+                        label=""
+                        id="recipientName"
+                        name="recipientName"
+                        type="text"
+                        onChange={onRecipientNameChange}
+                        component={renderRecipientNameField}
+                        style={{ width: 300 }}
+                      />
+                      <Field
+                        label=""
+                        id="recipientPhoneNumber"
+                        name="recipientPhoneNumber"
+                        onChange={onRecipientPhoneNumberChange}
+                        type="text"
+                        component={renderRecipientPhoneNumberField}
+                        style={{ width: 300 }}
+                      />
+                      <Field
+                        label=""
+                        id="recipientAddress"
+                        name="recipientAddress"
+                        //defaultValue={quantity}
+                        type="text"
+                        onChange={onRecipientAddressChange}
+                        component={renderRecipientAddressField}
+                        style={{ width: 300, marginTop: 10 }}
+                      />
+                      <Grid item container direction="column">
+                        <Grid item>
+                          <Field
+                            label=""
+                            id="recipientCountry"
+                            name="recipientCountry"
+                            //defaultValue={quantity}
+                            type="text"
+                            //onChange={onChange}
+                            component={renderCountryField}
+                            //style={{ width: 300, marginTop: 10 }}
+                          />
+                        </Grid>
+                        <Grid item>
+                          <Field
+                            label=""
+                            id="recipientState"
+                            name="recipientState"
+                            //defaultValue={quantity}
+                            type="text"
+                            //onChange={onChange}
+                            component={renderStateField}
+                            //style={{ width: 300, marginTop: 10 }}
+                          />
+                        </Grid>
+                        <Grid item>
+                          <Field
+                            label=""
+                            id="recipientCity"
+                            name="recipientCity"
+                            //defaultValue={quantity}
+                            type="text"
+                            //onChange={onChange}
+                            component={renderCityField}
+                            //style={{ width: 300, marginTop: 10 }}
+                          />
+                        </Grid>
+
+                        <Grid item>
+                          <Field
+                            label=""
+                            id="nearestBusstop"
+                            name="nearestBusstop"
+                            //defaultValue={quantity}
+                            type="text"
+                            onChange={onNearestBusStopChange}
+                            component={renderNearestBusstopField}
+                            //style={{ width: 300, marginTop: 10 }}
+                          />
+                        </Grid>
+                        <Grid item>
+                          <Field
+                            label=""
+                            id="postalCode"
+                            name="postalCode"
+                            //defaultValue={quantity}
+                            type="text"
+                            onChange={onPostalCodeChange}
+                            component={renderPostalCodeField}
+                            //style={{ width: 300, marginTop: 10 }}
+                          />
+                        </Grid>
+                        <Grid item>
+                          <Field
+                            label=""
+                            id="deliveryMode"
+                            name="deliveryMode"
+                            //defaultValue={quantity}
+                            type="text"
+                            //onChange={onChange}
+                            component={renderDeliveryModeField}
+                            //style={{ width: 300, marginTop: 10 }}
+                          />
+                        </Grid>
+                      </Grid>
+                    </Box>
+                  )}
+                {salesPreference === "deal" &&
+                  dealType === "private" &&
+                  dealDeliveryMode === "centralized-at-no-cost" && (
+                    <Box
+                      sx={{
+                        //width: 1200,
+                        //height: 450,
+                        width: "100%",
+                      }}
+                      noValidate
+                      autoComplete="off"
+                    >
+                      <Field
+                        label=""
+                        id="recipientName"
+                        name="recipientName"
+                        type="text"
+                        onChange={onRecipientNameChange}
+                        component={renderRecipientNameField}
+                        style={{ width: 300 }}
+                      />
+                      <Field
+                        label=""
+                        id="recipientPhoneNumber"
+                        name="recipientPhoneNumber"
+                        onChange={onRecipientPhoneNumberChange}
+                        type="text"
+                        component={renderRecipientPhoneNumberField}
+                        style={{ width: 300 }}
+                      />
+                      <Field
+                        label=""
+                        id="recipientAddress"
+                        name="recipientAddress"
+                        defaultValue={dealCentralizedDeliveryLocation}
+                        type="text"
+                        onChange={onRecipientAddressChange}
+                        component={renderDisabledRecipientAddressField}
+                        style={{ width: 300, marginTop: 10 }}
+                        helperText="Place of Delivery"
+                      />
+                    </Box>
+                  )}
+                {salesPreference === "deal" &&
+                  dealType === "private" &&
+                  dealDeliveryMode === "centralized-at-agreed-cost" && (
+                    <Box
+                      sx={{
+                        //width: 1200,
+                        //height: 450,
+                        width: "100%",
+                      }}
+                      noValidate
+                      autoComplete="off"
+                    >
+                      <Field
+                        label=""
+                        id="recipientName"
+                        name="recipientName"
+                        type="text"
+                        onChange={onRecipientNameChange}
+                        component={renderRecipientNameField}
+                        style={{ width: 300 }}
+                      />
+                      <Field
+                        label=""
+                        id="recipientPhoneNumber"
+                        name="recipientPhoneNumber"
+                        onChange={onRecipientPhoneNumberChange}
+                        type="text"
+                        component={renderRecipientPhoneNumberField}
+                        style={{ width: 300 }}
+                      />
+                      <Field
+                        label=""
+                        id="recipientAddress"
+                        name="recipientAddress"
+                        defaultValue={dealCentralizedDeliveryLocation}
+                        type="text"
+                        onChange={onRecipientAddressChange}
+                        component={renderDisabledRecipientAddressField}
+                        style={{ width: 300, marginTop: 10 }}
+                        helperText="Place of Delivery"
+                      />
+                    </Box>
+                  )}
+                {salesPreference === "deal" &&
+                  dealType === "private" &&
+                  dealDeliveryMode === "decentralized-at-no-cost" && (
+                    <Box
+                      sx={{
+                        //width: 1200,
+                        //height: 450,
+                        width: "100%",
+                      }}
+                      noValidate
+                      autoComplete="off"
+                    >
+                      <Field
+                        label=""
+                        id="recipientName"
+                        name="recipientName"
+                        type="text"
+                        onChange={onRecipientNameChange}
+                        component={renderRecipientNameField}
+                        style={{ width: 300 }}
+                      />
+                      <Field
+                        label=""
+                        id="recipientPhoneNumber"
+                        name="recipientPhoneNumber"
+                        onChange={onRecipientPhoneNumberChange}
+                        type="text"
+                        component={renderRecipientPhoneNumberField}
+                        style={{ width: 300 }}
+                      />
+                      <Field
+                        label=""
+                        id="recipientAddress"
+                        name="recipientAddress"
+                        type="text"
+                        component={renderDecentralizedEntityLocationsField}
+                        style={{ width: 300, marginTop: 10 }}
+                      />
+                    </Box>
+                  )}
+                {salesPreference === "deal" &&
+                  dealType === "private" &&
+                  dealDeliveryMode === "decentralized-at-agreed-cost" && (
+                    <Box
+                      sx={{
+                        //width: 1200,
+                        //height: 450,
+                        width: "100%",
+                      }}
+                      noValidate
+                      autoComplete="off"
+                    >
+                      <Field
+                        label=""
+                        id="recipientName"
+                        name="recipientName"
+                        type="text"
+                        onChange={onRecipientNameChange}
+                        component={renderRecipientNameField}
+                        style={{ width: 300 }}
+                      />
+                      <Field
+                        label=""
+                        id="recipientPhoneNumber"
+                        name="recipientPhoneNumber"
+                        onChange={onRecipientPhoneNumberChange}
+                        type="text"
+                        component={renderRecipientPhoneNumberField}
+                        style={{ width: 300 }}
+                      />
+
+                      <Grid item container direction="column">
+                        <Grid item>
+                          <Field
+                            label=""
+                            id="recipientCountry"
+                            name="recipientCountry"
+                            //defaultValue={quantity}
+                            type="text"
+                            //onChange={onChange}
+                            component={renderCountryField}
+                            //style={{ width: 300, marginTop: 10 }}
+                          />
+                        </Grid>
+                        <Grid item>
+                          <Field
+                            label=""
+                            id="recipientState"
+                            name="recipientState"
+                            //defaultValue={quantity}
+                            type="text"
+                            //onChange={onChange}
+                            component={renderEntityField}
+                            //style={{ width: 300, marginTop: 10 }}
+                          />
+                        </Grid>
+                        <Grid item>
+                          <Field
+                            label=""
+                            id="recipientCity"
+                            name="recipientCity"
+                            //defaultValue={quantity}
+                            type="text"
+                            //onChange={onChange}
+                            component={renderPlaceField}
+                            //style={{ width: 300, marginTop: 10 }}
+                          />
+                        </Grid>
+
+                        <Grid item>
+                          <Field
+                            label=""
+                            id="deliveryMode"
+                            name="deliveryMode"
+                            //defaultValue={quantity}
+                            type="text"
+                            //onChange={onChange}
+                            component={renderDeliveryModeField}
+                            //style={{ width: 300, marginTop: 10 }}
+                          />
+                        </Grid>
+                      </Grid>
+                    </Box>
+                  )}
               </form>
             </Grid>
           </Grid>
 
-          {/* <Grid
-            item
-            container
-            style={{
-              // width: "34%",
-              marginLeft: 15,
-              border: "1px dashed grey",
-              padding: 15,
-            }}
-          >
-            <Typography
+          {salesPreference !== "deal" && (
+            <Grid
+              item
+              container
               style={{
-                width: 300,
-                fontSize: 20,
-                marginTop: 15,
-                marginLeft: 10,
+                //width: "35%",
+                marginLeft: 15,
+                border: "1px dashed grey",
+                padding: 15,
+                height: 400,
               }}
             >
-              Total Cost:{getCurrencyCode()}
-              {totalProductCostForDisplay}
-            </Typography>
-
-            {renderPaymentMethodField()}
-            {!isOnlinePayment && paymentMethod && (
-              <Typography className={classes.bankDetails}>
-                Make payment to the accounts as detailed on the adjacent blocks
-              </Typography>
-            )}
-            {!isOnlinePayment && paymentMethod === "payOnDelivery" && (
-              <Button
-                variant="contained"
-                className={classes.submitButtonMobile}
-                onClick={[onSubmit, <ThankYou />]}
-              >
-                {loading ? (
-                  <CircularProgress size={30} color="inherit" />
-                ) : (
-                  buttonContent()
-                )}
-              </Button>
-            )}
-           
-
-            {isOnlinePayment &&
-              renderOnlinePayment(customerEmail, amountForPayment, orderNumber)}
-            {isSuccessful && <ThankYou />}
-          </Grid> */}
-          <Grid
-            item
-            container
-            style={{
-              //width: "35%",
-              marginLeft: 15,
-              border: "1px dashed grey",
-              padding: 15,
-              height: 400,
-            }}
-          >
-            <Typography
-              style={{
-                //width: 250,
-                fontSize: 20,
-                fontWeight: 300,
-                marginTop: 2,
-                marginLeft: 10,
-              }}
-            >
-              Total Cost of Product(s):{getCurrencyCode()}
-              {totalProductCostForDisplay}
-            </Typography>
-            <br />
-            <br />
-            {implementVatCollection && (
               <Typography
                 style={{
-                  width: 350,
+                  //width: 250,
                   fontSize: 20,
                   fontWeight: 300,
                   marginTop: 2,
                   marginLeft: 10,
                 }}
               >
-                {`VAT(${vatRate}%)`}:{getCurrencyCode()}
-                {vatForDispplay}
+                Total Cost of Product(s):{getCurrencyCode()}
+                {totalProductCostForDisplay}
               </Typography>
-            )}
-
-            {deliveryMode && (
-              <Typography
-                style={{
-                  width: 350,
-                  fontSize: 20,
-                  fontWeight: 300,
-                  marginTop: 2,
-                  marginLeft: 10,
-                }}
-              >
-                {deliveryMode === "sameday"
-                  ? "Same Day Delivery Cost"
-                  : deliveryMode === "priority"
-                  ? "Priority Delivery Cost"
-                  : deliveryMode === "standard"
-                  ? "Standard Delivery Cost"
-                  : "Delivery Cost"}
-                :{getCurrencyCode()}
-                {totalDeliveryCostForDisplay}
-              </Typography>
-            )}
-
-            <Typography
-              style={{
-                //width: 200,
-                fontSize: 23,
-                fontWeight: 700,
-                marginTop: 2,
-                marginLeft: 10,
-              }}
-            >
-              Total Cost:{getCurrencyCode()}
-              {totalOrderCostForDisplay}
-            </Typography>
-
-            {deliveryMode === "standard" && (
-              <Typography className={classes.bankDetails}>
-                {`Your order will be delivered in ${daysToStandardDelivery} from the day it was placed`}
-              </Typography>
-            )}
-            {deliveryMode === "sameday" && (
-              <Typography className={classes.bankDetails}>
-                {`Your order will be delivered same day if the order was placed before noon or  ${daysToSameDayDelivery} from the time it was placed`}
-              </Typography>
-            )}
-            {deliveryMode === "priority" && (
-              <Typography className={classes.bankDetails}>
-                {`Your order will be delivered in ${daysToPriorityDelivery} from the time it was placed`}
-              </Typography>
-            )}
-            {deliveryMode === "pickup" && (
-              <Typography className={classes.bankDetails}>
-                {`Your can pick up your order from any of our locations that is nearest to you. Call our contact numbers for guidance `}
-              </Typography>
-            )}
-
-            {renderPaymentMethodField()}
-
-            {!isOnlinePayment && paymentMethod === "payOnDelivery" && (
-              <Button
-                variant="contained"
-                className={classes.submitButton}
-                onClick={onSubmit}
-              >
-                {loading ? (
-                  <CircularProgress size={30} color="inherit" />
-                ) : (
-                  buttonContent()
-                )}
-              </Button>
-            )}
-
-            {isOnlinePayment && !deliveryMode && (
-              <Button
-                variant="contained"
-                className={classes.submitEmptyFieldButton}
-                onClick={onEmptyFieldSubmit}
-              >
-                {loading ? (
-                  <CircularProgress size={30} color="inherit" />
-                ) : (
-                  buttonEmptyFieldsContent()
-                )}
-              </Button>
-            )}
-            {isOnlinePayment &&
-              recipientName &&
-              recipientPhoneNumber &&
-              recipientAddress &&
-              country &&
-              state &&
-              city &&
-              deliveryMode &&
-              renderOnlinePayment(
-                customerEmail,
-                amountForPayment,
-                orderNumber,
-                customerPhoneNumber,
-                customerName
+              <br />
+              <br />
+              {implementVatCollection && (
+                <Typography
+                  style={{
+                    width: 350,
+                    fontSize: 20,
+                    fontWeight: 300,
+                    marginTop: 2,
+                    marginLeft: 10,
+                  }}
+                >
+                  {`VAT(${vatRate}%)`}:{getCurrencyCode()}
+                  {vatForDispplay}
+                </Typography>
               )}
-          </Grid>
+
+              {deliveryMode && (
+                <Typography
+                  style={{
+                    width: 350,
+                    fontSize: 20,
+                    fontWeight: 300,
+                    marginTop: 2,
+                    marginLeft: 10,
+                  }}
+                >
+                  {deliveryMode === "sameday"
+                    ? "Same Day Delivery Cost"
+                    : deliveryMode === "priority"
+                    ? "Priority Delivery Cost"
+                    : deliveryMode === "standard"
+                    ? "Standard Delivery Cost"
+                    : "Delivery Cost"}
+                  :{getCurrencyCode()}
+                  {totalDeliveryCostForDisplay}
+                </Typography>
+              )}
+
+              <Typography
+                style={{
+                  //width: 200,
+                  fontSize: 23,
+                  fontWeight: 700,
+                  marginTop: 2,
+                  marginLeft: 10,
+                }}
+              >
+                Total Cost:{getCurrencyCode()}
+                {totalOrderCostForDisplay}
+              </Typography>
+
+              {deliveryMode === "standard" && (
+                <Typography className={classes.bankDetails}>
+                  {`Your order will be delivered in ${daysToStandardDelivery} from the day it was placed`}
+                </Typography>
+              )}
+              {deliveryMode === "sameday" && (
+                <Typography className={classes.bankDetails}>
+                  {`Your order will be delivered same day if the order was placed before noon or  ${daysToSameDayDelivery} from the time it was placed`}
+                </Typography>
+              )}
+              {deliveryMode === "priority" && (
+                <Typography className={classes.bankDetails}>
+                  {`Your order will be delivered in ${daysToPriorityDelivery} from the time it was placed`}
+                </Typography>
+              )}
+              {deliveryMode === "pickup" && (
+                <Typography className={classes.bankDetails}>
+                  {`Your can pick up your order from any of our locations that is nearest to you. Call our contact numbers for guidance `}
+                </Typography>
+              )}
+
+              {renderPaymentMethodField()}
+
+              {!isOnlinePayment && paymentMethod === "payOnDelivery" && (
+                <Button
+                  variant="contained"
+                  className={classes.submitButton}
+                  onClick={onSubmit}
+                >
+                  {loading ? (
+                    <CircularProgress size={30} color="inherit" />
+                  ) : (
+                    buttonContent()
+                  )}
+                </Button>
+              )}
+
+              {isOnlinePayment && !deliveryMode && (
+                <Button
+                  variant="contained"
+                  className={classes.submitEmptyFieldButton}
+                  onClick={onEmptyFieldSubmit}
+                >
+                  {loading ? (
+                    <CircularProgress size={30} color="inherit" />
+                  ) : (
+                    buttonEmptyFieldsContent()
+                  )}
+                </Button>
+              )}
+              {isOnlinePayment &&
+                recipientName &&
+                recipientPhoneNumber &&
+                recipientAddress &&
+                country &&
+                state &&
+                city &&
+                deliveryMode &&
+                renderOnlinePayment(
+                  customerEmail,
+                  amountForPayment,
+                  orderNumber,
+                  customerPhoneNumber,
+                  customerName
+                )}
+            </Grid>
+          )}
+
+          {salesPreference === "deal" &&
+            dealType === "public" &&
+            dealDeliveryMode === "managed-by-each-beneficiary" && (
+              <Grid
+                item
+                container
+                style={{
+                  //width: "35%",
+                  marginLeft: 15,
+                  border: "1px dashed grey",
+                  padding: 15,
+                  height: 400,
+                }}
+              >
+                <Typography
+                  style={{
+                    //width: 250,
+                    fontSize: 20,
+                    fontWeight: 300,
+                    marginTop: 2,
+                    marginLeft: 10,
+                  }}
+                >
+                  Total Cost of Product(s):{getCurrencyCode()}
+                  {totalProductCostForDisplay}
+                </Typography>
+                <br />
+                <br />
+                {implementVatCollection && (
+                  <Typography
+                    style={{
+                      width: 350,
+                      fontSize: 20,
+                      fontWeight: 300,
+                      marginTop: 2,
+                      marginLeft: 10,
+                    }}
+                  >
+                    {`VAT(${vatRate}%)`}:{getCurrencyCode()}
+                    {vatForDispplay}
+                  </Typography>
+                )}
+
+                {deliveryMode && (
+                  <Typography
+                    style={{
+                      width: 350,
+                      fontSize: 20,
+                      fontWeight: 300,
+                      marginTop: 2,
+                      marginLeft: 10,
+                    }}
+                  >
+                    {deliveryMode === "sameday"
+                      ? "Same Day Delivery Cost"
+                      : deliveryMode === "priority"
+                      ? "Priority Delivery Cost"
+                      : deliveryMode === "standard"
+                      ? "Standard Delivery Cost"
+                      : "Delivery Cost"}
+                    :{getCurrencyCode()}
+                    {totalDeliveryCostForDisplay}
+                  </Typography>
+                )}
+
+                <Typography
+                  style={{
+                    //width: 200,
+                    fontSize: 23,
+                    fontWeight: 700,
+                    marginTop: 2,
+                    marginLeft: 10,
+                  }}
+                >
+                  Total Cost:{getCurrencyCode()}
+                  {totalOrderCostForDisplay}
+                </Typography>
+
+                {deliveryMode === "standard" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your order will be delivered in ${daysToStandardDelivery} from the day it was placed`}
+                  </Typography>
+                )}
+                {deliveryMode === "sameday" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your order will be delivered same day if the order was placed before noon or  ${daysToSameDayDelivery} from the time it was placed`}
+                  </Typography>
+                )}
+                {deliveryMode === "priority" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your order will be delivered in ${daysToPriorityDelivery} from the time it was placed`}
+                  </Typography>
+                )}
+                {deliveryMode === "pickup" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your can pick up your order from any of our locations that is nearest to you. Call our contact numbers for guidance `}
+                  </Typography>
+                )}
+
+                {renderPaymentMethodField()}
+
+                {!isOnlinePayment && paymentMethod === "payOnDelivery" && (
+                  <Button
+                    variant="contained"
+                    className={classes.submitButton}
+                    onClick={onSubmit}
+                  >
+                    {loading ? (
+                      <CircularProgress size={30} color="inherit" />
+                    ) : (
+                      buttonContent()
+                    )}
+                  </Button>
+                )}
+
+                {isOnlinePayment && !deliveryMode && (
+                  <Button
+                    variant="contained"
+                    className={classes.submitEmptyFieldButton}
+                    onClick={onEmptyFieldSubmit}
+                  >
+                    {loading ? (
+                      <CircularProgress size={30} color="inherit" />
+                    ) : (
+                      buttonEmptyFieldsContent()
+                    )}
+                  </Button>
+                )}
+                {isOnlinePayment &&
+                  recipientName &&
+                  recipientPhoneNumber &&
+                  recipientAddress &&
+                  country &&
+                  state &&
+                  city &&
+                  deliveryMode &&
+                  renderOnlinePayment(
+                    customerEmail,
+                    amountForPayment,
+                    orderNumber,
+                    customerPhoneNumber,
+                    customerName
+                  )}
+              </Grid>
+            )}
+
+          {salesPreference === "deal" &&
+            dealType === "public" &&
+            dealDeliveryMode === "centralized-at-no-cost" && (
+              <Grid
+                item
+                container
+                style={{
+                  //width: "35%",
+                  marginLeft: 15,
+                  border: "1px dashed grey",
+                  padding: 15,
+                  height: 400,
+                }}
+              >
+                <Typography
+                  style={{
+                    //width: 250,
+                    fontSize: 20,
+                    fontWeight: 300,
+                    marginTop: 2,
+                    marginLeft: 10,
+                  }}
+                >
+                  Total Cost of Product(s):{getCurrencyCode()}
+                  {totalProductCostForDisplay}
+                </Typography>
+                <br />
+                <br />
+                {implementVatCollection && (
+                  <Typography
+                    style={{
+                      width: 350,
+                      fontSize: 20,
+                      fontWeight: 300,
+                      marginTop: 2,
+                      marginLeft: 10,
+                    }}
+                  >
+                    {`VAT(${vatRate}%)`}:{getCurrencyCode()}
+                    {vatForDispplay}
+                  </Typography>
+                )}
+
+                {deliveryMode && (
+                  <Typography
+                    style={{
+                      width: 350,
+                      fontSize: 20,
+                      fontWeight: 300,
+                      marginTop: 2,
+                      marginLeft: 10,
+                    }}
+                  >
+                    {deliveryMode === "sameday"
+                      ? "Same Day Delivery Cost"
+                      : deliveryMode === "priority"
+                      ? "Priority Delivery Cost"
+                      : deliveryMode === "standard"
+                      ? "Standard Delivery Cost"
+                      : "Delivery Cost"}
+                    :{getCurrencyCode()}
+                    {totalDeliveryCostForDisplay}
+                  </Typography>
+                )}
+
+                <Typography
+                  style={{
+                    //width: 200,
+                    fontSize: 23,
+                    fontWeight: 700,
+                    marginTop: 2,
+                    marginLeft: 10,
+                  }}
+                >
+                  Total Cost:{getCurrencyCode()}
+                  {totalOrderCostForDisplay}
+                </Typography>
+
+                {deliveryMode === "standard" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your order will be delivered in ${daysToStandardDelivery} from the day it was placed`}
+                  </Typography>
+                )}
+                {deliveryMode === "sameday" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your order will be delivered same day if the order was placed before noon or  ${daysToSameDayDelivery} from the time it was placed`}
+                  </Typography>
+                )}
+                {deliveryMode === "priority" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your order will be delivered in ${daysToPriorityDelivery} from the time it was placed`}
+                  </Typography>
+                )}
+                {deliveryMode === "pickup" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your can pick up your order from any of our locations that is nearest to you. Call our contact numbers for guidance `}
+                  </Typography>
+                )}
+
+                {renderPaymentMethodField()}
+
+                {!isOnlinePayment && paymentMethod === "payOnDelivery" && (
+                  <Button
+                    variant="contained"
+                    className={classes.submitButton}
+                    onClick={onSubmit}
+                  >
+                    {loading ? (
+                      <CircularProgress size={30} color="inherit" />
+                    ) : (
+                      buttonContent()
+                    )}
+                  </Button>
+                )}
+
+                {isOnlinePayment && isBtnVisible && (
+                  <Button
+                    variant="contained"
+                    className={classes.submitEmptyFieldButton}
+                    onClick={onPublicDealCentralizedAtNoCostEmptyFieldSubmit}
+                  >
+                    {loading ? (
+                      <CircularProgress size={30} color="inherit" />
+                    ) : (
+                      buttonEmptyFieldsContent()
+                    )}
+                  </Button>
+                )}
+                {isOnlinePayment &&
+                  recipientName &&
+                  recipientPhoneNumber &&
+                  // recipientAddress &&
+                  // country &&
+                  // state &&
+                  // city &&
+                  // deliveryMode &&
+                  renderOnlinePayment(
+                    customerEmail,
+                    amountForPayment,
+                    orderNumber,
+                    customerPhoneNumber,
+                    customerName
+                  )}
+              </Grid>
+            )}
+          {salesPreference === "deal" &&
+            dealType === "public" &&
+            dealDeliveryMode === "centralized-at-agreed-cost" && (
+              <Grid
+                item
+                container
+                style={{
+                  //width: "35%",
+                  marginLeft: 15,
+                  border: "1px dashed grey",
+                  padding: 15,
+                  height: 400,
+                }}
+              >
+                <Typography
+                  style={{
+                    //width: 250,
+                    fontSize: 20,
+                    fontWeight: 300,
+                    marginTop: 2,
+                    marginLeft: 10,
+                  }}
+                >
+                  Total Cost of Product(s):{getCurrencyCode()}
+                  {totalProductCostForDisplay}
+                </Typography>
+                <br />
+                <br />
+                {implementVatCollection && (
+                  <Typography
+                    style={{
+                      width: 350,
+                      fontSize: 20,
+                      fontWeight: 300,
+                      marginTop: 2,
+                      marginLeft: 10,
+                    }}
+                  >
+                    {`VAT(${vatRate}%)`}:{getCurrencyCode()}
+                    {vatForDispplay}
+                  </Typography>
+                )}
+
+                <Typography
+                  style={{
+                    width: 350,
+                    fontSize: 20,
+                    fontWeight: 300,
+                    marginTop: 2,
+                    marginLeft: 10,
+                  }}
+                >
+                  {/* {deliveryMode === "sameday"
+                      ? "Same Day Delivery Cost"
+                      : deliveryMode === "priority"
+                      ? "Priority Delivery Cost"
+                      : deliveryMode === "standard"
+                      ? "Standard Delivery Cost"
+                      : "Delivery Cost"} */}
+                  Delivery Cost :{getCurrencyCode()}
+                  {totalDeliveryCostForDisplay}
+                </Typography>
+
+                <Typography
+                  style={{
+                    //width: 200,
+                    fontSize: 23,
+                    fontWeight: 700,
+                    marginTop: 2,
+                    marginLeft: 10,
+                  }}
+                >
+                  Total Cost:{getCurrencyCode()}
+                  {totalOrderCostForDisplay}
+                </Typography>
+
+                {deliveryMode === "standard" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your order will be delivered in ${daysToStandardDelivery} from the day it was placed`}
+                  </Typography>
+                )}
+                {deliveryMode === "sameday" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your order will be delivered same day if the order was placed before noon or  ${daysToSameDayDelivery} from the time it was placed`}
+                  </Typography>
+                )}
+                {deliveryMode === "priority" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your order will be delivered in ${daysToPriorityDelivery} from the time it was placed`}
+                  </Typography>
+                )}
+                {deliveryMode === "pickup" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your can pick up your order from any of our locations that is nearest to you. Call our contact numbers for guidance `}
+                  </Typography>
+                )}
+
+                {renderPaymentMethodField()}
+
+                {!isOnlinePayment && paymentMethod === "payOnDelivery" && (
+                  <Button
+                    variant="contained"
+                    className={classes.submitButton}
+                    onClick={onSubmit}
+                  >
+                    {loading ? (
+                      <CircularProgress size={30} color="inherit" />
+                    ) : (
+                      buttonContent()
+                    )}
+                  </Button>
+                )}
+
+                {isOnlinePayment && isBtnVisible && (
+                  <Button
+                    variant="contained"
+                    className={classes.submitEmptyFieldButton}
+                    onClick={
+                      onPublicDealCentralizedAtAgreedCostEmptyFieldSubmit
+                    }
+                  >
+                    {loading ? (
+                      <CircularProgress size={30} color="inherit" />
+                    ) : (
+                      buttonEmptyFieldsContent()
+                    )}
+                  </Button>
+                )}
+                {isOnlinePayment &&
+                  recipientName &&
+                  recipientPhoneNumber &&
+                  // recipientAddress &&
+                  // country &&
+                  // state &&
+                  // city &&
+                  // deliveryMode &&
+                  renderOnlinePayment(
+                    customerEmail,
+                    amountForPayment,
+                    orderNumber,
+                    customerPhoneNumber,
+                    customerName
+                  )}
+              </Grid>
+            )}
+
+          {salesPreference === "deal" &&
+            dealType === "public" &&
+            dealDeliveryMode === "decentralized-at-no-cost" && (
+              <Grid
+                item
+                container
+                style={{
+                  //width: "35%",
+                  marginLeft: 15,
+                  border: "1px dashed grey",
+                  padding: 15,
+                  height: 400,
+                }}
+              >
+                <Typography
+                  style={{
+                    //width: 250,
+                    fontSize: 20,
+                    fontWeight: 300,
+                    marginTop: 2,
+                    marginLeft: 10,
+                  }}
+                >
+                  Total Cost of Product(s):{getCurrencyCode()}
+                  {totalProductCostForDisplay}
+                </Typography>
+                <br />
+                <br />
+                {implementVatCollection && (
+                  <Typography
+                    style={{
+                      width: 350,
+                      fontSize: 20,
+                      fontWeight: 300,
+                      marginTop: 2,
+                      marginLeft: 10,
+                    }}
+                  >
+                    {`VAT(${vatRate}%)`}:{getCurrencyCode()}
+                    {vatForDispplay}
+                  </Typography>
+                )}
+
+                {deliveryMode && (
+                  <Typography
+                    style={{
+                      width: 350,
+                      fontSize: 20,
+                      fontWeight: 300,
+                      marginTop: 2,
+                      marginLeft: 10,
+                    }}
+                  >
+                    {deliveryMode === "sameday"
+                      ? "Same Day Delivery Cost"
+                      : deliveryMode === "priority"
+                      ? "Priority Delivery Cost"
+                      : deliveryMode === "standard"
+                      ? "Standard Delivery Cost"
+                      : "Delivery Cost"}
+                    :{getCurrencyCode()}
+                    {totalDeliveryCostForDisplay}
+                  </Typography>
+                )}
+
+                <Typography
+                  style={{
+                    //width: 200,
+                    fontSize: 23,
+                    fontWeight: 700,
+                    marginTop: 2,
+                    marginLeft: 10,
+                  }}
+                >
+                  Total Cost:{getCurrencyCode()}
+                  {totalOrderCostForDisplay}
+                </Typography>
+
+                {deliveryMode === "standard" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your order will be delivered in ${daysToStandardDelivery} from the day it was placed`}
+                  </Typography>
+                )}
+                {deliveryMode === "sameday" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your order will be delivered same day if the order was placed before noon or  ${daysToSameDayDelivery} from the time it was placed`}
+                  </Typography>
+                )}
+                {deliveryMode === "priority" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your order will be delivered in ${daysToPriorityDelivery} from the time it was placed`}
+                  </Typography>
+                )}
+                {deliveryMode === "pickup" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your can pick up your order from any of our locations that is nearest to you. Call our contact numbers for guidance `}
+                  </Typography>
+                )}
+
+                {renderPaymentMethodField()}
+
+                {!isOnlinePayment && paymentMethod === "payOnDelivery" && (
+                  <Button
+                    variant="contained"
+                    className={classes.submitButton}
+                    onClick={onSubmit}
+                  >
+                    {loading ? (
+                      <CircularProgress size={30} color="inherit" />
+                    ) : (
+                      buttonContent()
+                    )}
+                  </Button>
+                )}
+
+                {isOnlinePayment && !entityLocation && (
+                  <Button
+                    variant="contained"
+                    className={classes.submitEmptyFieldButton}
+                    onClick={onPublicDealDecentralizedAtNoCostEmptyFieldSubmit}
+                  >
+                    {loading ? (
+                      <CircularProgress size={30} color="inherit" />
+                    ) : (
+                      buttonEmptyFieldsContent()
+                    )}
+                  </Button>
+                )}
+                {isOnlinePayment &&
+                  recipientName &&
+                  recipientPhoneNumber &&
+                  entityLocation &&
+                  renderOnlinePayment(
+                    customerEmail,
+                    amountForPayment,
+                    orderNumber,
+                    customerPhoneNumber,
+                    customerName
+                  )}
+              </Grid>
+            )}
+
+          {salesPreference === "deal" &&
+            dealType === "public" &&
+            dealDeliveryMode === "decentralized-at-agreed-cost" && (
+              <Grid
+                item
+                container
+                style={{
+                  //width: "35%",
+                  marginLeft: 15,
+                  border: "1px dashed grey",
+                  padding: 15,
+                  height: 400,
+                }}
+              >
+                <Typography
+                  style={{
+                    //width: 250,
+                    fontSize: 20,
+                    fontWeight: 300,
+                    marginTop: 2,
+                    marginLeft: 10,
+                  }}
+                >
+                  Total Cost of Product(s):{getCurrencyCode()}
+                  {totalProductCostForDisplay}
+                </Typography>
+                <br />
+                <br />
+                {implementVatCollection && (
+                  <Typography
+                    style={{
+                      width: 350,
+                      fontSize: 20,
+                      fontWeight: 300,
+                      marginTop: 2,
+                      marginLeft: 10,
+                    }}
+                  >
+                    {`VAT(${vatRate}%)`}:{getCurrencyCode()}
+                    {vatForDispplay}
+                  </Typography>
+                )}
+
+                {deliveryMode && (
+                  <Typography
+                    style={{
+                      width: 350,
+                      fontSize: 20,
+                      fontWeight: 300,
+                      marginTop: 2,
+                      marginLeft: 10,
+                    }}
+                  >
+                    {deliveryMode === "sameday"
+                      ? "Same Day Delivery Cost"
+                      : deliveryMode === "priority"
+                      ? "Priority Delivery Cost"
+                      : deliveryMode === "standard"
+                      ? "Standard Delivery Cost"
+                      : "Delivery Cost"}
+                    :{getCurrencyCode()}
+                    {totalDeliveryCostForDisplay}
+                  </Typography>
+                )}
+
+                <Typography
+                  style={{
+                    //width: 200,
+                    fontSize: 23,
+                    fontWeight: 700,
+                    marginTop: 2,
+                    marginLeft: 10,
+                  }}
+                >
+                  Total Cost:{getCurrencyCode()}
+                  {totalOrderCostForDisplay}
+                </Typography>
+
+                {deliveryMode === "standard" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your order will be delivered in ${daysToStandardDelivery} from the day it was placed`}
+                  </Typography>
+                )}
+                {deliveryMode === "sameday" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your order will be delivered same day if the order was placed before noon or  ${daysToSameDayDelivery} from the time it was placed`}
+                  </Typography>
+                )}
+                {deliveryMode === "priority" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your order will be delivered in ${daysToPriorityDelivery} from the time it was placed`}
+                  </Typography>
+                )}
+                {deliveryMode === "pickup" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your can pick up your order from any of our locations that is nearest to you. Call our contact numbers for guidance `}
+                  </Typography>
+                )}
+
+                {renderPaymentMethodField()}
+
+                {!isOnlinePayment && paymentMethod === "payOnDelivery" && (
+                  <Button
+                    variant="contained"
+                    className={classes.submitButton}
+                    onClick={onSubmit}
+                  >
+                    {loading ? (
+                      <CircularProgress size={30} color="inherit" />
+                    ) : (
+                      buttonContent()
+                    )}
+                  </Button>
+                )}
+
+                {isOnlinePayment && !deliveryMode && (
+                  <Button
+                    variant="contained"
+                    className={classes.submitEmptyFieldButton}
+                    onClick={onPublicDealDecentralizedAtCostEmptyFieldSubmit}
+                  >
+                    {loading ? (
+                      <CircularProgress size={30} color="inherit" />
+                    ) : (
+                      buttonEmptyFieldsContent()
+                    )}
+                  </Button>
+                )}
+                {isOnlinePayment &&
+                  recipientName &&
+                  recipientPhoneNumber &&
+                  country &&
+                  entity &&
+                  place &&
+                  deliveryMode &&
+                  renderOnlinePayment(
+                    customerEmail,
+                    amountForPayment,
+                    orderNumber,
+                    customerPhoneNumber,
+                    customerName
+                  )}
+              </Grid>
+            )}
+
+          {salesPreference === "deal" &&
+            dealType === "private" &&
+            dealDeliveryMode === "managed-by-each-beneficiary" && (
+              <Grid
+                item
+                container
+                style={{
+                  //width: "35%",
+                  marginLeft: 15,
+                  border: "1px dashed grey",
+                  padding: 15,
+                  height: 400,
+                }}
+              >
+                <Typography
+                  style={{
+                    //width: 250,
+                    fontSize: 20,
+                    fontWeight: 300,
+                    marginTop: 2,
+                    marginLeft: 10,
+                  }}
+                >
+                  Total Cost of Product(s):{getCurrencyCode()}
+                  {totalProductCostForDisplay}
+                </Typography>
+                <br />
+                <br />
+                {implementVatCollection && (
+                  <Typography
+                    style={{
+                      width: 350,
+                      fontSize: 20,
+                      fontWeight: 300,
+                      marginTop: 2,
+                      marginLeft: 10,
+                    }}
+                  >
+                    {`VAT(${vatRate}%)`}:{getCurrencyCode()}
+                    {vatForDispplay}
+                  </Typography>
+                )}
+
+                {deliveryMode && (
+                  <Typography
+                    style={{
+                      width: 350,
+                      fontSize: 20,
+                      fontWeight: 300,
+                      marginTop: 2,
+                      marginLeft: 10,
+                    }}
+                  >
+                    {deliveryMode === "sameday"
+                      ? "Same Day Delivery Cost"
+                      : deliveryMode === "priority"
+                      ? "Priority Delivery Cost"
+                      : deliveryMode === "standard"
+                      ? "Standard Delivery Cost"
+                      : "Delivery Cost"}
+                    :{getCurrencyCode()}
+                    {totalDeliveryCostForDisplay}
+                  </Typography>
+                )}
+
+                <Typography
+                  style={{
+                    //width: 200,
+                    fontSize: 23,
+                    fontWeight: 700,
+                    marginTop: 2,
+                    marginLeft: 10,
+                  }}
+                >
+                  Total Cost:{getCurrencyCode()}
+                  {totalOrderCostForDisplay}
+                </Typography>
+
+                {deliveryMode === "standard" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your order will be delivered in ${daysToStandardDelivery} from the day it was placed`}
+                  </Typography>
+                )}
+                {deliveryMode === "sameday" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your order will be delivered same day if the order was placed before noon or  ${daysToSameDayDelivery} from the time it was placed`}
+                  </Typography>
+                )}
+                {deliveryMode === "priority" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your order will be delivered in ${daysToPriorityDelivery} from the time it was placed`}
+                  </Typography>
+                )}
+                {deliveryMode === "pickup" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your can pick up your order from any of our locations that is nearest to you. Call our contact numbers for guidance `}
+                  </Typography>
+                )}
+
+                {renderPaymentMethodField()}
+
+                {!isOnlinePayment && paymentMethod === "payOnDelivery" && (
+                  <Button
+                    variant="contained"
+                    className={classes.submitButton}
+                    onClick={onSubmit}
+                  >
+                    {loading ? (
+                      <CircularProgress size={30} color="inherit" />
+                    ) : (
+                      buttonContent()
+                    )}
+                  </Button>
+                )}
+
+                {isOnlinePayment && !deliveryMode && (
+                  <Button
+                    variant="contained"
+                    className={classes.submitEmptyFieldButton}
+                    onClick={onEmptyFieldSubmit}
+                  >
+                    {loading ? (
+                      <CircularProgress size={30} color="inherit" />
+                    ) : (
+                      buttonEmptyFieldsContent()
+                    )}
+                  </Button>
+                )}
+                {isOnlinePayment &&
+                  recipientName &&
+                  recipientPhoneNumber &&
+                  recipientAddress &&
+                  country &&
+                  state &&
+                  city &&
+                  deliveryMode &&
+                  renderOnlinePayment(
+                    customerEmail,
+                    amountForPayment,
+                    orderNumber,
+                    customerPhoneNumber,
+                    customerName
+                  )}
+              </Grid>
+            )}
+
+          {salesPreference === "deal" &&
+            dealType === "private" &&
+            dealDeliveryMode === "centralized-at-no-cost" && (
+              <Grid
+                item
+                container
+                style={{
+                  //width: "35%",
+                  marginLeft: 15,
+                  border: "1px dashed grey",
+                  padding: 15,
+                  height: 400,
+                }}
+              >
+                <Typography
+                  style={{
+                    //width: 250,
+                    fontSize: 20,
+                    fontWeight: 300,
+                    marginTop: 2,
+                    marginLeft: 10,
+                  }}
+                >
+                  Total Cost of Product(s):{getCurrencyCode()}
+                  {totalProductCostForDisplay}
+                </Typography>
+                <br />
+                <br />
+                {implementVatCollection && (
+                  <Typography
+                    style={{
+                      width: 350,
+                      fontSize: 20,
+                      fontWeight: 300,
+                      marginTop: 2,
+                      marginLeft: 10,
+                    }}
+                  >
+                    {`VAT(${vatRate}%)`}:{getCurrencyCode()}
+                    {vatForDispplay}
+                  </Typography>
+                )}
+
+                {deliveryMode && (
+                  <Typography
+                    style={{
+                      width: 350,
+                      fontSize: 20,
+                      fontWeight: 300,
+                      marginTop: 2,
+                      marginLeft: 10,
+                    }}
+                  >
+                    {deliveryMode === "sameday"
+                      ? "Same Day Delivery Cost"
+                      : deliveryMode === "priority"
+                      ? "Priority Delivery Cost"
+                      : deliveryMode === "standard"
+                      ? "Standard Delivery Cost"
+                      : "Delivery Cost"}
+                    :{getCurrencyCode()}
+                    {totalDeliveryCostForDisplay}
+                  </Typography>
+                )}
+
+                <Typography
+                  style={{
+                    //width: 200,
+                    fontSize: 23,
+                    fontWeight: 700,
+                    marginTop: 2,
+                    marginLeft: 10,
+                  }}
+                >
+                  Total Cost:{getCurrencyCode()}
+                  {totalOrderCostForDisplay}
+                </Typography>
+
+                {deliveryMode === "standard" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your order will be delivered in ${daysToStandardDelivery} from the day it was placed`}
+                  </Typography>
+                )}
+                {deliveryMode === "sameday" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your order will be delivered same day if the order was placed before noon or  ${daysToSameDayDelivery} from the time it was placed`}
+                  </Typography>
+                )}
+                {deliveryMode === "priority" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your order will be delivered in ${daysToPriorityDelivery} from the time it was placed`}
+                  </Typography>
+                )}
+                {deliveryMode === "pickup" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your can pick up your order from any of our locations that is nearest to you. Call our contact numbers for guidance `}
+                  </Typography>
+                )}
+
+                {renderPaymentMethodField()}
+
+                {!isOnlinePayment && paymentMethod === "payOnDelivery" && (
+                  <Button
+                    variant="contained"
+                    className={classes.submitButton}
+                    onClick={onSubmit}
+                  >
+                    {loading ? (
+                      <CircularProgress size={30} color="inherit" />
+                    ) : (
+                      buttonContent()
+                    )}
+                  </Button>
+                )}
+
+                {isOnlinePayment && deliveryMode === null && (
+                  <Button
+                    variant="contained"
+                    className={classes.submitEmptyFieldButton}
+                    onClick={onPrivateDealCentralizedAtNoCostEmptyFieldSubmit}
+                  >
+                    {loading ? (
+                      <CircularProgress size={30} color="inherit" />
+                    ) : (
+                      buttonEmptyFieldsContent()
+                    )}
+                  </Button>
+                )}
+                {isOnlinePayment &&
+                  isBtnVisible &&
+                  recipientName &&
+                  recipientPhoneNumber &&
+                  renderOnlinePayment(
+                    customerEmail,
+                    amountForPayment,
+                    orderNumber,
+                    customerPhoneNumber,
+                    customerName
+                  )}
+              </Grid>
+            )}
+
+          {salesPreference === "deal" &&
+            dealType === "private" &&
+            dealDeliveryMode === "centralized-at-agreed-cost" && (
+              <Grid
+                item
+                container
+                style={{
+                  //width: "35%",
+                  marginLeft: 15,
+                  border: "1px dashed grey",
+                  padding: 15,
+                  height: 400,
+                }}
+              >
+                <Typography
+                  style={{
+                    //width: 250,
+                    fontSize: 20,
+                    fontWeight: 300,
+                    marginTop: 2,
+                    marginLeft: 10,
+                  }}
+                >
+                  Total Cost of Product(s):{getCurrencyCode()}
+                  {totalProductCostForDisplay}
+                </Typography>
+                <br />
+                <br />
+                {implementVatCollection && (
+                  <Typography
+                    style={{
+                      width: 350,
+                      fontSize: 20,
+                      fontWeight: 300,
+                      marginTop: 2,
+                      marginLeft: 10,
+                    }}
+                  >
+                    {`VAT(${vatRate}%)`}:{getCurrencyCode()}
+                    {vatForDispplay}
+                  </Typography>
+                )}
+
+                <Typography
+                  style={{
+                    width: 350,
+                    fontSize: 20,
+                    fontWeight: 300,
+                    marginTop: 2,
+                    marginLeft: 10,
+                  }}
+                >
+                  {/* {deliveryMode === "sameday"
+                      ? "Same Day Delivery Cost"
+                      : deliveryMode === "priority"
+                      ? "Priority Delivery Cost"
+                      : deliveryMode === "standard"
+                      ? "Standard Delivery Cost"
+                      : "Delivery Cost"} */}
+                  Delivery Cost :{getCurrencyCode()}
+                  {totalDeliveryCostForDisplay}
+                </Typography>
+
+                <Typography
+                  style={{
+                    //width: 200,
+                    fontSize: 23,
+                    fontWeight: 700,
+                    marginTop: 2,
+                    marginLeft: 10,
+                  }}
+                >
+                  Total Cost:{getCurrencyCode()}
+                  {totalOrderCostForDisplay}
+                </Typography>
+
+                {deliveryMode === "standard" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your order will be delivered in ${daysToStandardDelivery} from the day it was placed`}
+                  </Typography>
+                )}
+                {deliveryMode === "sameday" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your order will be delivered same day if the order was placed before noon or  ${daysToSameDayDelivery} from the time it was placed`}
+                  </Typography>
+                )}
+                {deliveryMode === "priority" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your order will be delivered in ${daysToPriorityDelivery} from the time it was placed`}
+                  </Typography>
+                )}
+                {deliveryMode === "pickup" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your can pick up your order from any of our locations that is nearest to you. Call our contact numbers for guidance `}
+                  </Typography>
+                )}
+
+                {renderPaymentMethodField()}
+
+                {!isOnlinePayment && paymentMethod === "payOnDelivery" && (
+                  <Button
+                    variant="contained"
+                    className={classes.submitButton}
+                    onClick={onSubmit}
+                  >
+                    {loading ? (
+                      <CircularProgress size={30} color="inherit" />
+                    ) : (
+                      buttonContent()
+                    )}
+                  </Button>
+                )}
+
+                {isOnlinePayment && isBtnVisible && (
+                  <Button
+                    variant="contained"
+                    className={classes.submitEmptyFieldButton}
+                    onClick={
+                      onPrivateDealCentralizedAtAgreedCostEmptyFieldSubmit
+                    }
+                  >
+                    {loading ? (
+                      <CircularProgress size={30} color="inherit" />
+                    ) : (
+                      buttonEmptyFieldsContent()
+                    )}
+                  </Button>
+                )}
+                {isOnlinePayment &&
+                  recipientName &&
+                  recipientPhoneNumber &&
+                  // recipientAddress &&
+                  // country &&
+                  // state &&
+                  // city &&
+                  // deliveryMode &&
+                  renderOnlinePayment(
+                    customerEmail,
+                    amountForPayment,
+                    orderNumber,
+                    customerPhoneNumber,
+                    customerName
+                  )}
+              </Grid>
+            )}
+
+          {salesPreference === "deal" &&
+            dealType === "private" &&
+            dealDeliveryMode === "decentralized-at-no-cost" && (
+              <Grid
+                item
+                container
+                style={{
+                  //width: "35%",
+                  marginLeft: 15,
+                  border: "1px dashed grey",
+                  padding: 15,
+                  height: 400,
+                }}
+              >
+                <Typography
+                  style={{
+                    //width: 250,
+                    fontSize: 20,
+                    fontWeight: 300,
+                    marginTop: 2,
+                    marginLeft: 10,
+                  }}
+                >
+                  Total Cost of Product(s):{getCurrencyCode()}
+                  {totalProductCostForDisplay}
+                </Typography>
+                <br />
+                <br />
+                {implementVatCollection && (
+                  <Typography
+                    style={{
+                      width: 350,
+                      fontSize: 20,
+                      fontWeight: 300,
+                      marginTop: 2,
+                      marginLeft: 10,
+                    }}
+                  >
+                    {`VAT(${vatRate}%)`}:{getCurrencyCode()}
+                    {vatForDispplay}
+                  </Typography>
+                )}
+
+                {deliveryMode && (
+                  <Typography
+                    style={{
+                      width: 350,
+                      fontSize: 20,
+                      fontWeight: 300,
+                      marginTop: 2,
+                      marginLeft: 10,
+                    }}
+                  >
+                    {deliveryMode === "sameday"
+                      ? "Same Day Delivery Cost"
+                      : deliveryMode === "priority"
+                      ? "Priority Delivery Cost"
+                      : deliveryMode === "standard"
+                      ? "Standard Delivery Cost"
+                      : "Delivery Cost"}
+                    :{getCurrencyCode()}
+                    {totalDeliveryCostForDisplay}
+                  </Typography>
+                )}
+
+                <Typography
+                  style={{
+                    //width: 200,
+                    fontSize: 23,
+                    fontWeight: 700,
+                    marginTop: 2,
+                    marginLeft: 10,
+                  }}
+                >
+                  Total Cost:{getCurrencyCode()}
+                  {totalOrderCostForDisplay}
+                </Typography>
+
+                {deliveryMode === "standard" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your order will be delivered in ${daysToStandardDelivery} from the day it was placed`}
+                  </Typography>
+                )}
+                {deliveryMode === "sameday" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your order will be delivered same day if the order was placed before noon or  ${daysToSameDayDelivery} from the time it was placed`}
+                  </Typography>
+                )}
+                {deliveryMode === "priority" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your order will be delivered in ${daysToPriorityDelivery} from the time it was placed`}
+                  </Typography>
+                )}
+                {deliveryMode === "pickup" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your can pick up your order from any of our locations that is nearest to you. Call our contact numbers for guidance `}
+                  </Typography>
+                )}
+
+                {renderPaymentMethodField()}
+
+                {!isOnlinePayment && paymentMethod === "payOnDelivery" && (
+                  <Button
+                    variant="contained"
+                    className={classes.submitButton}
+                    onClick={onSubmit}
+                  >
+                    {loading ? (
+                      <CircularProgress size={30} color="inherit" />
+                    ) : (
+                      buttonContent()
+                    )}
+                  </Button>
+                )}
+
+                {isOnlinePayment && !entityLocation && (
+                  <Button
+                    variant="contained"
+                    className={classes.submitEmptyFieldButton}
+                    onClick={onPrivateDealDecentralizedAtNoCostEmptyFieldSubmit}
+                  >
+                    {loading ? (
+                      <CircularProgress size={30} color="inherit" />
+                    ) : (
+                      buttonEmptyFieldsContent()
+                    )}
+                  </Button>
+                )}
+                {isOnlinePayment &&
+                  recipientName &&
+                  recipientPhoneNumber &&
+                  entityLocation &&
+                  renderOnlinePayment(
+                    customerEmail,
+                    amountForPayment,
+                    orderNumber,
+                    customerPhoneNumber,
+                    customerName
+                  )}
+              </Grid>
+            )}
+
+          {salesPreference === "deal" &&
+            dealType === "private" &&
+            dealDeliveryMode === "decentralized-at-agreed-cost" && (
+              <Grid
+                item
+                container
+                style={{
+                  //width: "35%",
+                  marginLeft: 15,
+                  border: "1px dashed grey",
+                  padding: 15,
+                  height: 400,
+                }}
+              >
+                <Typography
+                  style={{
+                    //width: 250,
+                    fontSize: 20,
+                    fontWeight: 300,
+                    marginTop: 2,
+                    marginLeft: 10,
+                  }}
+                >
+                  Total Cost of Product(s):{getCurrencyCode()}
+                  {totalProductCostForDisplay}
+                </Typography>
+                <br />
+                <br />
+                {implementVatCollection && (
+                  <Typography
+                    style={{
+                      width: 350,
+                      fontSize: 20,
+                      fontWeight: 300,
+                      marginTop: 2,
+                      marginLeft: 10,
+                    }}
+                  >
+                    {`VAT(${vatRate}%)`}:{getCurrencyCode()}
+                    {vatForDispplay}
+                  </Typography>
+                )}
+
+                {deliveryMode && (
+                  <Typography
+                    style={{
+                      width: 350,
+                      fontSize: 20,
+                      fontWeight: 300,
+                      marginTop: 2,
+                      marginLeft: 10,
+                    }}
+                  >
+                    {deliveryMode === "sameday"
+                      ? "Same Day Delivery Cost"
+                      : deliveryMode === "priority"
+                      ? "Priority Delivery Cost"
+                      : deliveryMode === "standard"
+                      ? "Standard Delivery Cost"
+                      : "Delivery Cost"}
+                    :{getCurrencyCode()}
+                    {totalDeliveryCostForDisplay}
+                  </Typography>
+                )}
+
+                <Typography
+                  style={{
+                    //width: 200,
+                    fontSize: 23,
+                    fontWeight: 700,
+                    marginTop: 2,
+                    marginLeft: 10,
+                  }}
+                >
+                  Total Cost:{getCurrencyCode()}
+                  {totalOrderCostForDisplay}
+                </Typography>
+
+                {deliveryMode === "standard" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your order will be delivered in ${daysToStandardDelivery} from the day it was placed`}
+                  </Typography>
+                )}
+                {deliveryMode === "sameday" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your order will be delivered same day if the order was placed before noon or  ${daysToSameDayDelivery} from the time it was placed`}
+                  </Typography>
+                )}
+                {deliveryMode === "priority" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your order will be delivered in ${daysToPriorityDelivery} from the time it was placed`}
+                  </Typography>
+                )}
+                {deliveryMode === "pickup" && (
+                  <Typography className={classes.bankDetails}>
+                    {`Your can pick up your order from any of our locations that is nearest to you. Call our contact numbers for guidance `}
+                  </Typography>
+                )}
+
+                {renderPaymentMethodField()}
+
+                {!isOnlinePayment && paymentMethod === "payOnDelivery" && (
+                  <Button
+                    variant="contained"
+                    className={classes.submitButton}
+                    onClick={onSubmit}
+                  >
+                    {loading ? (
+                      <CircularProgress size={30} color="inherit" />
+                    ) : (
+                      buttonContent()
+                    )}
+                  </Button>
+                )}
+
+                {isOnlinePayment && !deliveryMode && (
+                  <Button
+                    variant="contained"
+                    className={classes.submitEmptyFieldButton}
+                    onClick={onPrivateDealDecentralizedAtCostEmptyFieldSubmit}
+                  >
+                    {loading ? (
+                      <CircularProgress size={30} color="inherit" />
+                    ) : (
+                      buttonEmptyFieldsContent()
+                    )}
+                  </Button>
+                )}
+                {isOnlinePayment &&
+                  recipientName &&
+                  recipientPhoneNumber &&
+                  country &&
+                  entity &&
+                  place &&
+                  deliveryMode &&
+                  renderOnlinePayment(
+                    customerEmail,
+                    amountForPayment,
+                    orderNumber,
+                    customerPhoneNumber,
+                    customerName
+                  )}
+              </Grid>
+            )}
         </Grid>
       )}
     </>

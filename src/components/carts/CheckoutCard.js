@@ -777,7 +777,7 @@ export default function CheckoutCard(props) {
                 {product.salesPreference === "deal" && (
                   <Typography>
                     <span style={{ fontSize: 14, marginLeft: 10 }}>
-                      <strong> Deal Direction:</strong>
+                      <strong> Deal Instruction:</strong>
                       <span>{product.dealComment}</span>
                     </span>
                   </Typography>
@@ -1067,7 +1067,7 @@ export default function CheckoutCard(props) {
                 {product.salesPreference === "deal" && (
                   <Typography>
                     <span style={{ fontSize: 14, marginLeft: 5 }}>
-                      <strong> Deal Direction:</strong>
+                      <strong> Deal Instruction:</strong>
                       <span>{product.dealComment}</span>
                     </span>
                   </Typography>

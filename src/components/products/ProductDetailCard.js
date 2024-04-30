@@ -301,6 +301,7 @@ export default function ProductDetailCard(props) {
   //   "this is description trim:",
   //   Str(props.description).limit(100, "...").get()
   // );
+  console.log("props are:", props);
 
   useEffect(() => {
     setPrice(props.product.pricePerUnit);
@@ -894,6 +895,7 @@ export default function ProductDetailCard(props) {
                     props.product.allowDealQuantityChange
                   }
                   dealStatus={props.product.dealStatus}
+                  dealType={props.product.dealType}
                   dealComment={props.product.dealComment}
                   dealDeliveryMode={props.product.dealDeliveryMode}
                   dealCentralizedDeliveryLocation={
@@ -1870,6 +1872,7 @@ export default function ProductDetailCard(props) {
                   presentWeightUnitIn={props.product.presentWeightUnitIn}
                   salesPreference={props.product.salesPreference}
                   dealCode={props.product.dealCode}
+                  dealType={props.product.dealType}
                   dealExpiryDate={props.product.dealExpiryDate}
                   showDealPricePerUnit={props.product.showDealPricePerUnit}
                   allowDealQuantityChange={

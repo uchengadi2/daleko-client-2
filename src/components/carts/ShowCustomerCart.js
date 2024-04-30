@@ -32,7 +32,7 @@ import BecomePartnerFormContainer from "./../partner/BecomePartnerFormContainer"
 import CategoryProductsCard from "../CategoryProductsCard";
 import CartProductCard from "./CartProductCard";
 import UpperFooter from "../ui/UpperFooter";
-import { EDIT_CART } from "../../actions/types";
+import { EDIT_CART, DELETE_CART } from "../../actions/types";
 
 import { baseURL } from "./../../apis/util";
 import api from "./../../apis/local";
@@ -239,6 +239,7 @@ function ShowCustomerCart(props) {
   const [contactUsOpen, setContactUsOpen] = useState(false);
   const [becomePartnerOpen, setBecomePartnerOpen] = useState(false);
   const [cartProductList, setCartProductList] = useState([]);
+  const [cartForCheckoutList, setCartForCheckoutList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [updateCart, setUpdateCart] = useState();
   const [count, setCount] = useState(0);
@@ -246,6 +247,7 @@ function ShowCustomerCart(props) {
   const [isLoading, setIsLoading] = useState(null);
   const [currency, setCurrency] = useState();
   const [policy, setPolicy] = useState();
+  const [salesPreference, setSalesPreference] = useState();
 
   const dispatch = useDispatch();
 
@@ -323,6 +325,24 @@ function ShowCustomerCart(props) {
           isVatable: cart.isVatable,
           unit: cart.unit,
           weightPerUnit: cart.weightPerUnit,
+          salesPreference: cart.salesPreference,
+          dealCode: cart.dealCode,
+          dealExpiryDate: cart.dealExpiryDate,
+          allowDealQuantityChange: cart.allowDealQuantityChange,
+          showDealPricePerUnit: cart.showDealPricePerUnit,
+          dealStatus: cart.dealStatus,
+          dealComment: cart.dealComment,
+          dealDeliveryMode: cart.dealDeliveryMode,
+          dealCentralizedDeliveryLocation: cart.dealCentralizedDeliveryLocation,
+          dealCentralizedAgreedDeliveryCost:
+            cart.dealCentralizedAgreedDeliveryCost,
+          dealDecentralizedDeliveryLocation:
+            cart.dealDecentralizedDeliveryLocation,
+          dealDecentralizedAgreedDeliveryCost:
+            cart.dealDecentralizedAgreedDeliveryCost,
+          showDealDeliveryCost: cart.showDealDeliveryCost,
+          productType: cart.productType,
+          dealType: cart.dealType,
         });
       });
 
@@ -330,6 +350,72 @@ function ShowCustomerCart(props) {
         return;
       }
       setCartProductList(allData);
+      setSalesPreference(allData[0].salesPreference);
+      setIsLoading(false);
+    };
+
+    //call the function
+
+    fetchData().catch(console.error);
+  }, [updateCart]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true);
+      let allData = [];
+      api.defaults.headers.common["Authorization"] = `Bearer ${props.token}`;
+      const response = await api.get(`/carts`, {
+        params: {
+          cartHolder: cartHolder,
+          status: "marked-for-checkout",
+          //isDeleted: false,
+        },
+      });
+      const items = response.data.data.data;
+
+      if (!items) {
+        return;
+      }
+
+      items.map((cart) => {
+        allData.push({
+          id: cart._id,
+          product: cart.product,
+          cartHolder: cart.cartHolder,
+          dateAddedToCart: cart.dateAddedToCart,
+          preferredStartDate: cart.preferredStartDate,
+          refNumber: cart.refNumber,
+          quantity: cart.quantity,
+          price: cart.price,
+          weightInKg: cart.weightInKg,
+          isVatable: cart.isVatable,
+          unit: cart.unit,
+          weightPerUnit: cart.weightPerUnit,
+          salesPreference: cart.salesPreference,
+          dealCode: cart.dealCode,
+          dealExpiryDate: cart.dealExpiryDate,
+          allowDealQuantityChange: cart.allowDealQuantityChange,
+          showDealPricePerUnit: cart.showDealPricePerUnit,
+          dealStatus: cart.dealStatus,
+          dealComment: cart.dealComment,
+          dealDeliveryMode: cart.dealDeliveryMode,
+          dealCentralizedDeliveryLocation: cart.dealCentralizedDeliveryLocation,
+          dealCentralizedAgreedDeliveryCost:
+            cart.dealCentralizedAgreedDeliveryCost,
+          dealDecentralizedDeliveryLocation:
+            cart.dealDecentralizedDeliveryLocation,
+          dealDecentralizedAgreedDeliveryCost:
+            cart.dealDecentralizedAgreedDeliveryCost,
+          showDealDeliveryCost: cart.showDealDeliveryCost,
+          productType: cart.productType,
+          dealType: cart.dealType,
+        });
+      });
+
+      if (!allData) {
+        return;
+      }
+      setCartForCheckoutList(allData);
       setIsLoading(false);
     };
 
@@ -414,6 +500,29 @@ function ShowCustomerCart(props) {
               handleFailedSnackbar={props.handleFailedSnackbar}
               renderCartUpdate={renderCartUpdate}
               renderCartUpdateAfterRemoval={props.renderCartUpdateAfterRemoval}
+              salesPreference={cart.salesPreference}
+              dealCode={cart.dealCode}
+              dealExpiryDate={cart.dealExpiryDate}
+              allowDealQuantityChange={cart.allowDealQuantityChange}
+              showDealPricePerUnit={cart.showDealPricePerUnit}
+              dealStatus={cart.dealStatus}
+              dealComment={cart.dealComment}
+              dealDeliveryMode={cart.dealDeliveryMode}
+              dealCentralizedDeliveryLocation={
+                cart.dealCentralizedDeliveryLocation
+              }
+              dealCentralizedAgreedDeliveryCost={
+                cart.dealCentralizedAgreedDeliveryCost
+              }
+              dealDecentralizedDeliveryLocation={
+                cart.dealDecentralizedDeliveryLocation
+              }
+              dealDecentralizedAgreedDeliveryCost={
+                cart.dealDecentralizedAgreedDeliveryCost
+              }
+              showDealDeliveryCost={cart.showDealDeliveryCost}
+              productType={cart.productType}
+              dealType={cart.dealType}
             />
           ))}
         </Grid>
@@ -455,6 +564,29 @@ function ShowCustomerCart(props) {
               handleFailedSnackbar={props.handleFailedSnackbar}
               renderCartUpdate={renderCartUpdate}
               renderCartUpdateAfterRemoval={props.renderCartUpdateAfterRemoval}
+              salesPreference={cart.salesPreference}
+              dealCode={cart.dealCode}
+              dealExpiryDate={cart.dealExpiryDate}
+              allowDealQuantityChange={cart.allowDealQuantityChange}
+              showDealPricePerUnit={cart.showDealPricePerUnit}
+              dealStatus={cart.dealStatus}
+              dealComment={cart.dealComment}
+              dealDeliveryMode={cart.dealDeliveryMode}
+              dealCentralizedDeliveryLocation={
+                cart.dealCentralizedDeliveryLocation
+              }
+              dealCentralizedAgreedDeliveryCost={
+                cart.dealCentralizedAgreedDeliveryCost
+              }
+              dealDecentralizedDeliveryLocation={
+                cart.dealDecentralizedDeliveryLocation
+              }
+              dealDecentralizedAgreedDeliveryCost={
+                cart.dealDecentralizedAgreedDeliveryCost
+              }
+              showDealDeliveryCost={cart.showDealDeliveryCost}
+              productType={cart.productType}
+              dealType={cart.dealType}
             />
           ))}
         </Grid>
@@ -473,6 +605,27 @@ function ShowCustomerCart(props) {
       props.handleMakeOpenLoginFormDialogStatus();
       setLoading(false);
       return;
+    }
+
+    if (salesPreference === "deal") {
+      //delete all items in this user's cart
+      cartForCheckoutList.map((cart, index) => {
+        const createForm = async () => {
+          api.defaults.headers.common[
+            "Authorization"
+          ] = `Bearer ${props.token}`;
+          await api.delete(`/carts/${cart.id}`);
+          dispatch({
+            type: DELETE_CART,
+            //payload: response2.data.data.data,
+          });
+          //props.cartCounterHandler(-1);
+        };
+        createForm().catch((err) => {
+          //props.handleFailedSnackbar();
+          console.log("err:", err.message);
+        });
+      });
     }
 
     let data = {

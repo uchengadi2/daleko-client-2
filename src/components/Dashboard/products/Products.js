@@ -157,6 +157,7 @@ function Products(props) {
           dealDecentralizedAgreedDeliveryCost:
             product.dealDecentralizedAgreedDeliveryCost,
           showDealDeliveryCost: product.showDealDeliveryCost,
+          dealDeliveryMode: product.dealDeliveryMode,
         });
       });
       setProductsList(allData);
@@ -464,6 +465,7 @@ function Products(props) {
         dealDecentralizedAgreedDeliveryCost:
           product.dealDecentralizedAgreedDeliveryCost,
         showDealDeliveryCost: product.showDealDeliveryCost,
+        dealDeliveryMode: product.dealDeliveryMode,
       };
       rows.push(row);
     });

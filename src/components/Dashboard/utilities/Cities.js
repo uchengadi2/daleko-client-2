@@ -82,6 +82,7 @@ function Cities(props) {
           state: city.state,
           code: city.code,
           description: city.description,
+          placeType: city.placeType,
         });
       });
       setCityList(allData);
@@ -250,6 +251,7 @@ function Cities(props) {
         countryId: city.country[0].id,
         stateId: city.state[0].id,
         description: city.description,
+        placeType: city.placeType,
       };
       rows.push(row);
     });

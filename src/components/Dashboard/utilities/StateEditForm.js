@@ -27,8 +27,8 @@ const useStyles = makeStyles((theme) => ({
   submitButton: {
     borderRadius: 10,
     height: 40,
-    width: 150,
-    marginLeft: 190,
+    width: 200,
+    marginLeft: 150,
     marginTop: 30,
     color: "white",
     backgroundColor: theme.palette.common.blue,
@@ -49,7 +49,7 @@ const renderStateNameField = ({
   return (
     <TextField
       //error={touched && invalid}
-      helperText="Enter State Name"
+      helperText="Enter State/Entity Name"
       variant="outlined"
       //label={label}
       id={input.name}
@@ -79,7 +79,7 @@ const renderStateCodeField = ({
   return (
     <TextField
       //error={touched && invalid}
-      helperText="Enter State Code"
+      helperText="Enter State/Entity Code"
       variant="outlined"
       //label={label}
       id={input.name}
@@ -109,7 +109,7 @@ const renderStateDescriptionField = ({
   return (
     <TextField
       //error={touched && invalid}
-      helperText="Provide a description of this state"
+      helperText="Provide a description of this state/entity"
       variant="outlined"
       //label={label}
       id={input.name}
@@ -125,6 +125,39 @@ const renderStateDescriptionField = ({
   );
 };
 
+const renderEntityDealCodeField = ({
+  input,
+  label,
+  meta: { touched, error, invalid },
+  type,
+  id,
+  helperText,
+  defaultValue,
+  ...custom
+}) => {
+  return (
+    <TextField
+      //error={touched && invalid}
+      helperText={helperText}
+      variant="outlined"
+      //label={label}
+      id={input.name}
+      //value={formInput.name}
+      defaultValue={defaultValue}
+      fullWidth
+      //required
+      type={type}
+      {...custom}
+      onChange={input.onChange}
+      inputProps={{
+        style: {
+          height: 1,
+        },
+      }}
+    />
+  );
+};
+
 function StateEditForm(props) {
   const { params, token, userId } = props;
   const classes = useStyles();
@@ -132,6 +165,7 @@ function StateEditForm(props) {
   const [country, setCountry] = useState(params[0].country);
   const [countryId, setCountryId] = useState(params[0].countryId);
   const [region, setRegion] = useState(params[0].region);
+  const [entityType, setEntityType] = useState(params[0].entityType);
   const [countryList, setCountryList] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -143,6 +177,10 @@ function StateEditForm(props) {
 
   const handleRegionChange = (event) => {
     setRegion(event.target.value);
+  };
+
+  const handleEntityTypeChange = (event) => {
+    setEntityType(event.target.value);
   };
 
   useEffect(() => {
@@ -244,8 +282,37 @@ function StateEditForm(props) {
     );
   };
 
+  const renderEntityTypeField = ({
+    input,
+    label,
+    meta: { touched, error, invalid },
+    type,
+    id,
+    ...custom
+  }) => {
+    return (
+      <Box>
+        <FormControl variant="outlined">
+          {/* <InputLabel id="vendor_city">City</InputLabel> */}
+          <Select
+            labelId="entityType"
+            id="entityType"
+            value={entityType}
+            onChange={handleEntityTypeChange}
+            //label="Country Region"
+            style={{ width: 500, height: 38, marginTop: 20 }}
+          >
+            <MenuItem value={"conventional"}>Conventional</MenuItem>
+            <MenuItem value={"organizational"}>Organizational</MenuItem>
+          </Select>
+          <FormHelperText>Select State/Entity Type</FormHelperText>
+        </FormControl>
+      </Box>
+    );
+  };
+
   const buttonContent = () => {
-    return <React.Fragment> Update State</React.Fragment>;
+    return <React.Fragment> Update State/Entity</React.Fragment>;
   };
 
   const onSubmit = (formValues) => {
@@ -253,6 +320,10 @@ function StateEditForm(props) {
     const data = {
       name: formValues.name ? formValues.name : params[0].name,
       region: region ? region : params[0].region,
+      entityType: entityType ? entityType : params[0].entityType,
+      entityDealCode: formValues.entityDealCode
+        ? formValues.entityDealCode
+        : params[0].entityDealCode,
       description: formValues.description
         ? formValues.description
         : params[0].description,
@@ -316,7 +387,7 @@ function StateEditForm(props) {
           style={{ color: "blue", fontSize: "1.5em" }}
           component="legend"
         >
-          <Typography variant="h5">Enter State Details</Typography>
+          <Typography variant="h5">Enter State/Entity Details</Typography>
         </FormLabel>
       </Grid>
       <Box
@@ -331,7 +402,7 @@ function StateEditForm(props) {
         style={{ marginTop: 10 }}
       >
         <Grid container direction="row" style={{ marginTop: 10 }}>
-          <Grid item style={{ width: "70%" }}>
+          <Grid item style={{ width: "65%" }}>
             <Field
               label=""
               id="name"
@@ -341,7 +412,7 @@ function StateEditForm(props) {
               component={renderStateNameField}
             />
           </Grid>
-          <Grid item style={{ width: "28%", marginLeft: 10 }}>
+          <Grid item style={{ width: "33%", marginLeft: 10 }}>
             <Field
               label=""
               id="code"
@@ -372,6 +443,23 @@ function StateEditForm(props) {
             />
           </Grid>
         </Grid>
+        <Field
+          label=""
+          id="entityType"
+          name="entityType"
+          type="text"
+          component={renderEntityTypeField}
+        />
+        <Field
+          label=""
+          id="entityDealCode"
+          name="entityDealCode"
+          defaultValue={params[0].entityDealCode}
+          type="text"
+          component={renderEntityDealCodeField}
+          helperText="Enter Entity Deal Code(Optional)"
+          style={{ marginTop: 10 }}
+        />
         <Field
           label=""
           id="description"
