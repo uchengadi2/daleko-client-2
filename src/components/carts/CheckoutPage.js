@@ -228,6 +228,8 @@ function CheckoutPage(props) {
   const [dealStatus, setDealStatus] = useState();
   const [dealType, setDealType] = useState();
   const [dealCode, setDealCode] = useState();
+  const [dealPaymentPreference, setDealPaymentPreference] = useState();
+  const [showDealPaymentDetails, setShowDealPaymentDetails] = useState();
   const [dealCentralizedDeliveryLocation, setDealCentralizedDeliveryLocation] =
     useState();
   const [
@@ -336,6 +338,8 @@ function CheckoutPage(props) {
             cart.dealDecentralizedAgreedDeliveryCost,
           showDealDeliveryCost: cart.showDealDeliveryCost,
           productType: cart.productType,
+          showDealPaymentDetails: cart.showDealPaymentDetails,
+          dealPaymentPreference: cart.dealPaymentPreference,
         });
       });
 
@@ -353,6 +357,8 @@ function CheckoutPage(props) {
       setDealStatus(allData[0].dealStatus);
       setDealCode(allData[0].dealCode);
       setDealType(allData[0].dealType);
+      setDealPaymentPreference(allData[0].dealPaymentPreference);
+      setShowDealPaymentDetails(allData[0].showDealPaymentDetails);
       setDealCentralizedDeliveryLocation(
         allData[0].dealCentralizedDeliveryLocation
       );
@@ -455,6 +461,8 @@ function CheckoutPage(props) {
               }
               showDealDeliveryCost={cart.showDealDeliveryCost}
               productType={cart.productType}
+              showDealPaymentDetails={cart.showDealPaymentDetails}
+              dealPaymentPreference={cart.dealPaymentPreference}
               salesPreference={cart.salesPreference}
               productSalesPreference={salesPreference}
               isVatable={cart.isVatable}
@@ -523,6 +531,8 @@ function CheckoutPage(props) {
               }
               showDealDeliveryCost={cart.showDealDeliveryCost}
               productType={cart.productType}
+              showDealPaymentDetails={cart.showDealPaymentDetails}
+              dealPaymentPreference={cart.dealPaymentPreference}
               salesPreference={cart.salesPreference}
               productSalesPreference={salesPreference}
               preferredStartDate={cart.preferredStartDate}
@@ -609,6 +619,8 @@ function CheckoutPage(props) {
               dealStatus={dealStatus}
               dealCode={dealCode}
               dealType={dealType}
+              dealPaymentPreference={dealPaymentPreference}
+              showDealPaymentDetails={showDealPaymentDetails}
               dealCentralizedDeliveryLocation={dealCentralizedDeliveryLocation}
               dealCentralizedAgreedDeliveryCost={
                 dealCentralizedAgreedDeliveryCost

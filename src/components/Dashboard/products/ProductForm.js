@@ -905,6 +905,10 @@ function ProductForm(props) {
     "centralized-at-no-cost"
   );
   const [showDealDeliveryCost, setShowDealDeliveryCost] = useState(false);
+  const [showDealPaymentDetails, setShowDealPaymentDetails] = useState(false);
+  const [dealPaymentPreference, setDealPaymentPreference] = useState(
+    "each-beneficiary-make-own-payment"
+  );
 
   const dispatch = useDispatch();
 
@@ -1185,6 +1189,14 @@ function ProductForm(props) {
 
   const handleShowDealDeliveryCostChange = (event) => {
     setShowDealDeliveryCost(event.target.value);
+  };
+
+  const handleShowDealPaymentDetailsChange = (event) => {
+    setShowDealPaymentDetails(event.target.value);
+  };
+
+  const handleDealPaymentPreferenceChange = (event) => {
+    setDealPaymentPreference(event.target.value);
   };
 
   const handleUploadFiles = (files) => {
@@ -1872,6 +1884,78 @@ function ProductForm(props) {
     );
   };
 
+  const renderShowDealPaymentDetailsField = ({
+    input,
+    label,
+    meta: { touched, error, invalid },
+    type,
+    id,
+    ...custom
+  }) => {
+    return (
+      <Box>
+        <FormControl variant="outlined">
+          {/* <InputLabel id="vendor_city">City</InputLabel> */}
+          <Select
+            labelId="showDealPaymentDetails"
+            id="showDealPaymentDetails"
+            value={showDealPaymentDetails}
+            onChange={handleShowDealPaymentDetailsChange}
+            //label="Allow Price Freezing"
+
+            style={{ width: 237, marginTop: 0, height: 38 }}
+            //{...input}
+          >
+            <MenuItem value={"false"}>No</MenuItem>
+            <MenuItem value={"true"}>Yes</MenuItem>
+          </Select>
+          <FormHelperText>Show Deal Payment Details?</FormHelperText>
+        </FormControl>
+      </Box>
+    );
+  };
+
+  const renderDealPaymentPreferenceField = ({
+    input,
+    label,
+    meta: { touched, error, invalid },
+    type,
+    id,
+    ...custom
+  }) => {
+    return (
+      <Box>
+        <FormControl variant="outlined">
+          {/* <InputLabel id="vendor_city">City</InputLabel> */}
+          <Select
+            labelId="dealPaymentPreference"
+            id="dealPaymentPreference"
+            value={dealPaymentPreference}
+            onChange={handleDealPaymentPreferenceChange}
+            //label="Allow Price Freezing"
+
+            style={{ width: 237, marginTop: 0, height: 38 }}
+            //{...input}
+          >
+            <MenuItem value={"each-beneficiary-make-own-payment"}>
+              Each Beneficiary Make Own Payment
+            </MenuItem>
+            <MenuItem value={"beneficiaries-make-collective-payment"}>
+              Beneficiaries Make Collective Payment
+            </MenuItem>
+            <MenuItem value={"payment-settled-by-an-entity"}>
+              Payment Settled By An Entity
+            </MenuItem>
+            <MenuItem value={"no-payment-is-required"}>
+              No Payment Is Required
+            </MenuItem>
+          </Select>
+          <FormHelperText>Select Deal Payment Preference</FormHelperText>
+        </FormControl>
+      </Box>
+    );
+  };
+
   const buttonContent = () => {
     return <React.Fragment> Submit</React.Fragment>;
   };
@@ -2107,6 +2191,8 @@ function ProductForm(props) {
     );
 
     form.append("showDealDeliveryCost", showDealDeliveryCost);
+    form.append("showDealPaymentDetails", showDealPaymentDetails);
+    form.append("dealPaymentPreference", dealPaymentPreference);
 
     // if (!formValues["sku"]) {
     //   const sku =
@@ -2813,6 +2899,30 @@ function ProductForm(props) {
                   component={renderEditableSingleLineField}
                 />
               </Grid> */}
+            </Grid>
+          )}
+          {salesPreference === "deal" && (
+            <Grid container direction="row" style={{ marginTop: 20 }}>
+              <Grid item style={{ width: "50%" }}>
+                <Field
+                  label=""
+                  id="dealPaymentPreference"
+                  name="dealPaymentPreference"
+                  // helperText="Show Deal's Price Per Unit"
+                  type="text"
+                  component={renderDealPaymentPreferenceField}
+                />
+              </Grid>
+              <Grid item style={{ marginLeft: 15, width: "47%" }}>
+                <Field
+                  label=""
+                  id="showDealPaymentDetails"
+                  name="showDealPaymentDetails"
+                  type="text"
+                  //helperText="Allow the Customer to Change Deal Quantity"
+                  component={renderShowDealPaymentDetailsField}
+                />
+              </Grid>
             </Grid>
           )}
 

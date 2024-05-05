@@ -248,6 +248,8 @@ function SendCourseToCheckoutForm(props) {
     dealDecentralizedAgreedDeliveryCost,
     showDealDeliveryCost,
     productType,
+    dealPaymentPreference,
+    showDealPaymentDetails,
     dealType,
   } = props;
   const [quantity, setQuantity] = useState(props.minQuantity);
@@ -593,6 +595,8 @@ function SendCourseToCheckoutForm(props) {
       productType,
       salesPreference,
       dealType,
+      showDealPaymentDetails,
+      dealPaymentPreference,
     };
 
     if (salesPreference === "deal") {
@@ -710,6 +714,8 @@ function SendCourseToCheckoutForm(props) {
         productType,
         salesPreference,
         dealType,
+        showDealPaymentDetails,
+        dealPaymentPreference,
       };
 
       //update the exist
@@ -820,6 +826,8 @@ function SendCourseToCheckoutForm(props) {
       productType,
       salesPreference,
       dealType,
+      showDealPaymentDetails,
+      dealPaymentPreference,
     };
 
     if (salesPreference === "deal") {
@@ -951,6 +959,8 @@ function SendCourseToCheckoutForm(props) {
         productType,
         salesPreference,
         dealType,
+        showDealPaymentDetails,
+        dealPaymentPreference,
       };
 
       //update the exist

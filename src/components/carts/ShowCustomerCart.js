@@ -343,6 +343,8 @@ function ShowCustomerCart(props) {
           showDealDeliveryCost: cart.showDealDeliveryCost,
           productType: cart.productType,
           dealType: cart.dealType,
+          showDealPaymentDetails: cart.showDealPaymentDetails,
+          dealPaymentPreference: cart.dealPaymentPreference,
         });
       });
 
@@ -409,6 +411,8 @@ function ShowCustomerCart(props) {
           showDealDeliveryCost: cart.showDealDeliveryCost,
           productType: cart.productType,
           dealType: cart.dealType,
+          showDealPaymentDetails: cart.showDealPaymentDetails,
+          dealPaymentPreference: cart.dealPaymentPreference,
         });
       });
 
@@ -523,6 +527,8 @@ function ShowCustomerCart(props) {
               showDealDeliveryCost={cart.showDealDeliveryCost}
               productType={cart.productType}
               dealType={cart.dealType}
+              showDealPaymentDetails={cart.showDealPaymentDetails}
+              dealPaymentPreference={cart.dealPaymentPreference}
             />
           ))}
         </Grid>
@@ -587,6 +593,8 @@ function ShowCustomerCart(props) {
               showDealDeliveryCost={cart.showDealDeliveryCost}
               productType={cart.productType}
               dealType={cart.dealType}
+              showDealPaymentDetails={cart.showDealPaymentDetails}
+              dealPaymentPreference={cart.dealPaymentPreference}
             />
           ))}
         </Grid>

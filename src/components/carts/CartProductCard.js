@@ -237,6 +237,8 @@ export default function CartProductCard(props) {
           product.dealDecentralizedAgreedDeliveryCost,
         showDealDeliveryCost: product.showDealDeliveryCost,
         dealPaymentPreference: product.dealPaymentPreference,
+        showDealPaymentDetails: product.showDealPaymentDetails,
+        dealPaymentPreference: product.dealPaymentPreference,
       });
 
       if (!allData) {
@@ -315,6 +317,8 @@ export default function CartProductCard(props) {
         dealDecentralizedAgreedDeliveryCost:
           allData[0].dealDecentralizedAgreedDeliveryCost,
         showDealDeliveryCost: allData[0].showDealDeliveryCost,
+        dealPaymentPreference: allData[0].dealPaymentPreference,
+        showDealPaymentDetails: allData[0].showDealPaymentDetails,
         dealPaymentPreference: allData[0].dealPaymentPreference,
       });
       setCurrency(allData[0].currency);
@@ -823,6 +827,8 @@ export default function CartProductCard(props) {
                   salesPreference={product.salesPreference}
                   showDealPricePerUnit={product.showDealPricePerUnit}
                   allowDealQuantityChange={product.allowDealQuantityChange}
+                  showDealPaymentDetails={product.showDealPaymentDetails}
+                  dealPaymentPreference={product.dealPaymentPreference}
                   weightPerUnitInCart={props.weightPerUnit}
                   productId={product.id}
                   currency={props.currency}
@@ -1108,6 +1114,8 @@ export default function CartProductCard(props) {
                   salesPreference={product.salesPreference}
                   showDealPricePerUnit={product.showDealPricePerUnit}
                   allowDealQuantityChange={product.allowDealQuantityChange}
+                  showDealPaymentDetails={product.showDealPaymentDetails}
+                  dealPaymentPreference={product.dealPaymentPreference}
                   weightPerUnitInCart={props.weightPerUnit}
                   productId={product.id}
                   currency={props.currency}
