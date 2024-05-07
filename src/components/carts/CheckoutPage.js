@@ -343,11 +343,16 @@ function CheckoutPage(props) {
         });
       });
 
+      console.log("allData:", allData);
+      console.log("allData length:", allData.length);
+
       if (allData.length === 0) {
+        setIsLoading(false);
         return;
       }
 
       if (!allData) {
+        setIsLoading(false);
         return;
       }
 
@@ -378,6 +383,8 @@ function CheckoutPage(props) {
 
     fetchData().catch(console.error);
   }, [updateCheckout]);
+
+  console.log("CartProductList:", cartProductList);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -595,7 +602,7 @@ function CheckoutPage(props) {
         {!isLoading && cartProductList.length === 0 ? (
           <p style={{ marginTop: 50, marginLeft: 10 }}>
             {" "}
-            There are no product in your checkout
+            There are no item in your checkout
           </p>
         ) : (
           <Grid item>{cartList}</Grid>

@@ -148,6 +148,40 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+const renderDealRedemptionCodeField = ({
+  input,
+  label,
+  meta: { touched, error, invalid },
+  type,
+  helperText,
+  id,
+  ...custom
+}) => {
+  return (
+    <TextField
+      error={touched && invalid}
+      //placeholder="category description"
+      variant="outlined"
+      helperText={helperText}
+      label={label}
+      id={input.name}
+      name={input.name}
+      fullWidth
+      type={type}
+      onChange={input.onChange}
+      InputProps={{
+        inputProps: {
+          min: 1,
+          style: {
+            height: 1,
+            //fontSize: "2em",
+          },
+        },
+      }}
+    />
+  );
+};
+
 const renderRecipientNameField = ({
   input,
   label,
@@ -447,6 +481,9 @@ function CheckoutDeliveryAndPayment(props) {
   const [entity, setEntity] = useState();
   const [place, setPlace] = useState();
   const [entityLocation, setEntityLocation] = useState();
+  const [dealRedemptionCode, setDealRedemptionCode] = useState(null);
+  const [isCorrectDealRedemptionCode, setIsCorrectDealRedemptionCode] =
+    useState(true);
 
   const dispatch = useDispatch();
 
@@ -488,9 +525,6 @@ function CheckoutDeliveryAndPayment(props) {
   }, [props]);
 
   const destinations = ["destination1", "destination2", "destination3"];
-
-  console.log("showDealPaymentDetails:", showDealPaymentDetails);
-  console.log("dealPaymentPreference:", dealPaymentPreference);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -824,6 +858,10 @@ function CheckoutDeliveryAndPayment(props) {
       }
     }
   }
+
+  const onDealRedemptionCodeChange = (e) => {
+    setDealRedemptionCode(e.target.value);
+  };
 
   const onRecipientNameChange = (e) => {
     setRecipientName(e.target.value);
@@ -1414,11 +1452,15 @@ function CheckoutDeliveryAndPayment(props) {
   };
 
   const buttonEmptyFieldsContent = () => {
-    return <React.Fragment>Make Payment2</React.Fragment>;
+    return <React.Fragment>Make Payment</React.Fragment>;
   };
 
   const buttonClaimContent = () => {
-    return <React.Fragment>Claim Deal</React.Fragment>;
+    return <React.Fragment>Place Order</React.Fragment>;
+  };
+
+  const buttonEmptyFieldsClaimContent = () => {
+    return <React.Fragment>Place Order</React.Fragment>;
   };
 
   const renderThankYou = () => {
@@ -1467,10 +1509,31 @@ function CheckoutDeliveryAndPayment(props) {
     daysToDelivery = daysToSameDayDelivery;
   }
 
+  console.log("showDealPaymentDetails:", showDealPaymentDetails);
+  console.log("isCorrectDealRedemptionCode:", isCorrectDealRedemptionCode);
   //when the delivery field are empty
 
   const onEmptyFieldSubmit = () => {
     setLoading(true);
+
+    if (salesPreference === "deal" && !showDealPaymentDetails) {
+      if (!dealRedemptionCode) {
+        props.handleFailedSnackbar("Please Provide The Deal redemption Code");
+        setLoading(false);
+        return;
+      }
+    }
+
+    if (salesPreference === "deal" && !showDealPaymentDetails) {
+      if (!isCorrectDealRedemptionCode) {
+        props.handleFailedSnackbar(
+          "Please Provide The Correct And Active Deal Redemption Code"
+        );
+        setLoading(false);
+        return;
+      }
+    }
+
     if (!recipientName) {
       props.handleFailedSnackbar("the recipient name field cannot be empty");
       setLoading(false);
@@ -1521,6 +1584,23 @@ function CheckoutDeliveryAndPayment(props) {
   //when sales preference is  a deal and dealType === "private" && dealDeliveryMode === "centralized-at-no-cost"
   const onPrivateDealCentralizedAtNoCostEmptyFieldSubmit = () => {
     setLoading(true);
+
+    if (!showDealPaymentDetails) {
+      if (!dealRedemptionCode) {
+        props.handleFailedSnackbar("Please Provide The Deal redemption Code");
+        setLoading(false);
+        return;
+      }
+    }
+    if (!showDealPaymentDetails) {
+      if (!isCorrectDealRedemptionCode) {
+        props.handleFailedSnackbar(
+          "Please Provide The Correct And Active Deal Redemption Code"
+        );
+        setLoading(false);
+        return;
+      }
+    }
     if (!recipientName) {
       props.handleFailedSnackbar("the recipient name field cannot be empty");
       setLoading(false);
@@ -1542,6 +1622,23 @@ function CheckoutDeliveryAndPayment(props) {
   //when sales preference is  a deal and dealType === "public" && dealDeliveryMode === "centralized-at-no-cost"
   const onPublicDealCentralizedAtNoCostEmptyFieldSubmit = () => {
     setLoading(true);
+
+    if (!showDealPaymentDetails) {
+      if (!dealRedemptionCode) {
+        props.handleFailedSnackbar("Please Provide The Deal redemption Code");
+        setLoading(false);
+        return;
+      }
+    }
+    if (!showDealPaymentDetails) {
+      if (!isCorrectDealRedemptionCode) {
+        props.handleFailedSnackbar(
+          "Please Provide The Correct And Active Deal Redemption Code"
+        );
+        setLoading(false);
+        return;
+      }
+    }
     if (!recipientName) {
       props.handleFailedSnackbar("the recipient name field cannot be empty");
       setLoading(false);
@@ -1563,6 +1660,22 @@ function CheckoutDeliveryAndPayment(props) {
   //when sales preference is  a deal and dealType === "private" && dealDeliveryMode === "centralized-at-agreed-cost"
   const onPrivateDealCentralizedAtAgreedCostEmptyFieldSubmit = () => {
     setLoading(true);
+    if (!showDealPaymentDetails) {
+      if (!dealRedemptionCode) {
+        props.handleFailedSnackbar("Please Provide The Deal redemption Code");
+        setLoading(false);
+        return;
+      }
+    }
+    if (!showDealPaymentDetails) {
+      if (!isCorrectDealRedemptionCode) {
+        props.handleFailedSnackbar(
+          "Please Provide The Correct And Active Deal Redemption Code"
+        );
+        setLoading(false);
+        return;
+      }
+    }
     if (!recipientName) {
       props.handleFailedSnackbar("the recipient name field cannot be empty");
       setLoading(false);
@@ -1584,6 +1697,22 @@ function CheckoutDeliveryAndPayment(props) {
   //when sales preference is  a deal and dealType === "public" && dealDeliveryMode === "centralized-at-agreed-cost"
   const onPublicDealCentralizedAtAgreedCostEmptyFieldSubmit = () => {
     setLoading(true);
+    if (!showDealPaymentDetails) {
+      if (!dealRedemptionCode) {
+        props.handleFailedSnackbar("Please Provide The Deal redemption Code");
+        setLoading(false);
+        return;
+      }
+    }
+    if (!showDealPaymentDetails) {
+      if (!isCorrectDealRedemptionCode) {
+        props.handleFailedSnackbar(
+          "Please Provide The Correct And Active Deal Redemption Code"
+        );
+        setLoading(false);
+        return;
+      }
+    }
     if (!recipientName) {
       props.handleFailedSnackbar("the recipient name field cannot be empty");
       setLoading(false);
@@ -1605,6 +1734,22 @@ function CheckoutDeliveryAndPayment(props) {
   //when sales preference is  a deal and dealType === "private" && dealDeliveryMode === "decentralized-at-no-cost"
   const onPrivateDealDecentralizedAtNoCostEmptyFieldSubmit = () => {
     setLoading(true);
+    if (!showDealPaymentDetails) {
+      if (!dealRedemptionCode) {
+        props.handleFailedSnackbar("Please Provide The Deal redemption Code");
+        setLoading(false);
+        return;
+      }
+    }
+    if (!showDealPaymentDetails) {
+      if (!isCorrectDealRedemptionCode) {
+        props.handleFailedSnackbar(
+          "Please Provide The Correct And Active Deal Redemption Code"
+        );
+        setLoading(false);
+        return;
+      }
+    }
     if (!recipientName) {
       props.handleFailedSnackbar("the recipient name field cannot be empty");
       setLoading(false);
@@ -1633,6 +1778,22 @@ function CheckoutDeliveryAndPayment(props) {
   //when sales preference is  a deal and dealType === "public" && dealDeliveryMode === "decentralized-at-no-cost"
   const onPublicDealDecentralizedAtNoCostEmptyFieldSubmit = () => {
     setLoading(true);
+    if (!showDealPaymentDetails) {
+      if (!dealRedemptionCode) {
+        props.handleFailedSnackbar("Please Provide The Deal redemption Code");
+        setLoading(false);
+        return;
+      }
+    }
+    if (!showDealPaymentDetails) {
+      if (!isCorrectDealRedemptionCode) {
+        props.handleFailedSnackbar(
+          "Please Provide The Correct And Active Deal Redemption Code"
+        );
+        setLoading(false);
+        return;
+      }
+    }
     if (!recipientName) {
       props.handleFailedSnackbar("the recipient name field cannot be empty");
       setLoading(false);
@@ -1661,6 +1822,22 @@ function CheckoutDeliveryAndPayment(props) {
   //when sales preference is  a deal and dealType === "private" && dealDeliveryMode === "decentralized-at-agreed-cost"
   const onPrivateDealDecentralizedAtCostEmptyFieldSubmit = () => {
     setLoading(true);
+    if (!showDealPaymentDetails) {
+      if (!dealRedemptionCode) {
+        props.handleFailedSnackbar("Please Provide The Deal redemption Code");
+        setLoading(false);
+        return;
+      }
+    }
+    if (!showDealPaymentDetails) {
+      if (!isCorrectDealRedemptionCode) {
+        props.handleFailedSnackbar(
+          "Please Provide The Correct And Active Deal Redemption Code"
+        );
+        setLoading(false);
+        return;
+      }
+    }
     if (!recipientName) {
       props.handleFailedSnackbar("the recipient name field cannot be empty");
       setLoading(false);
@@ -1705,6 +1882,22 @@ function CheckoutDeliveryAndPayment(props) {
   //when sales preference is  a deal and dealType === "public" && dealDeliveryMode === "decentralized-at-agreed-cost"
   const onPublicDealDecentralizedAtCostEmptyFieldSubmit = () => {
     setLoading(true);
+    if (!showDealPaymentDetails) {
+      if (!dealRedemptionCode) {
+        props.handleFailedSnackbar("Please Provide The Deal redemption Code");
+        setLoading(false);
+        return;
+      }
+    }
+    if (!showDealPaymentDetails) {
+      if (!isCorrectDealRedemptionCode) {
+        props.handleFailedSnackbar(
+          "Please Provide The Correct And Active Deal Redemption Code"
+        );
+        setLoading(false);
+        return;
+      }
+    }
     if (!recipientName) {
       props.handleFailedSnackbar("the recipient name field cannot be empty");
       setLoading(false);
@@ -1757,6 +1950,7 @@ function CheckoutDeliveryAndPayment(props) {
 
     const transData = {
       orderNumber: orderNumber,
+      dealRedemptionCode: dealRedemptionCode,
       customerName: customerName,
       customerPhoneNumber: customerPhoneNumber,
       customerEmailAddress: customerEmail,
@@ -1793,8 +1987,19 @@ function CheckoutDeliveryAndPayment(props) {
       deliveryStatus: "pending",
       deliveryMode: deliveryMode,
       daysToDelivery: daysToDelivery,
-
       shopType: "online",
+
+      salesPreference,
+      dealDeliveryMode,
+      dealStatus,
+      dealCode,
+      dealType,
+      dealCentralizedDeliveryLocation,
+      dealCentralizedAgreedDeliveryCost,
+      dealDecentralizedDeliveryLocation,
+      dealDecentralizedAgreedDeliveryCost,
+      showDealPaymentDetails,
+      dealPaymentPreference,
     };
 
     // write to the transaction table first
@@ -1816,6 +2021,7 @@ function CheckoutDeliveryAndPayment(props) {
           props.productList.map((cart, index) => {
             const data = {
               orderNumber: orderNumber,
+              dealRedemptionCode: dealRedemptionCode,
               transactionId: transId,
               product: cart.product,
               orderedPrice: cart.price,
@@ -1879,8 +2085,19 @@ function CheckoutDeliveryAndPayment(props) {
               deliveryStatus: "pending",
               deliveryMode: deliveryMode,
               daysToDelivery: daysToDelivery,
-
               shopType: "online",
+
+              salesPreference,
+              dealDeliveryMode,
+              dealStatus,
+              dealCode,
+              dealType,
+              dealCentralizedDeliveryLocation,
+              dealCentralizedAgreedDeliveryCost,
+              dealDecentralizedDeliveryLocation,
+              dealDecentralizedAgreedDeliveryCost,
+              showDealPaymentDetails,
+              dealPaymentPreference,
             };
 
             if (data) {
@@ -2172,6 +2389,18 @@ function CheckoutDeliveryAndPayment(props) {
                       noValidate
                       autoComplete="off"
                     >
+                      {!showDealPaymentDetails && (
+                        <Field
+                          label=""
+                          id="dealRedemptionCode"
+                          name="dealRedemptionCode"
+                          type="text"
+                          helperText="Enter Your Unique Deal Redemption Code(Request this code from the Deal's Owner  if you don't have it)"
+                          onChange={onDealRedemptionCodeChange}
+                          component={renderDealRedemptionCodeField}
+                          style={{ width: 300 }}
+                        />
+                      )}
                       <Field
                         label=""
                         id="recipientName"
@@ -2289,6 +2518,18 @@ function CheckoutDeliveryAndPayment(props) {
                       noValidate
                       autoComplete="off"
                     >
+                      {!showDealPaymentDetails && (
+                        <Field
+                          label=""
+                          id="dealRedemptionCode"
+                          name="dealRedemptionCode"
+                          type="text"
+                          helperText="Enter Your Unique Deal Redemption Code(Request this code from the Deal's Owner  if you don't have it)"
+                          onChange={onDealRedemptionCodeChange}
+                          component={renderDealRedemptionCodeField}
+                          style={{ width: 300 }}
+                        />
+                      )}
                       <Field
                         label=""
                         id="recipientName"
@@ -2332,6 +2573,18 @@ function CheckoutDeliveryAndPayment(props) {
                       noValidate
                       autoComplete="off"
                     >
+                      {!showDealPaymentDetails && (
+                        <Field
+                          label=""
+                          id="dealRedemptionCode"
+                          name="dealRedemptionCode"
+                          type="text"
+                          helperText="Enter Your Unique Deal Redemption Code(Request this code from the Deal's Owner  if you don't have it)"
+                          onChange={onDealRedemptionCodeChange}
+                          component={renderDealRedemptionCodeField}
+                          style={{ width: 300 }}
+                        />
+                      )}
                       <Field
                         label=""
                         id="recipientName"
@@ -2375,6 +2628,18 @@ function CheckoutDeliveryAndPayment(props) {
                       noValidate
                       autoComplete="off"
                     >
+                      {!showDealPaymentDetails && (
+                        <Field
+                          label=""
+                          id="dealRedemptionCode"
+                          name="dealRedemptionCode"
+                          type="text"
+                          helperText="Enter Your Unique Deal Redemption Code(Request this code from the Deal's Owner  if you don't have it)"
+                          onChange={onDealRedemptionCodeChange}
+                          component={renderDealRedemptionCodeField}
+                          style={{ width: 300 }}
+                        />
+                      )}
                       <Field
                         label=""
                         id="recipientName"
@@ -2416,6 +2681,18 @@ function CheckoutDeliveryAndPayment(props) {
                       noValidate
                       autoComplete="off"
                     >
+                      {!showDealPaymentDetails && (
+                        <Field
+                          label=""
+                          id="dealRedemptionCode"
+                          name="dealRedemptionCode"
+                          type="text"
+                          helperText="Enter Your Unique Deal Redemption Code(Request this code from the Deal's Owner  if you don't have it)"
+                          onChange={onDealRedemptionCodeChange}
+                          component={renderDealRedemptionCodeField}
+                          style={{ width: 300 }}
+                        />
+                      )}
                       <Field
                         label=""
                         id="recipientName"
@@ -2502,6 +2779,18 @@ function CheckoutDeliveryAndPayment(props) {
                       noValidate
                       autoComplete="off"
                     >
+                      {!showDealPaymentDetails && (
+                        <Field
+                          label=""
+                          id="dealRedemptionCode"
+                          name="dealRedemptionCode"
+                          type="text"
+                          helperText="Enter Your Unique Deal Redemption Code(Request this code from the Deal's Owner  if you don't have it)"
+                          onChange={onDealRedemptionCodeChange}
+                          component={renderDealRedemptionCodeField}
+                          style={{ width: 300 }}
+                        />
+                      )}
                       <Field
                         label=""
                         id="recipientName"
@@ -2619,6 +2908,18 @@ function CheckoutDeliveryAndPayment(props) {
                       noValidate
                       autoComplete="off"
                     >
+                      {!showDealPaymentDetails && (
+                        <Field
+                          label=""
+                          id="dealRedemptionCode"
+                          name="dealRedemptionCode"
+                          type="text"
+                          helperText="Enter Your Unique Deal Redemption Code(Request this code from the Deal's Owner  if you don't have it)"
+                          onChange={onDealRedemptionCodeChange}
+                          component={renderDealRedemptionCodeField}
+                          style={{ width: 300 }}
+                        />
+                      )}
                       <Field
                         label=""
                         id="recipientName"
@@ -2662,6 +2963,18 @@ function CheckoutDeliveryAndPayment(props) {
                       noValidate
                       autoComplete="off"
                     >
+                      {!showDealPaymentDetails && (
+                        <Field
+                          label=""
+                          id="dealRedemptionCode"
+                          name="dealRedemptionCode"
+                          type="text"
+                          helperText="Enter Your Unique Deal Redemption Code(Request this code from the Deal's Owner  if you don't have it)"
+                          onChange={onDealRedemptionCodeChange}
+                          component={renderDealRedemptionCodeField}
+                          style={{ width: 300 }}
+                        />
+                      )}
                       <Field
                         label=""
                         id="recipientName"
@@ -2705,6 +3018,18 @@ function CheckoutDeliveryAndPayment(props) {
                       noValidate
                       autoComplete="off"
                     >
+                      {!showDealPaymentDetails && (
+                        <Field
+                          label=""
+                          id="dealRedemptionCode"
+                          name="dealRedemptionCode"
+                          type="text"
+                          helperText="Enter Your Unique Deal Redemption Code(Request this code from the Deal's Owner  if you don't have it)"
+                          onChange={onDealRedemptionCodeChange}
+                          component={renderDealRedemptionCodeField}
+                          style={{ width: 300 }}
+                        />
+                      )}
                       <Field
                         label=""
                         id="recipientName"
@@ -2746,6 +3071,18 @@ function CheckoutDeliveryAndPayment(props) {
                       noValidate
                       autoComplete="off"
                     >
+                      {!showDealPaymentDetails && (
+                        <Field
+                          label=""
+                          id="dealRedemptionCode"
+                          name="dealRedemptionCode"
+                          type="text"
+                          helperText="Enter Your Unique Deal Redemption Code(Request this code from the Deal's Owner  if you don't have it)"
+                          onChange={onDealRedemptionCodeChange}
+                          component={renderDealRedemptionCodeField}
+                          style={{ width: 300 }}
+                        />
+                      )}
                       <Field
                         label=""
                         id="recipientName"
@@ -3288,7 +3625,7 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
@@ -3598,7 +3935,7 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
@@ -3907,7 +4244,7 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
@@ -4216,7 +4553,7 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
@@ -4546,7 +4883,7 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
@@ -4861,7 +5198,7 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
@@ -5175,7 +5512,7 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
@@ -5489,7 +5826,7 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
@@ -5815,7 +6152,7 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
@@ -6125,7 +6462,7 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
@@ -6436,7 +6773,7 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
@@ -6746,7 +7083,7 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
@@ -7073,7 +7410,7 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
@@ -7379,7 +7716,7 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
@@ -7685,7 +8022,7 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
@@ -7991,7 +8328,7 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
@@ -8317,7 +8654,7 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
@@ -8630,7 +8967,7 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
@@ -8942,7 +9279,7 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
@@ -9254,7 +9591,7 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
@@ -9580,7 +9917,7 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
@@ -9891,7 +10228,7 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
@@ -10201,7 +10538,7 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
@@ -10511,7 +10848,7 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
@@ -10837,7 +11174,7 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
@@ -11142,7 +11479,7 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
@@ -11446,7 +11783,7 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
@@ -11750,7 +12087,7 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
@@ -12072,7 +12409,7 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
@@ -12383,7 +12720,7 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
@@ -12693,7 +13030,7 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
@@ -13003,7 +13340,7 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
@@ -13330,7 +13667,7 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
@@ -13637,7 +13974,7 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
@@ -13943,7 +14280,7 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
@@ -14249,7 +14586,7 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
@@ -14575,7 +14912,7 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
@@ -14888,7 +15225,7 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
@@ -15200,7 +15537,7 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
@@ -15512,7 +15849,7 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
@@ -15692,6 +16029,18 @@ function CheckoutDeliveryAndPayment(props) {
                       noValidate
                       autoComplete="off"
                     >
+                      {!showDealPaymentDetails && (
+                        <Field
+                          label=""
+                          id="dealRedemptionCode"
+                          name="dealRedemptionCode"
+                          type="text"
+                          helperText="Enter Your Unique Deal Redemption Code(Request this code from the Deal's Owner  if you don't have it)"
+                          onChange={onDealRedemptionCodeChange}
+                          component={renderDealRedemptionCodeField}
+                          style={{ width: 300 }}
+                        />
+                      )}
                       <Field
                         label=""
                         id="recipientName"
@@ -15809,6 +16158,18 @@ function CheckoutDeliveryAndPayment(props) {
                       noValidate
                       autoComplete="off"
                     >
+                      {!showDealPaymentDetails && (
+                        <Field
+                          label=""
+                          id="dealRedemptionCode"
+                          name="dealRedemptionCode"
+                          type="text"
+                          helperText="Enter Your Unique Deal Redemption Code(Request this code from the Deal's Owner  if you don't have it)"
+                          onChange={onDealRedemptionCodeChange}
+                          component={renderDealRedemptionCodeField}
+                          style={{ width: 300 }}
+                        />
+                      )}
                       <Field
                         label=""
                         id="recipientName"
@@ -15852,6 +16213,18 @@ function CheckoutDeliveryAndPayment(props) {
                       noValidate
                       autoComplete="off"
                     >
+                      {!showDealPaymentDetails && (
+                        <Field
+                          label=""
+                          id="dealRedemptionCode"
+                          name="dealRedemptionCode"
+                          type="text"
+                          helperText="Enter Your Unique Deal Redemption Code(Request this code from the Deal's Owner  if you don't have it)"
+                          onChange={onDealRedemptionCodeChange}
+                          component={renderDealRedemptionCodeField}
+                          style={{ width: 300 }}
+                        />
+                      )}
                       <Field
                         label=""
                         id="recipientName"
@@ -15895,6 +16268,18 @@ function CheckoutDeliveryAndPayment(props) {
                       noValidate
                       autoComplete="off"
                     >
+                      {!showDealPaymentDetails && (
+                        <Field
+                          label=""
+                          id="dealRedemptionCode"
+                          name="dealRedemptionCode"
+                          type="text"
+                          helperText="Enter Your Unique Deal Redemption Code(Request this code from the Deal's Owner  if you don't have it)"
+                          onChange={onDealRedemptionCodeChange}
+                          component={renderDealRedemptionCodeField}
+                          style={{ width: 300 }}
+                        />
+                      )}
                       <Field
                         label=""
                         id="recipientName"
@@ -15935,6 +16320,18 @@ function CheckoutDeliveryAndPayment(props) {
                       noValidate
                       autoComplete="off"
                     >
+                      {!showDealPaymentDetails && (
+                        <Field
+                          label=""
+                          id="dealRedemptionCode"
+                          name="dealRedemptionCode"
+                          type="text"
+                          helperText="Enter Your Unique Deal Redemption Code(Request this code from the Deal's Owner  if you don't have it)"
+                          onChange={onDealRedemptionCodeChange}
+                          component={renderDealRedemptionCodeField}
+                          style={{ width: 300 }}
+                        />
+                      )}
                       <Field
                         label=""
                         id="recipientName"
@@ -16021,6 +16418,18 @@ function CheckoutDeliveryAndPayment(props) {
                       noValidate
                       autoComplete="off"
                     >
+                      {!showDealPaymentDetails && (
+                        <Field
+                          label=""
+                          id="dealRedemptionCode"
+                          name="dealRedemptionCode"
+                          type="text"
+                          helperText="Enter Your Unique Deal Redemption Code(Request this code from the Deal's Owner  if you don't have it)"
+                          onChange={onDealRedemptionCodeChange}
+                          component={renderDealRedemptionCodeField}
+                          style={{ width: 300 }}
+                        />
+                      )}
                       <Field
                         label=""
                         id="recipientName"
@@ -16138,6 +16547,18 @@ function CheckoutDeliveryAndPayment(props) {
                       noValidate
                       autoComplete="off"
                     >
+                      {!showDealPaymentDetails && (
+                        <Field
+                          label=""
+                          id="dealRedemptionCode"
+                          name="dealRedemptionCode"
+                          type="text"
+                          helperText="Enter Your Unique Deal Redemption Code(Request this code from the Deal's Owner  if you don't have it)"
+                          onChange={onDealRedemptionCodeChange}
+                          component={renderDealRedemptionCodeField}
+                          style={{ width: 300 }}
+                        />
+                      )}
                       <Field
                         label=""
                         id="recipientName"
@@ -16181,6 +16602,18 @@ function CheckoutDeliveryAndPayment(props) {
                       noValidate
                       autoComplete="off"
                     >
+                      {!showDealPaymentDetails && (
+                        <Field
+                          label=""
+                          id="dealRedemptionCode"
+                          name="dealRedemptionCode"
+                          type="text"
+                          helperText="Enter Your Unique Deal Redemption Code(Request this code from the Deal's Owner  if you don't have it)"
+                          onChange={onDealRedemptionCodeChange}
+                          component={renderDealRedemptionCodeField}
+                          style={{ width: 300 }}
+                        />
+                      )}
                       <Field
                         label=""
                         id="recipientName"
@@ -16224,6 +16657,18 @@ function CheckoutDeliveryAndPayment(props) {
                       noValidate
                       autoComplete="off"
                     >
+                      {!showDealPaymentDetails && (
+                        <Field
+                          label=""
+                          id="dealRedemptionCode"
+                          name="dealRedemptionCode"
+                          type="text"
+                          helperText="Enter Your Unique Deal Redemption Code(Request this code from the Deal's Owner  if you don't have it)"
+                          onChange={onDealRedemptionCodeChange}
+                          component={renderDealRedemptionCodeField}
+                          style={{ width: 300 }}
+                        />
+                      )}
                       <Field
                         label=""
                         id="recipientName"
@@ -16264,6 +16709,18 @@ function CheckoutDeliveryAndPayment(props) {
                       noValidate
                       autoComplete="off"
                     >
+                      {!showDealPaymentDetails && (
+                        <Field
+                          label=""
+                          id="dealRedemptionCode"
+                          name="dealRedemptionCode"
+                          type="text"
+                          helperText="Enter Your Unique Deal Redemption Code(Request this code from the Deal's Owner  if you don't have it)"
+                          onChange={onDealRedemptionCodeChange}
+                          component={renderDealRedemptionCodeField}
+                          style={{ width: 300 }}
+                        />
+                      )}
                       <Field
                         label=""
                         id="recipientName"
@@ -16752,7 +17209,7 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
@@ -17034,7 +17491,7 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
@@ -17315,7 +17772,7 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
@@ -17596,7 +18053,7 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
@@ -17898,7 +18355,7 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
@@ -18185,7 +18642,7 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
@@ -18471,7 +18928,7 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
@@ -18755,7 +19212,7 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
@@ -19051,7 +19508,7 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
@@ -19332,7 +19789,7 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
@@ -19612,7 +20069,7 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
@@ -19892,7 +20349,7 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
@@ -20189,7 +20646,7 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
@@ -20467,7 +20924,7 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
@@ -20744,7 +21201,7 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
@@ -21021,7 +21478,7 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
@@ -21319,7 +21776,7 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
@@ -21604,7 +22061,7 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
@@ -21887,7 +22344,7 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
@@ -22170,7 +22627,7 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
@@ -22467,7 +22924,7 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
@@ -22749,7 +23206,7 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
@@ -23031,7 +23488,7 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
@@ -23312,7 +23769,7 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
@@ -23464,7 +23921,7 @@ function CheckoutDeliveryAndPayment(props) {
                             </Button>
                           )}
 
-                        {isOnlinePayment && deliveryMode === null && (
+                        {isOnlinePayment && isBtnVisible && (
                           <Button
                             variant="contained"
                             className={classes.submitEmptyFieldButton}
@@ -23480,7 +23937,7 @@ function CheckoutDeliveryAndPayment(props) {
                           </Button>
                         )}
                         {isOnlinePayment &&
-                          isBtnVisible &&
+                          !isBtnVisible &&
                           recipientName &&
                           recipientPhoneNumber &&
                           renderOnlinePayment(
@@ -23599,7 +24056,7 @@ function CheckoutDeliveryAndPayment(props) {
                             </Button>
                           )}
 
-                        {isOnlinePayment && deliveryMode === null && (
+                        {isOnlinePayment && isBtnVisible && (
                           <Button
                             variant="contained"
                             className={classes.submitEmptyFieldButton}
@@ -23610,12 +24067,12 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
                         {isOnlinePayment &&
-                          isBtnVisible &&
+                          !isBtnVisible &&
                           recipientName &&
                           recipientPhoneNumber && (
                             <Button
@@ -23743,7 +24200,7 @@ function CheckoutDeliveryAndPayment(props) {
                             </Button>
                           )}
 
-                        {isOnlinePayment && deliveryMode === null && (
+                        {isOnlinePayment && isBtnVisible && (
                           <Button
                             variant="contained"
                             className={classes.submitEmptyFieldButton}
@@ -23759,7 +24216,7 @@ function CheckoutDeliveryAndPayment(props) {
                           </Button>
                         )}
                         {isOnlinePayment &&
-                          isBtnVisible &&
+                          !isBtnVisible &&
                           recipientName &&
                           recipientPhoneNumber &&
                           renderOnlinePayment(
@@ -23878,7 +24335,7 @@ function CheckoutDeliveryAndPayment(props) {
                             </Button>
                           )}
 
-                        {isOnlinePayment && deliveryMode === null && (
+                        {isOnlinePayment && isBtnVisible && (
                           <Button
                             variant="contained"
                             className={classes.submitEmptyFieldButton}
@@ -23889,12 +24346,11 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
-                        {
-                          isBtnVisible &&
+                        {!isBtnVisible &&
                           recipientName &&
                           recipientPhoneNumber && (
                             <Button
@@ -24021,7 +24477,7 @@ function CheckoutDeliveryAndPayment(props) {
                             </Button>
                           )}
 
-                        {isOnlinePayment && deliveryMode === null && (
+                        {isOnlinePayment && isBtnVisible && (
                           <Button
                             variant="contained"
                             className={classes.submitEmptyFieldButton}
@@ -24037,7 +24493,7 @@ function CheckoutDeliveryAndPayment(props) {
                           </Button>
                         )}
                         {isOnlinePayment &&
-                          isBtnVisible &&
+                          !isBtnVisible &&
                           recipientName &&
                           recipientPhoneNumber &&
                           renderOnlinePayment(
@@ -24156,7 +24612,7 @@ function CheckoutDeliveryAndPayment(props) {
                             </Button>
                           )}
 
-                        {isOnlinePayment && deliveryMode === null && (
+                        {isOnlinePayment && isBtnVisible && (
                           <Button
                             variant="contained"
                             className={classes.submitEmptyFieldButton}
@@ -24167,12 +24623,12 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
                         {isOnlinePayment &&
-                          isBtnVisible &&
+                          !isBtnVisible &&
                           recipientName &&
                           recipientPhoneNumber && (
                             <Button
@@ -24299,7 +24755,7 @@ function CheckoutDeliveryAndPayment(props) {
                             </Button>
                           )}
 
-                        {isOnlinePayment && deliveryMode === null && (
+                        {isOnlinePayment && isBtnVisible && (
                           <Button
                             variant="contained"
                             className={classes.submitEmptyFieldButton}
@@ -24315,7 +24771,7 @@ function CheckoutDeliveryAndPayment(props) {
                           </Button>
                         )}
                         {isOnlinePayment &&
-                          isBtnVisible &&
+                          !isBtnVisible &&
                           recipientName &&
                           recipientPhoneNumber &&
                           renderOnlinePayment(
@@ -24434,7 +24890,7 @@ function CheckoutDeliveryAndPayment(props) {
                             </Button>
                           )}
 
-                        {isOnlinePayment && deliveryMode === null && (
+                        {isOnlinePayment && isBtnVisible && (
                           <Button
                             variant="contained"
                             className={classes.submitEmptyFieldButton}
@@ -24445,12 +24901,12 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
                         {isOnlinePayment &&
-                          isBtnVisible &&
+                          !isBtnVisible &&
                           recipientName &&
                           recipientPhoneNumber && (
                             <Button
@@ -24740,7 +25196,7 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
@@ -25023,7 +25479,7 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
@@ -25305,7 +25761,7 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
@@ -25587,7 +26043,7 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
@@ -25886,7 +26342,7 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
@@ -26165,7 +26621,7 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
@@ -26443,7 +26899,7 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
@@ -26721,7 +27177,7 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
@@ -27019,7 +27475,7 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
@@ -27304,7 +27760,7 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
@@ -27588,7 +28044,7 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
@@ -27872,7 +28328,7 @@ function CheckoutDeliveryAndPayment(props) {
                             {loading ? (
                               <CircularProgress size={30} color="inherit" />
                             ) : (
-                              buttonEmptyFieldsContent()
+                              buttonEmptyFieldsClaimContent()
                             )}
                           </Button>
                         )}
