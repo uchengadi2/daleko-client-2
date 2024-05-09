@@ -2264,12 +2264,25 @@ function ProductEditForm(props) {
         ? formValues.dealCentralizedAgreedDeliveryCost
         : params[0].dealCentralizedAgreedDeliveryCost
     );
-    form.append(
-      "dealDecentralizedDeliveryLocation",
-      formValues.dealDecentralizedDeliveryLocation
-        ? formValues.dealDecentralizedDeliveryLocation
-        : params[0].dealDecentralizedDeliveryLocation
-    );
+    // form.append(
+    //   "dealDecentralizedDeliveryLocation",
+    //   formValues.dealDecentralizedDeliveryLocation
+    //     ? formValues.dealDecentralizedDeliveryLocation
+    //     : params[0].dealDecentralizedDeliveryLocation
+    // );
+
+    //converting string to array
+    for (
+      let i = 0;
+      i < formValues.dealDecentralizedDeliveryLocation.split("\n").length;
+      i++
+    ) {
+      form.append(
+        `dealDecentralizedDeliveryLocation`,
+        formValues.dealDecentralizedDeliveryLocation.split("\n")[i]
+      );
+    }
+
     form.append(
       "dealDecentralizedAgreedDeliveryCost",
       formValues.dealDecentralizedAgreedDeliveryCost

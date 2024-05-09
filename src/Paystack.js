@@ -142,6 +142,23 @@ function Paystack(props) {
       deliveryStatus: props.data.deliveryStatus,
       deliveryMode: props.data.deliveryMode,
       daysToDelivery: props.data.daysToDelivery,
+
+      salesPreference: props.data.salesPreference,
+      dealDeliveryMode: props.data.dealDeliveryMode,
+      dealStatus: props.data.dealStatus,
+      dealCode: props.data.dealCode,
+      dealType: props.data.dealType,
+      dealCentralizedDeliveryLocation:
+        props.data.dealCentralizedDeliveryLocation,
+      dealCentralizedAgreedDeliveryCost:
+        props.data.dealCentralizedAgreedDeliveryCost,
+      dealDecentralizedDeliveryLocation:
+        props.data.dealDecentralizedDeliveryLocation,
+      dealDecentralizedAgreedDeliveryCost:
+        props.data.dealDecentralizedAgreedDeliveryCost,
+      showDealPaymentDetails: props.data.showDealPaymentDetails,
+      dealPaymentPreference: props.data.dealPaymentPreference,
+      dealRedemptionCode: props.data.dealRedemptionCode,
     };
 
     if (transData) {
@@ -232,6 +249,23 @@ function Paystack(props) {
               deliveryStatus: props.data.deliveryStatus,
               deliveryMode: props.data.deliveryMode,
               daysToDelivery: props.data.daysToDelivery,
+
+              salesPreference: props.data.salesPreference,
+              dealDeliveryMode: props.data.dealDeliveryMode,
+              dealStatus: props.data.dealStatus,
+              dealCode: props.data.dealCode,
+              dealType: props.data.dealType,
+              dealCentralizedDeliveryLocation:
+                props.data.dealCentralizedDeliveryLocation,
+              dealCentralizedAgreedDeliveryCost:
+                props.data.dealCentralizedAgreedDeliveryCost,
+              dealDecentralizedDeliveryLocation:
+                props.data.dealDecentralizedDeliveryLocation,
+              dealDecentralizedAgreedDeliveryCost:
+                props.data.dealDecentralizedAgreedDeliveryCost,
+              showDealPaymentDetails: props.data.showDealPaymentDetails,
+              dealPaymentPreference: props.data.dealPaymentPreference,
+              dealRedemptionCode: props.data.dealRedemptionCode,
             };
 
             if (data) {

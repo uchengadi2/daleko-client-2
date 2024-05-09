@@ -2177,12 +2177,23 @@ function ProductForm(props) {
         ? formValues.dealCentralizedAgreedDeliveryCost
         : 0
     );
-    form.append(
-      "dealDecentralizedDeliveryLocation",
-      formValues.dealDecentralizedDeliveryLocation
-        ? formValues.dealDecentralizedDeliveryLocation
-        : null
-    );
+    // form.append(
+    //   "dealDecentralizedDeliveryLocation",
+    //   formValues.dealDecentralizedDeliveryLocation
+    //     ? formValues.dealDecentralizedDeliveryLocation
+    //     : null
+    // );
+    //converting string to array
+    for (
+      let i = 0;
+      i < formValues.dealDecentralizedDeliveryLocation.split("\n").length;
+      i++
+    ) {
+      form.append(
+        `dealDecentralizedDeliveryLocation`,
+        formValues.dealDecentralizedDeliveryLocation.split("\n")[i]
+      );
+    }
     form.append(
       "dealDecentralizedAgreedDeliveryCost",
       formValues.dealDecentralizedAgreedDeliveryCost

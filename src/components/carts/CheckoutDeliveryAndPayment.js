@@ -495,6 +495,15 @@ function CheckoutDeliveryAndPayment(props) {
   // );
   const [loading, setLoading] = useState();
 
+  console.log(
+    "dealDecentralizedDeliveryLocation length",
+    dealDecentralizedDeliveryLocation.length
+  );
+  console.log(
+    "dealDecentralizedDeliveryLocation:",
+    dealDecentralizedDeliveryLocation
+  );
+
   useEffect(() => {
     // 👇️ scroll to top on page load
     window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
@@ -523,8 +532,6 @@ function CheckoutDeliveryAndPayment(props) {
 
     fetchData().catch(console.error);
   }, [props]);
-
-  const destinations = ["destination1", "destination2", "destination3"];
 
   useEffect(() => {
     const fetchData = async () => {
@@ -1002,7 +1009,7 @@ function CheckoutDeliveryAndPayment(props) {
 
   //get the destination list
   const renderDecentralizedEntityLocationsList = () => {
-    return destinations.map((item) => {
+    return dealDecentralizedDeliveryLocation.map((item) => {
       return (
         <MenuItem key={item} value={item}>
           {item}
@@ -1509,8 +1516,6 @@ function CheckoutDeliveryAndPayment(props) {
     daysToDelivery = daysToSameDayDelivery;
   }
 
-  console.log("showDealPaymentDetails:", showDealPaymentDetails);
-  console.log("isCorrectDealRedemptionCode:", isCorrectDealRedemptionCode);
   //when the delivery field are empty
 
   const onEmptyFieldSubmit = () => {
@@ -1960,8 +1965,8 @@ function CheckoutDeliveryAndPayment(props) {
       nearestBusstop: nearestBusstop,
       postalCode: postalCode,
       recipientCountry: country,
-      recipientState: state,
-      recipientCity: city,
+      recipientState: state ? state : entity ? entity : null,
+      recipientCity: city ? city : place ? place : null,
       deliveryMode: deliveryMode,
       vatRate: vatRate,
       vat: vat,
@@ -1996,7 +2001,7 @@ function CheckoutDeliveryAndPayment(props) {
       dealType,
       dealCentralizedDeliveryLocation,
       dealCentralizedAgreedDeliveryCost,
-      dealDecentralizedDeliveryLocation,
+      dealDecentralizedDeliveryLocation: entityLocation ? entityLocation : null,
       dealDecentralizedAgreedDeliveryCost,
       showDealPaymentDetails,
       dealPaymentPreference,
@@ -2034,8 +2039,8 @@ function CheckoutDeliveryAndPayment(props) {
               nearestBusstop: nearestBusstop,
               postalCode: postalCode,
               recipientCountry: country,
-              recipientState: state,
-              recipientCity: city,
+              recipientState: state ? state : entity ? entity : null,
+              recipientCity: city ? city : place ? place : null,
               deliveryMode: deliveryMode,
               vatRate: vatRate,
 
@@ -2094,11 +2099,14 @@ function CheckoutDeliveryAndPayment(props) {
               dealType,
               dealCentralizedDeliveryLocation,
               dealCentralizedAgreedDeliveryCost,
-              dealDecentralizedDeliveryLocation,
+              dealDecentralizedDeliveryLocation: entityLocation
+                ? entityLocation
+                : null,
               dealDecentralizedAgreedDeliveryCost,
               showDealPaymentDetails,
               dealPaymentPreference,
             };
+            console.log("this data:", data);
 
             if (data) {
               const createForm = async () => {
@@ -2187,8 +2195,8 @@ function CheckoutDeliveryAndPayment(props) {
       nearestBusstop: nearestBusstop,
       postalCode: postalCode,
       recipientCountry: country,
-      recipientState: state,
-      recipientCity: city,
+      recipientState: state ? state : entity ? entity : null,
+      recipientCity: city ? city : place ? place : null,
       deliveryMode: deliveryMode,
       vatRate: vatRate,
       vat: vat,
@@ -2218,6 +2226,19 @@ function CheckoutDeliveryAndPayment(props) {
       deliveryStatus: "pending",
       deliveryMode: deliveryMode,
       daysToDelivery: daysToDelivery,
+
+      salesPreference,
+      dealDeliveryMode,
+      dealStatus,
+      dealCode,
+      dealType,
+      dealCentralizedDeliveryLocation,
+      dealCentralizedAgreedDeliveryCost,
+      dealDecentralizedDeliveryLocation: entityLocation ? entityLocation : null,
+      dealDecentralizedAgreedDeliveryCost,
+      showDealPaymentDetails,
+      dealPaymentPreference,
+      dealRedemptionCode,
     };
     return (
       <Paystack
