@@ -405,6 +405,7 @@ function CheckoutDeliveryAndPayment(props) {
     dealDecentralizedAgreedDeliveryCost,
     showDealPaymentDetails,
     dealPaymentPreference,
+    requestDealRedemptionCode,
   } = props;
   const [quantity, setQuantity] = useState(+props.quantity);
   const [productQuantityInCart, setProductQuantityInCart] = useState();
@@ -495,14 +496,7 @@ function CheckoutDeliveryAndPayment(props) {
   // );
   const [loading, setLoading] = useState();
 
-  console.log(
-    "dealDecentralizedDeliveryLocation length",
-    dealDecentralizedDeliveryLocation.length
-  );
-  console.log(
-    "dealDecentralizedDeliveryLocation:",
-    dealDecentralizedDeliveryLocation
-  );
+  console.log("requestDealRedemptionCode:", requestDealRedemptionCode);
 
   useEffect(() => {
     // 👇️ scroll to top on page load
@@ -1521,7 +1515,8 @@ function CheckoutDeliveryAndPayment(props) {
   const onEmptyFieldSubmit = () => {
     setLoading(true);
 
-    if (salesPreference === "deal" && !showDealPaymentDetails) {
+    // if (salesPreference === "deal" && !showDealPaymentDetails) {
+    if (salesPreference === "deal" && requestDealRedemptionCode) {
       if (!dealRedemptionCode) {
         props.handleFailedSnackbar("Please Provide The Deal redemption Code");
         setLoading(false);
@@ -1529,7 +1524,8 @@ function CheckoutDeliveryAndPayment(props) {
       }
     }
 
-    if (salesPreference === "deal" && !showDealPaymentDetails) {
+    // if (salesPreference === "deal" && !showDealPaymentDetails) {
+    if (salesPreference === "deal" && requestDealRedemptionCode) {
       if (!isCorrectDealRedemptionCode) {
         props.handleFailedSnackbar(
           "Please Provide The Correct And Active Deal Redemption Code"
@@ -1590,14 +1586,16 @@ function CheckoutDeliveryAndPayment(props) {
   const onPrivateDealCentralizedAtNoCostEmptyFieldSubmit = () => {
     setLoading(true);
 
-    if (!showDealPaymentDetails) {
+    // if (!showDealPaymentDetails) {
+    if (requestDealRedemptionCode) {
       if (!dealRedemptionCode) {
         props.handleFailedSnackbar("Please Provide The Deal redemption Code");
         setLoading(false);
         return;
       }
     }
-    if (!showDealPaymentDetails) {
+    // if (!showDealPaymentDetails) {
+    if (requestDealRedemptionCode) {
       if (!isCorrectDealRedemptionCode) {
         props.handleFailedSnackbar(
           "Please Provide The Correct And Active Deal Redemption Code"
@@ -1628,14 +1626,16 @@ function CheckoutDeliveryAndPayment(props) {
   const onPublicDealCentralizedAtNoCostEmptyFieldSubmit = () => {
     setLoading(true);
 
-    if (!showDealPaymentDetails) {
+    // if (!showDealPaymentDetails) {
+    if (requestDealRedemptionCode) {
       if (!dealRedemptionCode) {
         props.handleFailedSnackbar("Please Provide The Deal redemption Code");
         setLoading(false);
         return;
       }
     }
-    if (!showDealPaymentDetails) {
+    // if (!showDealPaymentDetails) {
+    if (requestDealRedemptionCode) {
       if (!isCorrectDealRedemptionCode) {
         props.handleFailedSnackbar(
           "Please Provide The Correct And Active Deal Redemption Code"
@@ -1665,14 +1665,16 @@ function CheckoutDeliveryAndPayment(props) {
   //when sales preference is  a deal and dealType === "private" && dealDeliveryMode === "centralized-at-agreed-cost"
   const onPrivateDealCentralizedAtAgreedCostEmptyFieldSubmit = () => {
     setLoading(true);
-    if (!showDealPaymentDetails) {
+    // if (!showDealPaymentDetails) {
+    if (requestDealRedemptionCode) {
       if (!dealRedemptionCode) {
         props.handleFailedSnackbar("Please Provide The Deal redemption Code");
         setLoading(false);
         return;
       }
     }
-    if (!showDealPaymentDetails) {
+    // if (!showDealPaymentDetails) {
+    if (requestDealRedemptionCode) {
       if (!isCorrectDealRedemptionCode) {
         props.handleFailedSnackbar(
           "Please Provide The Correct And Active Deal Redemption Code"
@@ -1702,14 +1704,16 @@ function CheckoutDeliveryAndPayment(props) {
   //when sales preference is  a deal and dealType === "public" && dealDeliveryMode === "centralized-at-agreed-cost"
   const onPublicDealCentralizedAtAgreedCostEmptyFieldSubmit = () => {
     setLoading(true);
-    if (!showDealPaymentDetails) {
+    // if (!showDealPaymentDetails) {
+    if (requestDealRedemptionCode) {
       if (!dealRedemptionCode) {
         props.handleFailedSnackbar("Please Provide The Deal redemption Code");
         setLoading(false);
         return;
       }
     }
-    if (!showDealPaymentDetails) {
+    // if (!showDealPaymentDetails) {
+    if (requestDealRedemptionCode) {
       if (!isCorrectDealRedemptionCode) {
         props.handleFailedSnackbar(
           "Please Provide The Correct And Active Deal Redemption Code"
@@ -1739,14 +1743,16 @@ function CheckoutDeliveryAndPayment(props) {
   //when sales preference is  a deal and dealType === "private" && dealDeliveryMode === "decentralized-at-no-cost"
   const onPrivateDealDecentralizedAtNoCostEmptyFieldSubmit = () => {
     setLoading(true);
-    if (!showDealPaymentDetails) {
+    // if (!showDealPaymentDetails) {
+    if (requestDealRedemptionCode) {
       if (!dealRedemptionCode) {
         props.handleFailedSnackbar("Please Provide The Deal redemption Code");
         setLoading(false);
         return;
       }
     }
-    if (!showDealPaymentDetails) {
+    // if (!showDealPaymentDetails) {
+    if (requestDealRedemptionCode) {
       if (!isCorrectDealRedemptionCode) {
         props.handleFailedSnackbar(
           "Please Provide The Correct And Active Deal Redemption Code"
@@ -1783,14 +1789,16 @@ function CheckoutDeliveryAndPayment(props) {
   //when sales preference is  a deal and dealType === "public" && dealDeliveryMode === "decentralized-at-no-cost"
   const onPublicDealDecentralizedAtNoCostEmptyFieldSubmit = () => {
     setLoading(true);
-    if (!showDealPaymentDetails) {
+    // if (!showDealPaymentDetails) {
+    if (requestDealRedemptionCode) {
       if (!dealRedemptionCode) {
         props.handleFailedSnackbar("Please Provide The Deal redemption Code");
         setLoading(false);
         return;
       }
     }
-    if (!showDealPaymentDetails) {
+    // if (!showDealPaymentDetails) {
+    if (requestDealRedemptionCode) {
       if (!isCorrectDealRedemptionCode) {
         props.handleFailedSnackbar(
           "Please Provide The Correct And Active Deal Redemption Code"
@@ -1827,14 +1835,16 @@ function CheckoutDeliveryAndPayment(props) {
   //when sales preference is  a deal and dealType === "private" && dealDeliveryMode === "decentralized-at-agreed-cost"
   const onPrivateDealDecentralizedAtCostEmptyFieldSubmit = () => {
     setLoading(true);
-    if (!showDealPaymentDetails) {
+    // if (!showDealPaymentDetails) {
+    if (requestDealRedemptionCode) {
       if (!dealRedemptionCode) {
         props.handleFailedSnackbar("Please Provide The Deal redemption Code");
         setLoading(false);
         return;
       }
     }
-    if (!showDealPaymentDetails) {
+    // if (!showDealPaymentDetails) {
+    if (requestDealRedemptionCode) {
       if (!isCorrectDealRedemptionCode) {
         props.handleFailedSnackbar(
           "Please Provide The Correct And Active Deal Redemption Code"
@@ -1887,14 +1897,16 @@ function CheckoutDeliveryAndPayment(props) {
   //when sales preference is  a deal and dealType === "public" && dealDeliveryMode === "decentralized-at-agreed-cost"
   const onPublicDealDecentralizedAtCostEmptyFieldSubmit = () => {
     setLoading(true);
-    if (!showDealPaymentDetails) {
+    // if (!showDealPaymentDetails) {
+    if (requestDealRedemptionCode) {
       if (!dealRedemptionCode) {
         props.handleFailedSnackbar("Please Provide The Deal redemption Code");
         setLoading(false);
         return;
       }
     }
-    if (!showDealPaymentDetails) {
+    // if (!showDealPaymentDetails) {
+    if (requestDealRedemptionCode) {
       if (!isCorrectDealRedemptionCode) {
         props.handleFailedSnackbar(
           "Please Provide The Correct And Active Deal Redemption Code"
@@ -2005,6 +2017,7 @@ function CheckoutDeliveryAndPayment(props) {
       dealDecentralizedAgreedDeliveryCost,
       showDealPaymentDetails,
       dealPaymentPreference,
+      requestDealRedemptionCode,
     };
 
     // write to the transaction table first
@@ -2105,8 +2118,8 @@ function CheckoutDeliveryAndPayment(props) {
               dealDecentralizedAgreedDeliveryCost,
               showDealPaymentDetails,
               dealPaymentPreference,
+              requestDealRedemptionCode,
             };
-            console.log("this data:", data);
 
             if (data) {
               const createForm = async () => {
@@ -2239,6 +2252,7 @@ function CheckoutDeliveryAndPayment(props) {
       showDealPaymentDetails,
       dealPaymentPreference,
       dealRedemptionCode,
+      requestDealRedemptionCode,
     };
     return (
       <Paystack
@@ -2410,7 +2424,7 @@ function CheckoutDeliveryAndPayment(props) {
                       noValidate
                       autoComplete="off"
                     >
-                      {!showDealPaymentDetails && (
+                      {requestDealRedemptionCode && (
                         <Field
                           label=""
                           id="dealRedemptionCode"
@@ -2539,7 +2553,7 @@ function CheckoutDeliveryAndPayment(props) {
                       noValidate
                       autoComplete="off"
                     >
-                      {!showDealPaymentDetails && (
+                      {requestDealRedemptionCode && (
                         <Field
                           label=""
                           id="dealRedemptionCode"
@@ -2594,7 +2608,7 @@ function CheckoutDeliveryAndPayment(props) {
                       noValidate
                       autoComplete="off"
                     >
-                      {!showDealPaymentDetails && (
+                      {requestDealRedemptionCode && (
                         <Field
                           label=""
                           id="dealRedemptionCode"
@@ -2649,7 +2663,7 @@ function CheckoutDeliveryAndPayment(props) {
                       noValidate
                       autoComplete="off"
                     >
-                      {!showDealPaymentDetails && (
+                      {requestDealRedemptionCode && (
                         <Field
                           label=""
                           id="dealRedemptionCode"
@@ -2702,7 +2716,7 @@ function CheckoutDeliveryAndPayment(props) {
                       noValidate
                       autoComplete="off"
                     >
-                      {!showDealPaymentDetails && (
+                      {requestDealRedemptionCode && (
                         <Field
                           label=""
                           id="dealRedemptionCode"
@@ -2800,7 +2814,7 @@ function CheckoutDeliveryAndPayment(props) {
                       noValidate
                       autoComplete="off"
                     >
-                      {!showDealPaymentDetails && (
+                      {requestDealRedemptionCode && (
                         <Field
                           label=""
                           id="dealRedemptionCode"
@@ -2929,7 +2943,7 @@ function CheckoutDeliveryAndPayment(props) {
                       noValidate
                       autoComplete="off"
                     >
-                      {!showDealPaymentDetails && (
+                      {requestDealRedemptionCode && (
                         <Field
                           label=""
                           id="dealRedemptionCode"
@@ -2984,7 +2998,7 @@ function CheckoutDeliveryAndPayment(props) {
                       noValidate
                       autoComplete="off"
                     >
-                      {!showDealPaymentDetails && (
+                      {requestDealRedemptionCode && (
                         <Field
                           label=""
                           id="dealRedemptionCode"
@@ -3039,7 +3053,7 @@ function CheckoutDeliveryAndPayment(props) {
                       noValidate
                       autoComplete="off"
                     >
-                      {!showDealPaymentDetails && (
+                      {requestDealRedemptionCode && (
                         <Field
                           label=""
                           id="dealRedemptionCode"
@@ -3092,7 +3106,7 @@ function CheckoutDeliveryAndPayment(props) {
                       noValidate
                       autoComplete="off"
                     >
-                      {!showDealPaymentDetails && (
+                      {requestDealRedemptionCode && (
                         <Field
                           label=""
                           id="dealRedemptionCode"
@@ -16050,7 +16064,7 @@ function CheckoutDeliveryAndPayment(props) {
                       noValidate
                       autoComplete="off"
                     >
-                      {!showDealPaymentDetails && (
+                      {requestDealRedemptionCode && (
                         <Field
                           label=""
                           id="dealRedemptionCode"
@@ -16179,7 +16193,7 @@ function CheckoutDeliveryAndPayment(props) {
                       noValidate
                       autoComplete="off"
                     >
-                      {!showDealPaymentDetails && (
+                      {requestDealRedemptionCode && (
                         <Field
                           label=""
                           id="dealRedemptionCode"
@@ -16234,7 +16248,7 @@ function CheckoutDeliveryAndPayment(props) {
                       noValidate
                       autoComplete="off"
                     >
-                      {!showDealPaymentDetails && (
+                      {requestDealRedemptionCode && (
                         <Field
                           label=""
                           id="dealRedemptionCode"
@@ -16289,7 +16303,7 @@ function CheckoutDeliveryAndPayment(props) {
                       noValidate
                       autoComplete="off"
                     >
-                      {!showDealPaymentDetails && (
+                      {requestDealRedemptionCode && (
                         <Field
                           label=""
                           id="dealRedemptionCode"
@@ -16341,7 +16355,7 @@ function CheckoutDeliveryAndPayment(props) {
                       noValidate
                       autoComplete="off"
                     >
-                      {!showDealPaymentDetails && (
+                      {requestDealRedemptionCode && (
                         <Field
                           label=""
                           id="dealRedemptionCode"
@@ -16439,7 +16453,7 @@ function CheckoutDeliveryAndPayment(props) {
                       noValidate
                       autoComplete="off"
                     >
-                      {!showDealPaymentDetails && (
+                      {requestDealRedemptionCode && (
                         <Field
                           label=""
                           id="dealRedemptionCode"
@@ -16568,7 +16582,7 @@ function CheckoutDeliveryAndPayment(props) {
                       noValidate
                       autoComplete="off"
                     >
-                      {!showDealPaymentDetails && (
+                      {requestDealRedemptionCode && (
                         <Field
                           label=""
                           id="dealRedemptionCode"
@@ -16623,7 +16637,7 @@ function CheckoutDeliveryAndPayment(props) {
                       noValidate
                       autoComplete="off"
                     >
-                      {!showDealPaymentDetails && (
+                      {requestDealRedemptionCode && (
                         <Field
                           label=""
                           id="dealRedemptionCode"
@@ -16678,7 +16692,7 @@ function CheckoutDeliveryAndPayment(props) {
                       noValidate
                       autoComplete="off"
                     >
-                      {!showDealPaymentDetails && (
+                      {requestDealRedemptionCode && (
                         <Field
                           label=""
                           id="dealRedemptionCode"
@@ -16730,7 +16744,7 @@ function CheckoutDeliveryAndPayment(props) {
                       noValidate
                       autoComplete="off"
                     >
-                      {!showDealPaymentDetails && (
+                      {requestDealRedemptionCode && (
                         <Field
                           label=""
                           id="dealRedemptionCode"

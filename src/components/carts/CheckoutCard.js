@@ -229,8 +229,6 @@ export default function CheckoutCard(props) {
         showDealDeliveryCost: product.showDealDeliveryCost,
       });
 
-      console.log("response:", response);
-      console.log("all data:", allData);
       if (!allData) {
         return;
       }

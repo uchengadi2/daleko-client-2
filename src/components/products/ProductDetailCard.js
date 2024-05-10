@@ -914,6 +914,9 @@ export default function ProductDetailCard(props) {
                   productType={props.product.productType}
                   dealPaymentPreference={props.product.dealPaymentPreference}
                   showDealPaymentDetails={props.product.showDealPaymentDetails}
+                  requestDealRedemptionCode={
+                    props.product.requestDealRedemptionCode
+                  }
                   allowPriceFreezing={props.product.allowPriceFreezing}
                   isVatable={props.product.isVatable}
                   revenueMargin={props.product.revenueMargin}
@@ -1899,6 +1902,9 @@ export default function ProductDetailCard(props) {
                   productType={props.product.productType}
                   dealPaymentPreference={props.product.dealPaymentPreference}
                   showDealPaymentDetails={props.product.showDealPaymentDetails}
+                  requestDealRedemptionCode={
+                    props.product.requestDealRedemptionCode
+                  }
                   allowPriceFreezing={props.product.allowPriceFreezing}
                   isVatable={props.product.isVatable}
                   revenueMargin={props.product.revenueMargin}

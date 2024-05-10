@@ -250,6 +250,7 @@ function SendCourseToCheckoutForm(props) {
     productType,
     dealPaymentPreference,
     showDealPaymentDetails,
+    requestDealRedemptionCode,
     dealType,
   } = props;
   const [quantity, setQuantity] = useState(props.minQuantity);
@@ -597,6 +598,7 @@ function SendCourseToCheckoutForm(props) {
       dealType,
       showDealPaymentDetails,
       dealPaymentPreference,
+      requestDealRedemptionCode,
     };
 
     if (salesPreference === "deal") {
@@ -716,6 +718,7 @@ function SendCourseToCheckoutForm(props) {
         dealType,
         showDealPaymentDetails,
         dealPaymentPreference,
+        requestDealRedemptionCode,
       };
 
       //update the exist
@@ -828,6 +831,7 @@ function SendCourseToCheckoutForm(props) {
       dealType,
       showDealPaymentDetails,
       dealPaymentPreference,
+      requestDealRedemptionCode,
     };
 
     if (salesPreference === "deal") {
@@ -961,6 +965,7 @@ function SendCourseToCheckoutForm(props) {
         dealType,
         showDealPaymentDetails,
         dealPaymentPreference,
+        requestDealRedemptionCode,
       };
 
       //update the exist

@@ -345,6 +345,7 @@ function ShowCustomerCart(props) {
           dealType: cart.dealType,
           showDealPaymentDetails: cart.showDealPaymentDetails,
           dealPaymentPreference: cart.dealPaymentPreference,
+          requestDealRedemptionCode: cart.requestDealRedemptionCode,
         });
       });
 
@@ -413,6 +414,7 @@ function ShowCustomerCart(props) {
           dealType: cart.dealType,
           showDealPaymentDetails: cart.showDealPaymentDetails,
           dealPaymentPreference: cart.dealPaymentPreference,
+          requestDealRedemptionCode: cart.requestDealRedemptionCode,
         });
       });
 
@@ -529,6 +531,7 @@ function ShowCustomerCart(props) {
               dealType={cart.dealType}
               showDealPaymentDetails={cart.showDealPaymentDetails}
               dealPaymentPreference={cart.dealPaymentPreference}
+              requestDealRedemptionCode={cart.requestDealRedemptionCode}
             />
           ))}
         </Grid>
@@ -595,6 +598,7 @@ function ShowCustomerCart(props) {
               dealType={cart.dealType}
               showDealPaymentDetails={cart.showDealPaymentDetails}
               dealPaymentPreference={cart.dealPaymentPreference}
+              requestDealRedemptionCode={cart.requestDealRedemptionCode}
             />
           ))}
         </Grid>

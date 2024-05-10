@@ -239,6 +239,7 @@ export default function CartProductCard(props) {
         dealPaymentPreference: product.dealPaymentPreference,
         showDealPaymentDetails: product.showDealPaymentDetails,
         dealPaymentPreference: product.dealPaymentPreference,
+        requestDealRedemptionCode: product.requestDealRedemptionCode,
       });
 
       if (!allData) {
@@ -320,6 +321,7 @@ export default function CartProductCard(props) {
         dealPaymentPreference: allData[0].dealPaymentPreference,
         showDealPaymentDetails: allData[0].showDealPaymentDetails,
         dealPaymentPreference: allData[0].dealPaymentPreference,
+        requestDealRedemptionCode: allData[0].requestDealRedemptionCode,
       });
       setCurrency(allData[0].currency);
     };
@@ -829,6 +831,7 @@ export default function CartProductCard(props) {
                   allowDealQuantityChange={product.allowDealQuantityChange}
                   showDealPaymentDetails={product.showDealPaymentDetails}
                   dealPaymentPreference={product.dealPaymentPreference}
+                  requestDealRedemptionCode={product.requestDealRedemptionCode}
                   weightPerUnitInCart={props.weightPerUnit}
                   productId={product.id}
                   currency={props.currency}
@@ -1116,6 +1119,7 @@ export default function CartProductCard(props) {
                   allowDealQuantityChange={product.allowDealQuantityChange}
                   showDealPaymentDetails={product.showDealPaymentDetails}
                   dealPaymentPreference={product.dealPaymentPreference}
+                  requestDealRedemptionCode={product.requestDealRedemptionCode}
                   weightPerUnitInCart={props.weightPerUnit}
                   productId={product.id}
                   currency={props.currency}

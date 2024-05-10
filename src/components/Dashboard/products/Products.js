@@ -160,6 +160,7 @@ function Products(props) {
           dealDeliveryMode: product.dealDeliveryMode,
           dealPaymentPreference: product.dealPaymentPreference,
           showDealPaymentDetails: product.showDealPaymentDetails,
+          requestDealRedemptionCode: product.requestDealRedemptionCode,
         });
       });
       setProductsList(allData);
@@ -470,6 +471,7 @@ function Products(props) {
         dealDeliveryMode: product.dealDeliveryMode,
         dealPaymentPreference: product.dealPaymentPreference,
         showDealPaymentDetails: product.showDealPaymentDetails,
+        requestDealRedemptionCode: product.requestDealRedemptionCode,
       };
       rows.push(row);
     });

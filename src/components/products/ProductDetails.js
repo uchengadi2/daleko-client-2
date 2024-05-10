@@ -343,6 +343,7 @@ function ProductDetails(props) {
           productType: product[0].productType,
           dealPaymentPreference: product[0].dealPaymentPreference,
           showDealPaymentDetails: product[0].showDealPaymentDetails,
+          requestDealRedemptionCode: product[0].requestDealRedemptionCode,
         });
 
         setProduct({
@@ -419,6 +420,7 @@ function ProductDetails(props) {
           productType: allData[0].productType,
           dealPaymentPreference: allData[0].dealPaymentPreference,
           showDealPaymentDetails: allData[0].showDealPaymentDetails,
+          requestDealRedemptionCode: allData[0].requestDealRedemptionCode,
         });
 
         setIsLoading(false);
@@ -514,6 +516,7 @@ function ProductDetails(props) {
             productType={product.productType}
             dealPaymentPreference={product.dealPaymentPreference}
             showDealPaymentDetails={product.showDealPaymentDetails}
+            requestDealRedemptionCode={product.requestDealRedemptionCode}
             key={product.id}
             token={props.token}
             userId={props.userId}
@@ -615,6 +618,7 @@ function ProductDetails(props) {
             productType={product.productType}
             dealPaymentPreference={product.dealPaymentPreference}
             showDealPaymentDetails={product.showDealPaymentDetails}
+            requestDealRedemptionCode={product.requestDealRedemptionCode}
             key={product.id}
             token={props.token}
             userId={props.userId}

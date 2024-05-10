@@ -159,6 +159,7 @@ function Paystack(props) {
       showDealPaymentDetails: props.data.showDealPaymentDetails,
       dealPaymentPreference: props.data.dealPaymentPreference,
       dealRedemptionCode: props.data.dealRedemptionCode,
+      requestDealRedemptionCode: props.data.requestDealRedemptionCode,
     };
 
     if (transData) {
@@ -266,6 +267,7 @@ function Paystack(props) {
               showDealPaymentDetails: props.data.showDealPaymentDetails,
               dealPaymentPreference: props.data.dealPaymentPreference,
               dealRedemptionCode: props.data.dealRedemptionCode,
+              requestDealRedemptionCode: props.data.requestDealRedemptionCode,
             };
 
             if (data) {

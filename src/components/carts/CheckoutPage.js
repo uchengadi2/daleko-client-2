@@ -230,6 +230,7 @@ function CheckoutPage(props) {
   const [dealCode, setDealCode] = useState();
   const [dealPaymentPreference, setDealPaymentPreference] = useState();
   const [showDealPaymentDetails, setShowDealPaymentDetails] = useState();
+  const [requestDealRedemptionCode, setRequestDealRedemptionCode] = useState();
   const [dealCentralizedDeliveryLocation, setDealCentralizedDeliveryLocation] =
     useState();
   const [
@@ -340,11 +341,9 @@ function CheckoutPage(props) {
           productType: cart.productType,
           showDealPaymentDetails: cart.showDealPaymentDetails,
           dealPaymentPreference: cart.dealPaymentPreference,
+          requestDealRedemptionCode: cart.requestDealRedemptionCode,
         });
       });
-
-      console.log("allData:", allData);
-      console.log("allData length:", allData.length);
 
       if (allData.length === 0) {
         setIsLoading(false);
@@ -364,6 +363,7 @@ function CheckoutPage(props) {
       setDealType(allData[0].dealType);
       setDealPaymentPreference(allData[0].dealPaymentPreference);
       setShowDealPaymentDetails(allData[0].showDealPaymentDetails);
+      setRequestDealRedemptionCode(allData[0].requestDealRedemptionCode);
       setDealCentralizedDeliveryLocation(
         allData[0].dealCentralizedDeliveryLocation
       );
@@ -628,6 +628,7 @@ function CheckoutPage(props) {
               dealType={dealType}
               dealPaymentPreference={dealPaymentPreference}
               showDealPaymentDetails={showDealPaymentDetails}
+              requestDealRedemptionCode={requestDealRedemptionCode}
               dealCentralizedDeliveryLocation={dealCentralizedDeliveryLocation}
               dealCentralizedAgreedDeliveryCost={
                 dealCentralizedAgreedDeliveryCost

@@ -927,7 +927,9 @@ function ProductEditForm(props) {
   const [dealPaymentPreference, setDealPaymentPreference] = useState(
     params[0].dealPaymentPreference
   );
-
+  const [requestDealRedemptionCode, setRequestDealRedemptionCode] = useState(
+    params[0].requestDealRedemptionCode
+  );
   const [loading, setLoading] = useState(false);
 
   const dispatch = useDispatch();
@@ -1196,6 +1198,10 @@ function ProductEditForm(props) {
 
   const handleDealPaymentPreferenceChange = (event) => {
     setDealPaymentPreference(event.target.value);
+  };
+
+  const handleRequestDealRedemptionCodeChange = (event) => {
+    setRequestDealRedemptionCode(event.target.value);
   };
 
   const handleUploadFiles = (files) => {
@@ -1954,6 +1960,37 @@ function ProductEditForm(props) {
     );
   };
 
+  const renderRequestDealRedemptionCodeField = ({
+    input,
+    label,
+    meta: { touched, error, invalid },
+    type,
+    id,
+    ...custom
+  }) => {
+    return (
+      <Box>
+        <FormControl variant="outlined">
+          {/* <InputLabel id="vendor_city">City</InputLabel> */}
+          <Select
+            labelId="requestDealRedemptionCode"
+            id="requestDealRedemptionCode"
+            value={requestDealRedemptionCode}
+            onChange={handleRequestDealRedemptionCodeChange}
+            //label="Allow Price Freezing"
+
+            style={{ width: 500, marginTop: 10, height: 38 }}
+            //{...input}
+          >
+            <MenuItem value={"false"}>No</MenuItem>
+            <MenuItem value={"true"}>Yes</MenuItem>
+          </Select>
+          <FormHelperText>Request Deal Redemption Code</FormHelperText>
+        </FormControl>
+      </Box>
+    );
+  };
+
   const buttonContent = () => {
     return <React.Fragment> Submit</React.Fragment>;
   };
@@ -2264,12 +2301,6 @@ function ProductEditForm(props) {
         ? formValues.dealCentralizedAgreedDeliveryCost
         : params[0].dealCentralizedAgreedDeliveryCost
     );
-    // form.append(
-    //   "dealDecentralizedDeliveryLocation",
-    //   formValues.dealDecentralizedDeliveryLocation
-    //     ? formValues.dealDecentralizedDeliveryLocation
-    //     : params[0].dealDecentralizedDeliveryLocation
-    // );
 
     //converting string to array
     for (
@@ -2302,6 +2333,13 @@ function ProductEditForm(props) {
       dealPaymentPreference
         ? dealPaymentPreference
         : params[0].dealPaymentPreference
+    );
+
+    form.append(
+      "requestDealRedemptionCode",
+      requestDealRedemptionCode
+        ? requestDealRedemptionCode
+        : params[0].requestDealRedemptionCode
     );
 
     if (formValues.imageCover) {
@@ -3058,6 +3096,17 @@ function ProductEditForm(props) {
                 />
               </Grid>
             </Grid>
+          )}
+
+          {salesPreference === "deal" && (
+            <Field
+              label=""
+              id="requestDealRedemptionCode"
+              name="requestDealRedemptionCode"
+              type="text"
+              //helperText="Allow the Customer to Change Deal Quantity"
+              component={renderRequestDealRedemptionCodeField}
+            />
           )}
 
           {salesPreference === "deal" && (

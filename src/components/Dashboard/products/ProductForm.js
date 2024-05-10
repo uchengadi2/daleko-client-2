@@ -909,6 +909,8 @@ function ProductForm(props) {
   const [dealPaymentPreference, setDealPaymentPreference] = useState(
     "each-beneficiary-make-own-payment"
   );
+  const [requestDealRedemptionCode, setRequestDealRedemptionCode] =
+    useState(false);
 
   const dispatch = useDispatch();
 
@@ -1197,6 +1199,9 @@ function ProductForm(props) {
 
   const handleDealPaymentPreferenceChange = (event) => {
     setDealPaymentPreference(event.target.value);
+  };
+  const handleRequestDealRedemptionCodeChange = (event) => {
+    setRequestDealRedemptionCode(event.target.value);
   };
 
   const handleUploadFiles = (files) => {
@@ -1956,6 +1961,37 @@ function ProductForm(props) {
     );
   };
 
+  const renderRequestDealRedemptionCodeField = ({
+    input,
+    label,
+    meta: { touched, error, invalid },
+    type,
+    id,
+    ...custom
+  }) => {
+    return (
+      <Box>
+        <FormControl variant="outlined">
+          {/* <InputLabel id="vendor_city">City</InputLabel> */}
+          <Select
+            labelId="requestDealRedemptionCode"
+            id="requestDealRedemptionCode"
+            value={requestDealRedemptionCode}
+            onChange={handleRequestDealRedemptionCodeChange}
+            //label="Allow Price Freezing"
+
+            style={{ width: 500, marginTop: 10, height: 38 }}
+            //{...input}
+          >
+            <MenuItem value={"false"}>No</MenuItem>
+            <MenuItem value={"true"}>Yes</MenuItem>
+          </Select>
+          <FormHelperText>Request Deal Redemption Code</FormHelperText>
+        </FormControl>
+      </Box>
+    );
+  };
+
   const buttonContent = () => {
     return <React.Fragment> Submit</React.Fragment>;
   };
@@ -2177,12 +2213,7 @@ function ProductForm(props) {
         ? formValues.dealCentralizedAgreedDeliveryCost
         : 0
     );
-    // form.append(
-    //   "dealDecentralizedDeliveryLocation",
-    //   formValues.dealDecentralizedDeliveryLocation
-    //     ? formValues.dealDecentralizedDeliveryLocation
-    //     : null
-    // );
+
     //converting string to array
     for (
       let i = 0;
@@ -2204,6 +2235,7 @@ function ProductForm(props) {
     form.append("showDealDeliveryCost", showDealDeliveryCost);
     form.append("showDealPaymentDetails", showDealPaymentDetails);
     form.append("dealPaymentPreference", dealPaymentPreference);
+    form.append("requestDealRedemptionCode", requestDealRedemptionCode);
 
     // if (!formValues["sku"]) {
     //   const sku =
@@ -2935,6 +2967,16 @@ function ProductForm(props) {
                 />
               </Grid>
             </Grid>
+          )}
+          {salesPreference === "deal" && (
+            <Field
+              label=""
+              id="requestDealRedemptionCode"
+              name="requestDealRedemptionCode"
+              type="text"
+              //helperText="Allow the Customer to Change Deal Quantity"
+              component={renderRequestDealRedemptionCodeField}
+            />
           )}
 
           {salesPreference === "deal" && (
