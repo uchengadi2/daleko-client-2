@@ -2215,16 +2215,20 @@ function ProductForm(props) {
     );
 
     //converting string to array
-    for (
-      let i = 0;
-      i < formValues.dealDecentralizedDeliveryLocation.split("\n").length;
-      i++
-    ) {
-      form.append(
-        `dealDecentralizedDeliveryLocation`,
-        formValues.dealDecentralizedDeliveryLocation.split("\n")[i]
-      );
+
+    if (formValues.dealDecentralizedDeliveryLocation) {
+      for (
+        let i = 0;
+        i < formValues.dealDecentralizedDeliveryLocation.split("\n").length;
+        i++
+      ) {
+        form.append(
+          `dealDecentralizedDeliveryLocation`,
+          formValues.dealDecentralizedDeliveryLocation.split("\n")[i]
+        );
+      }
     }
+
     form.append(
       "dealDecentralizedAgreedDeliveryCost",
       formValues.dealDecentralizedAgreedDeliveryCost
