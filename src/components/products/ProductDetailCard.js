@@ -301,7 +301,6 @@ export default function ProductDetailCard(props) {
   //   "this is description trim:",
   //   Str(props.description).limit(100, "...").get()
   // );
-  console.log("props are:", props);
 
   useEffect(() => {
     setPrice(props.product.pricePerUnit);
@@ -867,6 +866,63 @@ export default function ProductDetailCard(props) {
                     </span>
                   </Typography>
                 )}
+                {props.product.salesPreference === "deal" &&
+                  props.product.dealType === "private" &&
+                  props.product.isAContributoryDeal === true && (
+                    <Typography>
+                      <span style={{ fontSize: 14, marginLeft: 10 }}>
+                        {/* <strong> Deal Instruction:</strong> */}
+                        <span
+                          style={{
+                            fontSize: 14,
+                            marginLeft: 10,
+                            marginTop: 20,
+                            fontWeight: 700,
+                          }}
+                        >
+                          This Is A Private Target Scheme
+                        </span>
+                      </span>
+                    </Typography>
+                  )}
+                {props.product.salesPreference === "deal" &&
+                  props.product.dealType === "public" &&
+                  props.product.isAContributoryDeal === true && (
+                    <Typography>
+                      <span style={{ fontSize: 14, marginLeft: 10 }}>
+                        {/* <strong> Deal Instruction:</strong> */}
+                        <span
+                          style={{
+                            fontSize: 14,
+                            marginLeft: 10,
+                            marginTop: 20,
+                            fontWeight: 700,
+                          }}
+                        >
+                          This Is A Public Target Scheme
+                        </span>
+                      </span>
+                    </Typography>
+                  )}
+                {props.product.salesPreference === "deal" &&
+                  props.product.dealType === "public" &&
+                  props.product.isAContributoryDeal === false && (
+                    <Typography>
+                      <span style={{ fontSize: 14, marginLeft: 10 }}>
+                        {/* <strong> Deal Instruction:</strong> */}
+                        <span
+                          style={{
+                            fontSize: 14,
+                            marginLeft: 10,
+                            marginTop: 20,
+                            fontWeight: 700,
+                          }}
+                        >
+                          This Is Not A Target Scheme
+                        </span>
+                      </span>
+                    </Typography>
+                  )}
               </Box>
             </Grid>
 
@@ -917,6 +973,9 @@ export default function ProductDetailCard(props) {
                   requestDealRedemptionCode={
                     props.product.requestDealRedemptionCode
                   }
+                  isAContributoryDeal={props.product.isAContributoryDeal}
+                  dealOwner={props.product.dealOwner}
+                  dealOwnerEntity={props.product.dealOwnerEntity}
                   allowPriceFreezing={props.product.allowPriceFreezing}
                   isVatable={props.product.isVatable}
                   revenueMargin={props.product.revenueMargin}
@@ -1856,6 +1915,63 @@ export default function ProductDetailCard(props) {
                     </span>
                   </Typography>
                 )}
+                {props.product.salesPreference === "deal" &&
+                  props.product.dealType === "private" &&
+                  props.product.isAContributoryDeal === true && (
+                    <Typography>
+                      <span style={{ fontSize: 14, marginLeft: 10 }}>
+                        {/* <strong> Deal Instruction:</strong> */}
+                        <span
+                          style={{
+                            fontSize: 14,
+                            marginLeft: 10,
+                            marginTop: 20,
+                            fontWeight: 700,
+                          }}
+                        >
+                          This Is A Private Target Scheme
+                        </span>
+                      </span>
+                    </Typography>
+                  )}
+                {props.product.salesPreference === "deal" &&
+                  props.product.dealType === "public" &&
+                  props.product.isAContributoryDeal === true && (
+                    <Typography>
+                      <span style={{ fontSize: 14, marginLeft: 10 }}>
+                        {/* <strong> Deal Instruction:</strong> */}
+                        <span
+                          style={{
+                            fontSize: 14,
+                            marginLeft: 10,
+                            marginTop: 20,
+                            fontWeight: 700,
+                          }}
+                        >
+                          This Is A Public Target Scheme
+                        </span>
+                      </span>
+                    </Typography>
+                  )}
+                {props.product.salesPreference === "deal" &&
+                  props.product.dealType === "public" &&
+                  props.product.isAContributoryDeal === false && (
+                    <Typography>
+                      <span style={{ fontSize: 14, marginLeft: 10 }}>
+                        {/* <strong> Deal Instruction:</strong> */}
+                        <span
+                          style={{
+                            fontSize: 14,
+                            marginLeft: 10,
+                            marginTop: 20,
+                            fontWeight: 700,
+                          }}
+                        >
+                          This Is Not A Target Scheme
+                        </span>
+                      </span>
+                    </Typography>
+                  )}
               </Box>
             </Grid>
             <Grid item className={classes.thirdRowMobile}>
@@ -1905,6 +2021,9 @@ export default function ProductDetailCard(props) {
                   requestDealRedemptionCode={
                     props.product.requestDealRedemptionCode
                   }
+                  isAContributoryDeal={props.product.isAContributoryDeal}
+                  dealOwner={props.product.dealOwner}
+                  dealOwnerEntity={props.product.dealOwnerEntity}
                   allowPriceFreezing={props.product.allowPriceFreezing}
                   isVatable={props.product.isVatable}
                   revenueMargin={props.product.revenueMargin}

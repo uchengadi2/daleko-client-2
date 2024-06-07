@@ -22,6 +22,7 @@ import MenuItem from "@material-ui/core/MenuItem";
 import FormHelperText from "@material-ui/core/FormHelperText";
 import api from "./../../../apis/local";
 import { CREATE_PRODUCT } from "../../../actions/types";
+import { identity } from "lodash";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -911,6 +912,11 @@ function ProductForm(props) {
   );
   const [requestDealRedemptionCode, setRequestDealRedemptionCode] =
     useState(false);
+  const [isAContributoryDeal, setIsAContributoryDeal] = useState(false);
+  const [community, setCommunity] = useState(null);
+  const [communityList, setCommunityList] = useState([]);
+  const [entityList, setEntityList] = useState([]);
+  const [entity, setEntity] = useState();
 
   const dispatch = useDispatch();
 
@@ -936,7 +942,7 @@ function ProductForm(props) {
       let allData = [];
       api.defaults.headers.common["Authorization"] = `Bearer ${props.token}`;
       const response = await api.get(`/states`, {
-        params: { country: country },
+        params: { country: country, entityType: "conventional" },
       });
       const workingData = response.data.data.data;
       workingData.map((state) => {
@@ -1018,6 +1024,66 @@ function ProductForm(props) {
     fetchData().catch(console.error);
   }, []);
 
+  useEffect(() => {
+    const fetchData = async () => {
+      let allData = [];
+      api.defaults.headers.common["Authorization"] = `Bearer ${props.token}`;
+      const response = await api.get(`/states`, {
+        params: { entityType: "organizational" },
+      });
+      const workingData = response.data.data.data;
+      workingData.map((state) => {
+        allData.push({ id: state._id, name: state.name });
+      });
+      setEntityList(allData);
+    };
+
+    //call the function
+
+    fetchData().catch(console.error);
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      let allData = [];
+      api.defaults.headers.common["Authorization"] = `Bearer ${props.token}`;
+      const response = await api.get(`/communities`, {
+        params: { state: entity },
+      });
+      const workingData = response.data.data.data;
+      workingData.map((community) => {
+        allData.push({ id: community._id, name: community.name });
+      });
+      setCommunityList(allData);
+    };
+
+    //call the function
+
+    fetchData().catch(console.error);
+  }, [entity]);
+
+  //get the community list
+  const renderCommunityList = () => {
+    return communityList.map((item) => {
+      return (
+        <MenuItem key={item.id} value={item.id}>
+          {item.name}
+        </MenuItem>
+      );
+    });
+  };
+
+  //get the entity list
+  const renderEntityList = () => {
+    return entityList.map((item) => {
+      return (
+        <MenuItem key={item.id} value={item.id}>
+          {item.name}
+        </MenuItem>
+      );
+    });
+  };
+
   //get the vendor list
   const renderVendorList = () => {
     return vendorList.map((item) => {
@@ -1086,7 +1152,6 @@ function ProductForm(props) {
 
   const onImageChange = (e) => {
     setImage(e.target.value);
-    console.log("the image is:", image);
   };
 
   const handleVendorChange = (event) => {
@@ -1204,6 +1269,18 @@ function ProductForm(props) {
     setRequestDealRedemptionCode(event.target.value);
   };
 
+  const handleIsAContibutoryDealChange = (event) => {
+    setIsAContributoryDeal(event.target.value);
+  };
+
+  const handleCommunityChange = (event) => {
+    setCommunity(event.target.value);
+  };
+
+  const handleEntityChange = (event) => {
+    setEntity(event.target.value);
+  };
+
   const handleUploadFiles = (files) => {
     const uploaded = [...uploadedFiles];
     let limitExceeded = false;
@@ -1312,8 +1389,11 @@ function ProductForm(props) {
             <MenuItem value={"derica"}>Derica</MenuItem>
             <MenuItem value={"paint"}>Paint</MenuItem>
             <MenuItem value={"wholesale"}>Wholesale(Bulk Sales)</MenuItem>
-            <MenuItem value={"community"}>Community Purchase</MenuItem>
+            {/* <MenuItem value={"community"}>Community Purchase</MenuItem> */}
             <MenuItem value={"deal"}>Setup a Deal</MenuItem>
+            {/* <MenuItem value={"contributory-deal"}>
+              Setup a Contributory Deal
+            </MenuItem> */}
           </Select>
           <FormHelperText>Product Sales Preference</FormHelperText>
         </FormControl>
@@ -1992,6 +2072,97 @@ function ProductForm(props) {
     );
   };
 
+  const renderIsAContributoryDealField = ({
+    input,
+    label,
+    meta: { touched, error, invalid },
+    type,
+    id,
+    ...custom
+  }) => {
+    return (
+      <Box>
+        <FormControl variant="outlined">
+          {/* <InputLabel id="vendor_city">City</InputLabel> */}
+          <Select
+            labelId="isAContributoryDeal"
+            id="isAContributoryDeal"
+            value={isAContributoryDeal}
+            onChange={handleIsAContibutoryDealChange}
+            //label="Allow Price Freezing"
+
+            style={{ width: 500, marginTop: 10, height: 38 }}
+            //{...input}
+          >
+            <MenuItem value={"false"}>No</MenuItem>
+            <MenuItem value={"true"}>Yes</MenuItem>
+          </Select>
+          <FormHelperText>Is this a Contributory Deal?</FormHelperText>
+        </FormControl>
+      </Box>
+    );
+  };
+
+  const renderDealOwnerField = ({
+    input,
+    label,
+    meta: { touched, error, invalid },
+    type,
+    id,
+    ...custom
+  }) => {
+    return (
+      <Box>
+        <FormControl variant="outlined">
+          {/* <InputLabel id="vendor_city">City</InputLabel> */}
+          <Select
+            labelId="dealOwner"
+            id="dealOwner"
+            value={community}
+            onChange={handleCommunityChange}
+            //label="Allow Price Freezing"
+
+            style={{ width: 237, marginTop: 10, height: 38 }}
+            //{...input}
+          >
+            {renderCommunityList()}
+          </Select>
+          <FormHelperText>Select The Deal Owner Community</FormHelperText>
+        </FormControl>
+      </Box>
+    );
+  };
+
+  const renderEntityListField = ({
+    input,
+    label,
+    meta: { touched, error, invalid },
+    type,
+    id,
+    ...custom
+  }) => {
+    return (
+      <Box>
+        <FormControl variant="outlined">
+          {/* <InputLabel id="vendor_city">City</InputLabel> */}
+          <Select
+            labelId="entity"
+            id="entity"
+            value={entity}
+            onChange={handleEntityChange}
+            //label="Allow Price Freezing"
+
+            style={{ width: 257, marginTop: 10, height: 38 }}
+            //{...input}
+          >
+            {renderEntityList()}
+          </Select>
+          <FormHelperText>Select Deal Owner Entity</FormHelperText>
+        </FormControl>
+      </Box>
+    );
+  };
+
   const buttonContent = () => {
     return <React.Fragment> Submit</React.Fragment>;
   };
@@ -2200,6 +2371,7 @@ function ProductForm(props) {
       formValues.dealComment ? formValues.dealComment : null
     );
     form.append("productType", productType);
+
     form.append("dealDeliveryMode", dealDeliveryMode);
     form.append(
       "dealCentralizedDeliveryLocation",
@@ -2240,6 +2412,9 @@ function ProductForm(props) {
     form.append("showDealPaymentDetails", showDealPaymentDetails);
     form.append("dealPaymentPreference", dealPaymentPreference);
     form.append("requestDealRedemptionCode", requestDealRedemptionCode);
+    form.append("isAContributoryDeal", isAContributoryDeal);
+    form.append("dealOwnerEntity", entity ? entity : null);
+    form.append("dealOwner", community ? community : null);
 
     // if (!formValues["sku"]) {
     //   const sku =
@@ -2981,6 +3156,42 @@ function ProductForm(props) {
               //helperText="Allow the Customer to Change Deal Quantity"
               component={renderRequestDealRedemptionCodeField}
             />
+          )}
+
+          {salesPreference === "deal" && (
+            <Field
+              label=""
+              id="isAContributoryDeal"
+              name="isAContributoryDeal"
+              type="text"
+              //helperText="Allow the Customer to Change Deal Quantity"
+              component={renderIsAContributoryDealField}
+            />
+          )}
+
+          {salesPreference === "deal" && (
+            <Grid container direction="row" style={{ marginTop: 20 }}>
+              <Grid item style={{ width: "50%" }}>
+                <Field
+                  label=""
+                  id="entity"
+                  name="entity"
+                  type="text"
+                  //helperText="Allow the Customer to Change Deal Quantity"
+                  component={renderEntityListField}
+                />
+              </Grid>
+              <Grid item style={{ marginLeft: 15, width: "47%" }}>
+                <Field
+                  label=""
+                  id="dealOwner"
+                  name="dealOwner"
+                  type="text"
+                  //helperText="Allow the Customer to Change Deal Quantity"
+                  component={renderDealOwnerField}
+                />
+              </Grid>
+            </Grid>
           )}
 
           {salesPreference === "deal" && (

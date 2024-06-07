@@ -441,6 +441,12 @@ const DealHome = (props) => {
               product.dealDecentralizedAgreedDeliveryCost,
             showDealDeliveryCost: product.showDealDeliveryCost,
             productType: product.productType,
+            dealPaymentPreference: product.dealPaymentPreference,
+            showDealPaymentDetails: product.showDealPaymentDetails,
+            requestDealRedemptionCode: product.requestDealRedemptionCode,
+            isAContributoryDeal: product.isAContributoryDeal,
+            dealOwnerEntity: product.dealOwnerEntity,
+            dealOwner: product.dealOwner,
           });
         });
         setProductsList(allData);
@@ -522,6 +528,13 @@ const DealHome = (props) => {
               product.dealDecentralizedAgreedDeliveryCost,
             showDealDeliveryCost: product.showDealDeliveryCost,
             productType: product.productType,
+
+            dealPaymentPreference: product.dealPaymentPreference,
+            showDealPaymentDetails: product.showDealPaymentDetails,
+            requestDealRedemptionCode: product.requestDealRedemptionCode,
+            isAContributoryDeal: product.isAContributoryDeal,
+            dealOwnerEntity: product.dealOwnerEntity,
+            dealOwner: product.dealOwner,
           });
         });
         setProductsList(allData);
@@ -630,6 +643,12 @@ const DealHome = (props) => {
               }
               showDealDeliveryCost={product.showDealDeliveryCost}
               productType={product.productType}
+              dealPaymentPreference={product.dealPaymentPreference}
+              showDealPaymentDetails={product.showDealPaymentDetails}
+              requestDealRedemptionCode={product.requestDealRedemptionCode}
+              isAContributoryDeal={product.isAContributoryDeal}
+              dealOwnerEntity={product.dealOwnerEntity}
+              dealOwner={product.dealOwner}
               allowPriceFreezing={product.allowPriceFreezing}
               keyword1={product.keyword1}
               keyword2={product.keyword2}
@@ -712,6 +731,12 @@ const DealHome = (props) => {
               }
               showDealDeliveryCost={product.showDealDeliveryCost}
               productType={product.productType}
+              dealPaymentPreference={product.dealPaymentPreference}
+              showDealPaymentDetails={product.showDealPaymentDetails}
+              requestDealRedemptionCode={product.requestDealRedemptionCode}
+              isAContributoryDeal={product.isAContributoryDeal}
+              dealOwnerEntity={product.dealOwnerEntity}
+              dealOwner={product.dealOwner}
               allowPriceFreezing={product.allowPriceFreezing}
               deliverability={product.deliverability}
               pickupInfo={product.pickupInfo}

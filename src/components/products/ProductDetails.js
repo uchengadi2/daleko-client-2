@@ -344,6 +344,9 @@ function ProductDetails(props) {
           dealPaymentPreference: product[0].dealPaymentPreference,
           showDealPaymentDetails: product[0].showDealPaymentDetails,
           requestDealRedemptionCode: product[0].requestDealRedemptionCode,
+          isAContributoryDeal: product[0].isAContributoryDeal,
+          dealOwner: product[0].dealOwner,
+          dealOwnerEntity: product[0].dealOwnerEntity,
         });
 
         setProduct({
@@ -421,6 +424,9 @@ function ProductDetails(props) {
           dealPaymentPreference: allData[0].dealPaymentPreference,
           showDealPaymentDetails: allData[0].showDealPaymentDetails,
           requestDealRedemptionCode: allData[0].requestDealRedemptionCode,
+          isAContributoryDeal: allData[0].isAContributoryDeal,
+          dealOwner: allData[0].dealOwner,
+          dealOwnerEntity: allData[0].dealOwnerEntity,
         });
 
         setIsLoading(false);
@@ -517,6 +523,9 @@ function ProductDetails(props) {
             dealPaymentPreference={product.dealPaymentPreference}
             showDealPaymentDetails={product.showDealPaymentDetails}
             requestDealRedemptionCode={product.requestDealRedemptionCode}
+            isAContributoryDeal={product.isAContributoryDeal}
+            dealOwner={product.dealOwner}
+            dealOwnerEntity={product.dealOwnerEntity}
             key={product.id}
             token={props.token}
             userId={props.userId}
@@ -619,6 +628,9 @@ function ProductDetails(props) {
             dealPaymentPreference={product.dealPaymentPreference}
             showDealPaymentDetails={product.showDealPaymentDetails}
             requestDealRedemptionCode={product.requestDealRedemptionCode}
+            isAContributoryDeal={product.isAContributoryDeal}
+            dealOwner={product.dealOwner}
+            dealOwnerEntity={product.dealOwnerEntity}
             key={product.id}
             token={props.token}
             userId={props.userId}

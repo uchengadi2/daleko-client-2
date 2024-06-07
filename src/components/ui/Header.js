@@ -55,6 +55,7 @@ import OrderPage from "../orders/OrderPage";
 import ProfileLayout from "../ProfileLayout";
 import Dashboard from "../Dashboard/Dashboard";
 import MainDashboard from "../Dashboard/MainDashboard";
+import OwnTargetsPage from "../targets/OwnTargetsPage";
 
 function ElevationScroll(props) {
   const { children } = props;
@@ -157,7 +158,7 @@ const useStyles = makeStyles((theme) => ({
     height: "45px",
     fontSize: "13px",
     fontWeight: "500px",
-    width: "70px",
+    width: "40px",
     "&:hover": {
       backgroundColor: theme.palette.secondary.light,
       color: "white",
@@ -198,6 +199,34 @@ const useStyles = makeStyles((theme) => ({
     marginRight: "2px",
     height: "45px",
     width: "70px",
+    fontSize: "13px",
+    fontWeight: "500px",
+    "&:hover": {
+      backgroundColor: theme.palette.secondary.light,
+      color: "white",
+    },
+  },
+  target: {
+    ...theme.typography.estimate,
+    borderRadius: "250px",
+    marginLeft: "3px",
+    marginRight: "2px",
+    height: "45px",
+    width: "135px",
+    fontSize: "13px",
+    fontWeight: "500px",
+    "&:hover": {
+      backgroundColor: theme.palette.secondary.light,
+      color: "white",
+    },
+  },
+  profile: {
+    ...theme.typography.estimate,
+    borderRadius: "250px",
+    marginLeft: "3px",
+    marginRight: "2px",
+    height: "45px",
+    width: "50px",
     fontSize: "13px",
     fontWeight: "500px",
     "&:hover": {
@@ -262,7 +291,7 @@ const useStyles = makeStyles((theme) => ({
     marginLeft: "30px",
     marginRight: "10px",
     height: "45px",
-    width: "100px",
+    width: "110px",
     "&:hover": {
       backgroundColor: theme.palette.common.orange,
       color: "white",
@@ -598,12 +627,23 @@ const Header = (props) => {
             Checkout
           </Button>
           <Button
+            onClick={() => <OwnTargetsPage />}
+            disableRipple
+            component={Link}
+            // to={`/checkouts/${props.userId}`}
+            to={`/targets/targets`}
+            className={classes.target}
+          >
+            {/* <img alt="company logo" src={logo} className={classes.logo} /> */}
+            Target Scheme
+          </Button>
+          <Button
             onClick={() => <ProfileLayout />}
             disableRipple
             component={Link}
             // to={`/profile/${props.userId}`}
             to={`/profile/profile`}
-            className={classes.checkout}
+            className={classes.profile}
           >
             {/* <img alt="company logo" src={logo} className={classes.logo} /> */}
             Profile
@@ -1226,13 +1266,14 @@ const Header = (props) => {
                   backgroundColor: "white",
                   padding: 10,
                   borderRadius: 20,
+                  width: 500,
                 }}
               >
                 {renderCategoryField()}
                 <TextField
                   variant="outlined"
                   className={classes.root}
-                  style={{ width: 200, marginLeft: 8 }}
+                  style={{ width: 180, marginLeft: 8 }}
                   onChange={onChangeSearchText}
                   defaultValue={searchText}
                   component={Link}

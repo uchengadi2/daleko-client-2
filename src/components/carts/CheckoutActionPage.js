@@ -712,7 +712,8 @@ function CheckoutActionPage(props) {
       );
 
       //history.push("/");
-      props.renderCheckoutUpdate(props.cartId);
+      // props.renderCheckoutUpdate(props.cartId);
+      props.renderCheckoutUpdate();
 
       setLoadingRemoval(false);
     };
@@ -793,7 +794,8 @@ function CheckoutActionPage(props) {
 
           setLoading(false);
           //props.renderCartUpdate(props.cartId);
-          props.renderCheckoutUpdate(props.cartId);
+          // props.renderCheckoutUpdate(props.cartId);
+          props.renderCheckoutUpdate();
           //setIsCheckoutVisible(true);
         } else {
           props.handleFailedSnackbar(

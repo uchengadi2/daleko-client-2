@@ -13,7 +13,12 @@ import Box from "@material-ui/core/Box";
 import FormControl from "@material-ui/core/FormControl";
 import FormLabel from "@material-ui/core/FormLabel";
 import api from "../../apis/local";
-import { CREATE_CART, EDIT_CART, DELETE_CART } from "../../actions/types";
+import {
+  CREATE_CART,
+  EDIT_CART,
+  DELETE_CART,
+  CREATE_TARGET,
+} from "../../actions/types";
 import history from "../../history";
 import RequestQuote from "../quote/RequestQuote";
 import FreezePriceForm from "../freeze/FreezePriceForm";
@@ -33,6 +38,19 @@ const useStyles = makeStyles((theme) => ({
     marginTop: 30,
     color: "white",
     backgroundColor: theme.palette.common.green,
+    "&:hover": {
+      backgroundColor: theme.palette.common.green,
+    },
+  },
+
+  submitTargetButton: {
+    borderRadius: 10,
+    height: 40,
+    width: 240,
+    marginLeft: 50,
+    marginTop: 30,
+    color: "white",
+    backgroundColor: theme.palette.common.orange,
     "&:hover": {
       backgroundColor: theme.palette.common.green,
     },
@@ -252,6 +270,9 @@ function SendCourseToCheckoutForm(props) {
     showDealPaymentDetails,
     requestDealRedemptionCode,
     dealType,
+    isAContributoryDeal,
+    dealOwner,
+    dealOwnerEntity,
   } = props;
   const [quantity, setQuantity] = useState(props.minQuantity);
   const [newQuantity, setNewQuantity] = useState(props.minQuantity);
@@ -495,6 +516,10 @@ function SendCourseToCheckoutForm(props) {
     return <React.Fragment>Add to Cart</React.Fragment>;
   };
 
+  const targetButtonContent = () => {
+    return <React.Fragment>Add to My Target Scheme</React.Fragment>;
+  };
+
   const subscriptionButtonContent = () => {
     return <React.Fragment>Subscribe</React.Fragment>;
   };
@@ -599,6 +624,7 @@ function SendCourseToCheckoutForm(props) {
       showDealPaymentDetails,
       dealPaymentPreference,
       requestDealRedemptionCode,
+      isAContributoryDeal,
     };
 
     if (salesPreference === "deal") {
@@ -719,6 +745,7 @@ function SendCourseToCheckoutForm(props) {
         showDealPaymentDetails,
         dealPaymentPreference,
         requestDealRedemptionCode,
+        isAContributoryDeal,
       };
 
       //update the exist
@@ -832,6 +859,7 @@ function SendCourseToCheckoutForm(props) {
       showDealPaymentDetails,
       dealPaymentPreference,
       requestDealRedemptionCode,
+      isAContributoryDeal,
     };
 
     if (salesPreference === "deal") {
@@ -966,6 +994,7 @@ function SendCourseToCheckoutForm(props) {
         showDealPaymentDetails,
         dealPaymentPreference,
         requestDealRedemptionCode,
+        isAContributoryDeal,
       };
 
       //update the exist
@@ -1002,6 +1031,117 @@ function SendCourseToCheckoutForm(props) {
         props.handleFailedSnackbar("Something went wrong, please try again!!!");
       }
     } //end of the no cartholder
+    // } else {
+    //   //add come code here
+    // }
+  };
+
+  //submitting to the  target scheme
+
+  const onSubmitToTarget = (formValues) => {
+    setIsLoading(true);
+
+    if (props.token === undefined) {
+      props.handleMakeOpenLoginFormDialogStatus();
+      setIsLoading(false);
+      return;
+    }
+
+    if (!newQuantity) {
+      props.handleFailedSnackbar("The order quantity cannot be empty or 0");
+      setIsLoading(false);
+      return;
+    }
+
+    if (newQuantity <= 0) {
+      props.handleFailedSnackbar(
+        "The order quantity cannot be lower than the Minimum Quantity Required(MQR)"
+      );
+      setIsLoading(false);
+      return;
+    }
+
+    if (newQuantity < +minimumQuantity) {
+      props.handleFailedSnackbar(
+        "The order quantity cannot be lower than the Minimum Quantity Required(MQR)"
+      );
+      setIsLoading(false);
+      return;
+    }
+
+    const data = {
+      product: productId,
+      refNumber: formValues.refNumber
+        ? formValues.refNumber
+        : "PRO-" + Math.floor(Math.random() * 1000000000) + "-CT",
+
+      quantity: quantity,
+      cartHolder: props.userId,
+      isDeleted: false,
+      price: price,
+      currency: props.currency,
+      status: "pending",
+      weightInKg: weightInKg,
+      unit: props.unit,
+      weightPerUnit: props.weightPerUnit,
+      isVatable: props.isVatable,
+      revenueMargin: props.revenueMargin,
+      revenueMarginShouldPrevail: props.revenueMarginShouldPrevail,
+      dealCode,
+      dealExpiryDate,
+      allowDealQuantityChange,
+      showDealPricePerUnit,
+      dealStatus,
+      dealComment,
+      dealDeliveryMode,
+      dealCentralizedDeliveryLocation,
+      dealCentralizedAgreedDeliveryCost,
+      dealDecentralizedDeliveryLocation,
+      dealDecentralizedAgreedDeliveryCost,
+      showDealDeliveryCost,
+      productType,
+      salesPreference,
+      dealType,
+      showDealPaymentDetails,
+      dealPaymentPreference,
+      requestDealRedemptionCode,
+      isAContributoryDeal,
+      dealOwnerEntity,
+      dealOwner,
+    };
+
+    //create a new cart and add the product
+    if (data) {
+      const createForm = async () => {
+        api.defaults.headers.common["Authorization"] = `Bearer ${props.token}`;
+        const response = await api.post(`/targets`, data);
+
+        if (response.data.status === "success") {
+          dispatch({
+            type: CREATE_TARGET,
+            payload: response.data.data.data,
+          });
+
+          props.handleSuccessfulCreateSnackbar(
+            `item(s) successfully added to your target scheme. Please visit the target scheme page to continue`
+          );
+          //props.cartCounterHandler(1);
+          history.push("/dealscentral");
+          setLoading(false);
+        } else {
+          props.handleFailedSnackbar(
+            "Something went wrong, please try again!!!"
+          );
+        }
+      };
+      createForm().catch((err) => {
+        props.handleFailedSnackbar();
+        console.log("err:", err.message);
+      });
+    } else {
+      props.handleFailedSnackbar("Something went wrong, please try again!!!");
+    }
+
     // } else {
     //   //add come code here
     // }
@@ -1090,33 +1230,51 @@ function SendCourseToCheckoutForm(props) {
           </Grid> */}
         </Grid>
 
-        {props.pricingMechanism === "pricing" && (
-          <Button
-            variant="contained"
-            className={classes.submitButton}
-            onClick={props.handleSubmit(onSubmit)}
-          >
-            {loading ? (
-              <CircularProgress size={30} color="inherit" />
-            ) : (
-              buttonContent()
-            )}
-          </Button>
-        )}
+        {props.pricingMechanism === "pricing" &&
+          isAContributoryDeal === false && (
+            <Button
+              variant="contained"
+              className={classes.submitButton}
+              onClick={props.handleSubmit(onSubmit)}
+            >
+              {loading ? (
+                <CircularProgress size={30} color="inherit" />
+              ) : (
+                buttonContent()
+              )}
+            </Button>
+          )}
 
-        {props.pricingMechanism === "pricing" && (
-          <Button
-            variant="text"
-            className={classes.submitToCartButton}
-            onClick={props.handleSubmit(onSubmitToCart)}
-          >
-            {isLoading ? (
-              <CircularProgress size={30} color="inherit" />
-            ) : (
-              cartButtonContent()
-            )}
-          </Button>
-        )}
+        {props.pricingMechanism === "pricing" &&
+          isAContributoryDeal === false && (
+            <Button
+              variant="text"
+              className={classes.submitToCartButton}
+              onClick={props.handleSubmit(onSubmitToCart)}
+            >
+              {isLoading ? (
+                <CircularProgress size={30} color="inherit" />
+              ) : (
+                cartButtonContent()
+              )}
+            </Button>
+          )}
+
+        {props.pricingMechanism === "pricing" &&
+          salesPreference === "deal" &&
+          isAContributoryDeal === true && (
+            <Button
+              variant="contained"
+              className={classes.submitTargetButton}
+              onClick={props.handleSubmit(onSubmitToTarget)}
+            >
+              {loading ? (
+                <CircularProgress size={30} color="inherit" />
+              ) : (
+                targetButtonContent()
+              )}
+            </Button>
+          )}
 
         {props.pricingMechanism === "pricing" && allowPriceFreezing && (
           <Button

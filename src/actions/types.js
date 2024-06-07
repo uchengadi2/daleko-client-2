@@ -182,3 +182,17 @@ export const FETCH_DEALS = "FETCH_DEALS";
 export const FETCH_DEAL = "FETCH_DEAL";
 export const DELETE_DEAL = "DELETE_DEAL";
 export const EDIT_DEAL = "EDIT_DEAL";
+
+// for community resources
+export const CREATE_COMMUNITY = "CREATE_COMMUNITY";
+export const FETCH_COMMUNITIES = "FETCH_COMMUNITIES";
+export const FETCH_COMMUNITY = "FETCH_COMMUNITY";
+export const DELETE_COMMUNITY = "DELETE_COMMUNITY";
+export const EDIT_COMMUNITY = "EDIT_COMMUNITY";
+
+// for targets resources
+export const CREATE_TARGET = "CREATE_TARGET";
+export const FETCH_TARGETS = "FETCH_TARGETS";
+export const FETCH_TARGET = "FETCH_TARGET";
+export const DELETE_TARGET = "DELETE_TARGET";
+export const EDIT_TARGET = "EDIT_TARGET";

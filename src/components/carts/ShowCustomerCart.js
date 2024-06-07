@@ -241,13 +241,15 @@ function ShowCustomerCart(props) {
   const [cartProductList, setCartProductList] = useState([]);
   const [cartForCheckoutList, setCartForCheckoutList] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [updateCart, setUpdateCart] = useState();
+  const [updateCart, setUpdateCart] = useState(false);
   const [count, setCount] = useState(0);
   const [isProcessed, setIsProcessed] = useState(false);
   const [isLoading, setIsLoading] = useState(null);
   const [currency, setCurrency] = useState();
   const [policy, setPolicy] = useState();
   const [salesPreference, setSalesPreference] = useState();
+  const [isAContributoryDeal, setIsAContributoryDeal] = useState();
+  const [dealOwner, setDealOwner] = useState();
 
   const dispatch = useDispatch();
 
@@ -267,8 +269,12 @@ function ShowCustomerCart(props) {
 
   const cartHolder = props.userId;
 
-  const renderCartUpdate = (value) => {
-    setUpdateCart(value);
+  // const renderCartUpdate = (value) => {
+  //   setUpdateCart(value);
+  // };
+
+  const renderCartUpdate = () => {
+    setUpdateCart((prevState) => !prevState);
   };
 
   const handleBecomeAPartnerOpenDialogBox = () => {
@@ -346,6 +352,8 @@ function ShowCustomerCart(props) {
           showDealPaymentDetails: cart.showDealPaymentDetails,
           dealPaymentPreference: cart.dealPaymentPreference,
           requestDealRedemptionCode: cart.requestDealRedemptionCode,
+          isAContributoryDeal: cart.isAContributoryDeal,
+          dealOwner: cart.dealOwner,
         });
       });
 
@@ -354,6 +362,8 @@ function ShowCustomerCart(props) {
       }
       setCartProductList(allData);
       setSalesPreference(allData[0].salesPreference);
+      setIsAContributoryDeal(allData[0].isAContributoryDeal);
+      setDealOwner(allData[0].dealOwner);
       setIsLoading(false);
     };
 
@@ -415,6 +425,8 @@ function ShowCustomerCart(props) {
           showDealPaymentDetails: cart.showDealPaymentDetails,
           dealPaymentPreference: cart.dealPaymentPreference,
           requestDealRedemptionCode: cart.requestDealRedemptionCode,
+          isAContributoryDeal: cart.isAContributoryDeal,
+          dealOwner: cart.dealOwner,
         });
       });
 
@@ -532,6 +544,7 @@ function ShowCustomerCart(props) {
               showDealPaymentDetails={cart.showDealPaymentDetails}
               dealPaymentPreference={cart.dealPaymentPreference}
               requestDealRedemptionCode={cart.requestDealRedemptionCode}
+              dealOwner={cart.dealOwner}
             />
           ))}
         </Grid>
@@ -599,6 +612,7 @@ function ShowCustomerCart(props) {
               showDealPaymentDetails={cart.showDealPaymentDetails}
               dealPaymentPreference={cart.dealPaymentPreference}
               requestDealRedemptionCode={cart.requestDealRedemptionCode}
+              dealOwner={cart.dealOwner}
             />
           ))}
         </Grid>
@@ -619,7 +633,7 @@ function ShowCustomerCart(props) {
       return;
     }
 
-    if (salesPreference === "deal") {
+    if (salesPreference === "deal" && !isAContributoryDeal) {
       //delete all items in this user's cart
       cartForCheckoutList.map((cart, index) => {
         const createForm = async () => {

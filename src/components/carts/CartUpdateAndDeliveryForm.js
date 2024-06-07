@@ -636,7 +636,8 @@ function CartUpdateAndDeliveryForm(props) {
 
         setLoadingRemoval(false);
         props.cartCounterHandler(-1);
-        props.renderCartUpdate(props.cartId);
+        // props.renderCartUpdate(props.cartId);
+        props.renderCartUpdate();
       };
       createForm().catch((err) => {
         props.handleFailedSnackbar();
@@ -719,7 +720,8 @@ function CartUpdateAndDeliveryForm(props) {
           );
 
           setLoading(false);
-          props.renderCartUpdate(props.cartId);
+          // props.renderCartUpdate(props.cartId);
+          props.renderCartUpdate();
           //setIsCheckoutVisible(true);
         } else {
           props.handleFailedSnackbar(

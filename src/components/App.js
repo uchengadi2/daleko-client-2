@@ -30,7 +30,6 @@ import ThankYou from "./thankyou/ThankYou";
 import MainDashboard from "./Dashboard/MainDashboard";
 import Products from "./Dashboard/products/Products";
 import ProductCategories from "./Dashboard/products/Categories";
-
 import OrderPage from "./orders/OrderPage";
 import SearchPage from "./search/SearchPage";
 import RequestQuote from "./quote/RequestQuote";
@@ -51,6 +50,8 @@ import FreezePriceWholesalePageAd from "./freeze/FreezePriceWholesalePageAd";
 import FreezePriceCommunityPageAd from "./freeze/FreezePriceCommunityPageAd";
 import FreezePriceDealPageAd from "./freeze/FreezePriceDealPageAdPage";
 import DealPropositionAdPage from "./deals/DealPropositionAdPage";
+import OwnTargetsPage from "./targets/OwnTargetsPage";
+import TargetProductDetailPage from "./targets/TargetProductDetailPage";
 
 function App() {
   const { token, setToken } = useToken();
@@ -251,6 +252,31 @@ function App() {
                 handleFailedSnackbar={handleFailedSnackbar}
               />
             </Route>
+
+            <Route path="/targets/targets">
+              <OwnTargetsPage
+                token={token}
+                userId={userId}
+                setToken={setToken ? setToken : {}}
+                setUserId={setUserId ? setUserId : {}}
+                handleCartItemForCheckoutBox={handleCartItemForCheckoutBox}
+                handleSuccessfulCreateSnackbar={handleSuccessfulCreateSnackbar}
+                handleFailedSnackbar={handleFailedSnackbar}
+              />
+            </Route>
+
+            <Route path="/targets/target/:target">
+              <TargetProductDetailPage
+                token={token}
+                userId={userId}
+                setToken={setToken ? setToken : {}}
+                setUserId={setUserId ? setUserId : {}}
+                handleCartItemForCheckoutBox={handleCartItemForCheckoutBox}
+                handleSuccessfulCreateSnackbar={handleSuccessfulCreateSnackbar}
+                handleFailedSnackbar={handleFailedSnackbar}
+              />
+            </Route>
+
             <Route path="/orders/orders">
               <OrderPage
                 token={token}

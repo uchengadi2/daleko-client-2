@@ -136,6 +136,16 @@ import {
   FETCH_DEAL,
   EDIT_DEAL,
   DELETE_DEAL,
+  CREATE_COMMUNITY,
+  FETCH_COMMUNITIES,
+  FETCH_COMMUNITY,
+  EDIT_COMMUNITY,
+  DELETE_COMMUNITY,
+  CREATE_TARGET,
+  FETCH_TARGET,
+  FETCH_TARGETS,
+  EDIT_TARGET,
+  DELETE_TARGET,
 } from "./types";
 
 //authentication and authorization  operations
@@ -1430,6 +1440,100 @@ export const deleteDeal = (id) => {
   return async (dispatch) => {
     await data.delete(`/deals/${id}`);
     dispatch({ type: DELETE_DEAL, payload: id });
+    //history.push("/");
+  };
+};
+
+////////////////////////////////////////Deals///////////////////////////////
+//Community resources crud operations
+
+export const createCommunity = (formValues) => {
+  return async (dispatch, getState) => {
+    const { userId } = getState().auth;
+    const response = await data.post("/communities", {
+      ...formValues,
+      userId,
+    });
+
+    //console.log(response);
+    dispatch({ type: CREATE_COMMUNITY, payload: response.data });
+    // history.push("/");
+  };
+};
+
+export const fetchCommunities = () => {
+  return async (dispatch) => {
+    const response = await data.get("/communities");
+    dispatch({ type: FETCH_COMMUNITIES, payload: response.data.data.data });
+  };
+};
+
+export const fetchCommunity = (id) => {
+  return async (dispatch) => {
+    const response = await data.get(`/communities/${id}`);
+    dispatch({ type: FETCH_COMMUNITY, payload: response.data.data });
+  };
+};
+
+export const editCommunity = (id, formValues) => {
+  return async (dispatch) => {
+    const response = await data.patch(`/communities/${id}`, formValues);
+    dispatch({ type: EDIT_COMMUNITY, payload: response.data.data });
+    //history.push("/");
+  };
+};
+
+export const deleteCommunity = (id) => {
+  return async (dispatch) => {
+    await data.delete(`/communities/${id}`);
+    dispatch({ type: DELETE_COMMUNITY, payload: id });
+    //history.push("/");
+  };
+};
+
+////////////////////////////////////////Targets///////////////////////////////
+//Targets resources crud operations
+
+export const createTarget = (formValues) => {
+  return async (dispatch, getState) => {
+    const { userId } = getState().auth;
+    const response = await data.post("/targets", {
+      ...formValues,
+      userId,
+    });
+
+    //console.log(response);
+    dispatch({ type: CREATE_TARGET, payload: response.data });
+    // history.push("/");
+  };
+};
+
+export const fetchTargets = () => {
+  return async (dispatch) => {
+    const response = await data.get("/targets");
+    dispatch({ type: FETCH_TARGETS, payload: response.data.data.data });
+  };
+};
+
+export const fetchTarget = (id) => {
+  return async (dispatch) => {
+    const response = await data.get(`/targets/${id}`);
+    dispatch({ type: FETCH_TARGET, payload: response.data.data });
+  };
+};
+
+export const editTarget = (id, formValues) => {
+  return async (dispatch) => {
+    const response = await data.patch(`/targets/${id}`, formValues);
+    dispatch({ type: EDIT_TARGET, payload: response.data.data });
+    //history.push("/");
+  };
+};
+
+export const deleteTarget = (id) => {
+  return async (dispatch) => {
+    await data.delete(`/targets/${id}`);
+    dispatch({ type: DELETE_TARGET, payload: id });
     //history.push("/");
   };
 };

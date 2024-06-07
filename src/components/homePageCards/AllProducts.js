@@ -730,6 +730,75 @@ export default function AllProducts(props) {
                     </span>
                   </Typography>
                 )}
+                {props.salesPreference === "deal" &&
+                  props.isAContributoryDeal === true &&
+                  props.dealType === "private" && (
+                    <Typography>
+                      <span
+                        style={{
+                          fontSize: 14,
+                          fontWeight: 700,
+                          marginLeft: 10,
+                        }}
+                      >
+                        {/* <strong> Note:</strong> */}
+                        <span
+                          style={{
+                            fontSize: 20,
+                            fontWeight: 700,
+                            marginLeft: 10,
+                            marginTop: 20,
+                          }}
+                        >
+                          This Is A Private TARGET SCHEME
+                        </span>
+                      </span>
+                    </Typography>
+                  )}
+                {props.salesPreference === "deal" &&
+                  props.isAContributoryDeal === true &&
+                  props.dealType === "public" && (
+                    <Typography>
+                      <span
+                        style={{
+                          fontSize: 20,
+                          fontWeight: 700,
+                          marginLeft: 10,
+                          marginTop: 10,
+                        }}
+                      >
+                        {/* <strong> Note:</strong> */}
+                        <span
+                          style={{
+                            fontSize: 20,
+                            fontWeight: 700,
+                            marginLeft: 10,
+                            marginTop: 20,
+                          }}
+                        >
+                          This Is A Public TARGET SCHEME
+                        </span>
+                      </span>
+                    </Typography>
+                  )}
+                {props.salesPreference === "deal" &&
+                  props.isAContributoryDeal === false && (
+                    <Typography>
+                      <span style={{ fontSize: 14, marginLeft: 10 }}>
+                        {/* <strong> Note:</strong> */}
+                        <span
+                          style={{
+                            fontSize: 20,
+                            fontWeight: 700,
+                            marginLeft: 10,
+                            marginTop: 20,
+                          }}
+                        >
+                          This Is Not A TARGET SCHEME
+                        </span>
+                      </span>
+                    </Typography>
+                  )}
                 <br /> <br />
               </CardContent>
             </Grid>
@@ -741,6 +810,8 @@ export default function AllProducts(props) {
                 showDealPricePerUnit={props.showDealPricePerUnit}
                 allowDealQuantityChange={props.allowDealQuantityChange}
                 dealStatus={props.dealStatus}
+                dealType={props.dealType}
+                isAContributoryDeal={props.isAContributoryDeal}
                 allowPriceFreezing={props.allowPriceFreezing}
                 //tools={props.tools}
                 //policy={props.policy}
@@ -1046,6 +1117,75 @@ export default function AllProducts(props) {
                       </span>
                     </Typography>
                   )}
+                  {props.salesPreference === "deal" &&
+                    props.isAContributoryDeal === true &&
+                    props.dealType === "private" && (
+                      <Typography>
+                        <span
+                          style={{
+                            fontSize: 14,
+                            fontWeight: 700,
+                            marginLeft: 10,
+                          }}
+                        >
+                          {/* <strong> Note:</strong> */}
+                          <span
+                            style={{
+                              fontSize: 20,
+                              fontWeight: 700,
+                              marginLeft: 10,
+                              marginTop: 20,
+                            }}
+                          >
+                            This Is A Private TARGET SCHEME
+                          </span>
+                        </span>
+                      </Typography>
+                    )}
+                  {props.salesPreference === "deal" &&
+                    props.isAContributoryDeal === true &&
+                    props.dealType === "public" && (
+                      <Typography>
+                        <span
+                          style={{
+                            fontSize: 20,
+                            fontWeight: 700,
+                            marginLeft: 10,
+                            marginTop: 10,
+                          }}
+                        >
+                          {/* <strong> Note:</strong> */}
+                          <span
+                            style={{
+                              fontSize: 20,
+                              fontWeight: 700,
+                              marginLeft: 10,
+                              marginTop: 20,
+                            }}
+                          >
+                            This Is A Public TARGET SCHEME
+                          </span>
+                        </span>
+                      </Typography>
+                    )}
+                  {props.salesPreference === "deal" &&
+                    props.isAContributoryDeal === false && (
+                      <Typography>
+                        <span style={{ fontSize: 14, marginLeft: 10 }}>
+                          {/* <strong> Note:</strong> */}
+                          <span
+                            style={{
+                              fontSize: 20,
+                              fontWeight: 700,
+                              marginLeft: 10,
+                              marginTop: 20,
+                            }}
+                          >
+                            This Is Not A TARGET SCHEME
+                          </span>
+                        </span>
+                      </Typography>
+                    )}
                 </CardContent>
               </Grid>
 
@@ -1057,6 +1197,8 @@ export default function AllProducts(props) {
                   showDealPricePerUnit={props.showDealPricePerUnit}
                   allowDealQuantityChange={props.allowDealQuantityChange}
                   dealStatus={props.dealStatus}
+                  dealType={props.dealType}
+                  isAContributoryDeal={props.isAContributoryDeal}
                   allowPriceFreezing={props.allowPriceFreezing}
                   //tools={props.tools}
                   // policy={props.policy}

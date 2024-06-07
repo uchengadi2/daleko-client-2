@@ -161,6 +161,9 @@ function Products(props) {
           dealPaymentPreference: product.dealPaymentPreference,
           showDealPaymentDetails: product.showDealPaymentDetails,
           requestDealRedemptionCode: product.requestDealRedemptionCode,
+          isAContributoryDeal: product.isAContributoryDeal,
+          dealOwner: product.dealOwner,
+          dealOwnerEntity: product.dealOwnerEntity,
         });
       });
       setProductsList(allData);
@@ -472,6 +475,9 @@ function Products(props) {
         dealPaymentPreference: product.dealPaymentPreference,
         showDealPaymentDetails: product.showDealPaymentDetails,
         requestDealRedemptionCode: product.requestDealRedemptionCode,
+        isAContributoryDeal: product.isAContributoryDeal,
+        dealOwner: product.dealOwner,
+        dealOwnerEntity: product.dealOwnerEntity,
       };
       rows.push(row);
     });

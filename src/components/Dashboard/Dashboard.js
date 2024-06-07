@@ -42,6 +42,7 @@ import PlaceIcon from "@mui/icons-material/Place";
 import RedeemIcon from "@mui/icons-material/Redeem";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import SellIcon from "@mui/icons-material/Sell";
+import Diversity3Icon from "@mui/icons-material/Diversity3";
 import StorefrontIcon from "@mui/icons-material/Storefront";
 import CommuteIcon from "@mui/icons-material/Commute";
 import CorporateFareIcon from "@mui/icons-material/CorporateFare";
@@ -101,6 +102,7 @@ import Affiliates from "./utilities/Affiliates";
 import OrderList from "./ecommerce/OrderList";
 import RejectedTransactions from "./ecommerce/RejectedTransactions";
 import ProposedDeals from "./ecommerce/ProposedDeals";
+import Communities from "./utilities/Communities";
 
 // const Item = styled(Paper)(({ theme }) => ({
 //   backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#fff",
@@ -772,6 +774,21 @@ function Dashboard(props) {
               </MenuItem>
               <MenuItem
                 className={
+                  slug === "utilities-communities" ? classes.selected : null
+                }
+                selected={slug === "utilities-communities" ? true : false}
+                onClick={(event) => {
+                  event.preventDefault();
+                  history.push(`/dashboard/utilities-communities`);
+                }}
+              >
+                <ListItemIcon>
+                  <Diversity3Icon fontSize="small" />
+                </ListItemIcon>
+                <ListItemText>Communities</ListItemText>
+              </MenuItem>
+              <MenuItem
+                className={
                   slug === "utilities-carriers" ? classes.selected : null
                 }
                 selected={slug === "utilities-carriers" ? true : false}
@@ -1059,6 +1076,11 @@ function Dashboard(props) {
         {slug === "utilities-affiliates" && (
           <Grid item xs={9.5}>
             <Affiliates />
+          </Grid>
+        )}
+        {slug === "utilities-communities" && (
+          <Grid item xs={9.5}>
+            <Communities />
           </Grid>
         )}
         {slug === "settings-policy" && (

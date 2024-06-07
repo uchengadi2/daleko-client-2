@@ -214,7 +214,7 @@ function CheckoutPage(props) {
   const [contactUsOpen, setContactUsOpen] = useState(false);
   const [becomePartnerOpen, setBecomePartnerOpen] = useState(false);
   const [cartProductList, setCartProductList] = useState([]);
-  const [updateCheckout, setUpdateCheckout] = useState();
+
   const [totalCost, setTotalCost] = useState();
   const [currency, setCurrency] = useState();
   const [isLoading, setIsLoading] = useState(null);
@@ -246,6 +246,8 @@ function CheckoutPage(props) {
     setDealDecentralizedAgreedDeliveryCost,
   ] = useState();
   const [showDealDeliveryCost, setShowDealDeliveryCost] = useState();
+  const [updateCheckout, setUpdateCheckout] = useState(false);
+
   const [alert, setAlert] = useState({
     open: false,
     message: "",
@@ -260,8 +262,12 @@ function CheckoutPage(props) {
     },
   };
 
-  const renderCheckoutUpdate = (value) => {
-    setUpdateCheckout(value);
+  // const renderCheckoutUpdate = (value) => {
+  //   setUpdateCheckout(value);
+  // };
+
+  const renderCheckoutUpdate = () => {
+    setUpdateCheckout((prevState) => !prevState);
   };
 
   const cartHolder = props.userId;
@@ -347,12 +353,10 @@ function CheckoutPage(props) {
 
       if (allData.length === 0) {
         setIsLoading(false);
-        return;
       }
 
       if (!allData) {
         setIsLoading(false);
-        return;
       }
 
       setCartProductList(allData);
@@ -383,8 +387,6 @@ function CheckoutPage(props) {
 
     fetchData().catch(console.error);
   }, [updateCheckout]);
-
-  console.log("CartProductList:", cartProductList);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -601,7 +603,6 @@ function CheckoutPage(props) {
         )}
         {!isLoading && cartProductList.length === 0 ? (
           <p style={{ marginTop: 50, marginLeft: 10 }}>
-            {" "}
             There are no item in your checkout
           </p>
         ) : (
