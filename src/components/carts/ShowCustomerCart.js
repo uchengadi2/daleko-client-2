@@ -354,6 +354,13 @@ function ShowCustomerCart(props) {
           requestDealRedemptionCode: cart.requestDealRedemptionCode,
           isAContributoryDeal: cart.isAContributoryDeal,
           dealOwner: cart.dealOwner,
+          dealOwnerEntity: cart.dealOwnerEntity,
+          dealInitialPercentageContribution:
+            cart.dealInitialPercentageContribution,
+          dealMaximumInstallmentAllowed: cart.dealMaximumInstallmentAllowed,
+          includeGatewayChargesInPrice: cart.includeGatewayChargesInPrice,
+          gatewayFixedCharge: cart.gatewayFixedCharge,
+          gatewayRateCharge: cart.gatewayRateCharge,
         });
       });
 
@@ -427,6 +434,13 @@ function ShowCustomerCart(props) {
           requestDealRedemptionCode: cart.requestDealRedemptionCode,
           isAContributoryDeal: cart.isAContributoryDeal,
           dealOwner: cart.dealOwner,
+          dealOwnerEntity: cart.dealOwnerEntity,
+          dealInitialPercentageContribution:
+            cart.dealInitialPercentageContribution,
+          dealMaximumInstallmentAllowed: cart.dealMaximumInstallmentAllowed,
+          includeGatewayChargesInPrice: cart.includeGatewayChargesInPrice,
+          gatewayFixedCharge: cart.gatewayFixedCharge,
+          gatewayRateCharge: cart.gatewayRateCharge,
         });
       });
 
@@ -545,6 +559,14 @@ function ShowCustomerCart(props) {
               dealPaymentPreference={cart.dealPaymentPreference}
               requestDealRedemptionCode={cart.requestDealRedemptionCode}
               dealOwner={cart.dealOwner}
+              dealOwnerEntity={cart.dealOwnerEntity}
+              dealInitialPercentageContribution={
+                cart.dealInitialPercentageContribution
+              }
+              dealMaximumInstallmentAllowed={cart.dealMaximumInstallmentAllowed}
+              includeGatewayChargesInPrice={cart.includeGatewayChargesInPrice}
+              gatewayFixedCharge={cart.gatewayFixedCharge}
+              gatewayRateCharge={cart.gatewayRateCharge}
             />
           ))}
         </Grid>
@@ -613,6 +635,14 @@ function ShowCustomerCart(props) {
               dealPaymentPreference={cart.dealPaymentPreference}
               requestDealRedemptionCode={cart.requestDealRedemptionCode}
               dealOwner={cart.dealOwner}
+              dealOwnerEntity={cart.dealOwnerEntity}
+              dealInitialPercentageContribution={
+                cart.dealInitialPercentageContribution
+              }
+              dealMaximumInstallmentAllowed={cart.dealMaximumInstallmentAllowed}
+              includeGatewayChargesInPrice={cart.includeGatewayChargesInPrice}
+              gatewayFixedCharge={cart.gatewayFixedCharge}
+              gatewayRateCharge={cart.gatewayRateCharge}
             />
           ))}
         </Grid>

@@ -308,6 +308,12 @@ function TargetProductDetailAction(props) {
     salesPreference,
     amountAlreadyContributed,
     paymentStatus,
+    dealInitialPercentageContribution,
+    dealNumberOfInstallments,
+    includeGatewayChargesInPrice,
+    gatewayFixedCharge,
+    gatewayRateCharge,
+    currentInstallmentRound,
   } = props;
   const [quantity, setQuantity] = useState(+props.quantity);
   const [productQuantityInCart, setProductQuantityInCart] = useState();
@@ -336,6 +342,23 @@ function TargetProductDetailAction(props) {
   const [orderNumber, setOrderNumber] = useState(
     "OR-" + Math.floor(Math.random() * 10000000000000) + "-" + "ES"
   );
+  const [contributedAmount, setContributedAmount] = useState(0);
+  // const [charges, setCharges] = useState(
+  //   currentInstallmentRound === 0
+  //     ? gatewayFixedCharge +
+  //         gatewayRateCharge *
+  //           price *
+  //           quantity *
+  //           dealInitialPercentageContribution
+  //     : gatewayFixedCharge +
+  //         gatewayRateCharge *
+  //           price *
+  //           quantity *
+  //           (dealNumberOfInstallments > 1
+  //             ? (1 - dealInitialPercentageContribution) /
+  //               (dealNumberOfInstallments - 1)
+  //             : dealNumberOfInstallments)
+  // );
 
   const dispatch = useDispatch();
 
@@ -348,6 +371,59 @@ function TargetProductDetailAction(props) {
   // );
   const [loading, setLoading] = useState();
   const [loadingRemoval, setLoadingRemoval] = useState();
+
+  useEffect(() => {
+    let amount = 0;
+
+    if (dealNumberOfInstallments === 1) {
+      amount =
+        price * quantity +
+        (gatewayFixedCharge + gatewayRateCharge * price * quantity);
+    } else {
+      if (currentInstallmentRound === 0) {
+        if (includeGatewayChargesInPrice) {
+          const roundSum =
+            dealInitialPercentageContribution * (price * quantity);
+          amount =
+            roundSum + (gatewayFixedCharge + gatewayRateCharge * roundSum);
+        } else {
+          amount = dealInitialPercentageContribution * (price * quantity);
+        }
+      } else {
+        if (includeGatewayChargesInPrice) {
+          const roundSum =
+            ((1 - dealInitialPercentageContribution) /
+              (dealNumberOfInstallments - 1)) *
+            (price * quantity);
+          amount =
+            roundSum + (gatewayFixedCharge + gatewayRateCharge * roundSum);
+        } else {
+          amount =
+            ((1 - dealInitialPercentageContribution) /
+              (dealNumberOfInstallments - 1)) *
+            (price * quantity);
+        }
+      }
+    }
+
+    setContributedAmount(amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,"));
+  }, [price, quantity]);
+
+  let charges = 0;
+  let amount = 0;
+  if (dealNumberOfInstallments === 1) {
+    charges = gatewayFixedCharge + gatewayRateCharge * price * quantity;
+  } else {
+    if (currentInstallmentRound === 0) {
+      amount = dealInitialPercentageContribution * price * quantity;
+      charges = gatewayFixedCharge + gatewayRateCharge * amount;
+    } else {
+      amount =
+        ((1 - dealInitialPercentageContribution) * price * quantity) /
+        (dealNumberOfInstallments - 1);
+      charges = gatewayFixedCharge + gatewayRateCharge * amount;
+    }
+  }
 
   useEffect(() => {
     if (!price) {
@@ -527,6 +603,7 @@ function TargetProductDetailAction(props) {
     meta: { touched, error, invalid },
     type,
     defaultValue,
+    helperText,
     id,
     ...custom
   }) => {
@@ -535,7 +612,88 @@ function TargetProductDetailAction(props) {
         error={touched && invalid}
         //placeholder="category description"
         variant="outlined"
-        helperText="Total Amount Contributed"
+        helperText={helperText}
+        label={label}
+        id={input.name}
+        name={input.name}
+        //value={total}
+        defaultValue={defaultValue}
+        fullWidth
+        type={type}
+        disabled
+        style={{ marginTop: 10, width: 250 }}
+        onChange={input.onChange}
+        InputProps={{
+          inputProps: {
+            min: 1,
+            style: {
+              height: 1,
+              //fontSize: "2em",
+            },
+          },
+        }}
+      />
+    );
+  };
+  const renderCurrentInstallmentRoundField = ({
+    input,
+    label,
+    meta: { touched, error, invalid },
+    type,
+    defaultValue,
+    helperText,
+    id,
+    ...custom
+  }) => {
+    return (
+      <TextField
+        error={touched && invalid}
+        //placeholder="category description"
+        variant="outlined"
+        helperText={helperText}
+        label={label}
+        id={input.name}
+        name={input.name}
+        //value={total}
+        defaultValue={defaultValue}
+        fullWidth
+        type={type}
+        disabled
+        style={{ marginTop: 10, width: 250 }}
+        onChange={input.onChange}
+        InputProps={{
+          inputProps: {
+            min: 1,
+            style: {
+              height: 1,
+              //fontSize: "2em",
+            },
+          },
+        }}
+      />
+    );
+  };
+
+  const renderAmountDueForContributionField = ({
+    input,
+    label,
+    meta: { touched, error, invalid },
+    type,
+    defaultValue,
+    helperText,
+    id,
+    ...custom
+  }) => {
+    return (
+      <TextField
+        error={touched && invalid}
+        //placeholder="category description"
+        variant="outlined"
+        helperText={
+          !includeGatewayChargesInPrice
+            ? helperText
+            : `${helperText} (Includes Payment Gateway charges of =N=${charges})`
+        }
         label={label}
         id={input.name}
         name={input.name}
@@ -1032,9 +1190,52 @@ function TargetProductDetailAction(props) {
                 label=""
                 id="amountAlreadyContributed"
                 name="amountAlreadyContributed"
-                defaultValue={amountAlreadyContributed}
+                defaultValue={
+                  amountAlreadyContributed !== 0
+                    ? amountAlreadyContributed
+                        .toFixed(2)
+                        .replace(/\d(?=(\d{3})+\.)/g, "$&,")
+                    : 0
+                }
                 type="text"
+                helperText="Total Amount Already Contributed"
                 component={renderAmountAlreadyContributedTotalField}
+                style={{ width: 150 }}
+              />
+            </Grid>
+          </Grid>
+
+          <Grid container direction="row">
+            <Grid item style={{ width: 50, marginTop: 10, fontSize: 25 }}>
+              {/* <span style={{ color: "grey" }}>&#8358;</span> */}
+            </Grid>
+            <Grid item style={{ marginLeft: 0, marginTop: 10, width: 150 }}>
+              <Field
+                label=""
+                id="currentInstallmentRound"
+                name="currentInstallmentRound"
+                defaultValue={currentInstallmentRound}
+                type="text"
+                helperText="Previous Installment Round"
+                component={renderCurrentInstallmentRoundField}
+                style={{ width: 150 }}
+              />
+            </Grid>
+          </Grid>
+
+          <Grid container direction="row">
+            <Grid item style={{ width: 50, marginTop: 10, fontSize: 25 }}>
+              <span style={{ color: "grey" }}>&#8358;</span>
+            </Grid>
+            <Grid item style={{ marginLeft: 0, marginTop: 10, width: 150 }}>
+              <Field
+                label=""
+                id="contributedAmount"
+                name="contributedAmount"
+                defaultValue={contributedAmount}
+                type="text"
+                helperText="Amount Due for Contribution"
+                component={renderAmountDueForContributionField}
                 style={{ width: 150 }}
               />
             </Grid>

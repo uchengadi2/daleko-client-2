@@ -4,6 +4,7 @@ import CircularProgress from "@material-ui/core/CircularProgress";
 import { Link } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import Grid from "@material-ui/core/Grid";
+import Container from "@material-ui/core/Container";
 import Card from "@material-ui/core/Card";
 import CardContent from "@material-ui/core/CardContent";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
@@ -273,6 +274,11 @@ function SendCourseToCheckoutForm(props) {
     isAContributoryDeal,
     dealOwner,
     dealOwnerEntity,
+    dealInitialPercentageContribution,
+    dealMaximumInstallmentAllowed,
+    includeGatewayChargesInPrice,
+    gatewayFixedCharge,
+    gatewayRateCharge,
   } = props;
   const [quantity, setQuantity] = useState(props.minQuantity);
   const [newQuantity, setNewQuantity] = useState(props.minQuantity);
@@ -289,6 +295,7 @@ function SendCourseToCheckoutForm(props) {
   const [total, setTotal] = useState();
   const [sameProductAlreadyInCart, setSameProductAlreadyInCart] =
     useState(false);
+  const [dealNumberOfInstallments, setDealNumberOfInstallments] = useState(0);
 
   const dispatch = useDispatch();
 
@@ -434,6 +441,43 @@ function SendCourseToCheckoutForm(props) {
     setTotal(newTotal.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,"));
     setNewQuantity(newQuantity);
   };
+
+  const onDealNumberOfInstallmentChange = (event) => {
+    setDealNumberOfInstallments(event.target.value);
+
+    // if (event.target.value > 0) {
+    //   if (event.target.value > minimumContributableAmount) {
+    //     setCanMakeContribution(true);
+    //   } else {
+    //     setCanMakeContribution(false);
+    //   }
+    // } else {
+    //   setCanMakeContribution(false);
+    // }
+  };
+
+  const renderPreferredNumberOfInstallmentField = () => {
+    return (
+      <TextField
+        label="Enter Your Preferred Number of Installments"
+        variant="outlined"
+        fullWidth
+        type="number"
+        id="dealNumberOfInstallments"
+        name="dealNumberOfInstallments"
+        // defaultValue={dealNumberOfInstallments}
+        style={{
+          marginTop: 20,
+          marginLeft: -13,
+          marginBottom: 20,
+          width: 300,
+          height: 30,
+        }}
+        onChange={onDealNumberOfInstallmentChange}
+      />
+    );
+  };
+  console.log("dealNumberOfInstallments:", dealNumberOfInstallments);
 
   const renderTotalField = ({
     input,
@@ -625,6 +669,11 @@ function SendCourseToCheckoutForm(props) {
       dealPaymentPreference,
       requestDealRedemptionCode,
       isAContributoryDeal,
+      dealInitialPercentageContribution,
+      dealMaximumInstallmentAllowed,
+      includeGatewayChargesInPrice,
+      gatewayFixedCharge,
+      gatewayRateCharge,
     };
 
     if (salesPreference === "deal") {
@@ -746,6 +795,11 @@ function SendCourseToCheckoutForm(props) {
         dealPaymentPreference,
         requestDealRedemptionCode,
         isAContributoryDeal,
+        dealInitialPercentageContribution,
+        dealMaximumInstallmentAllowed,
+        includeGatewayChargesInPrice,
+        gatewayFixedCharge,
+        gatewayRateCharge,
       };
 
       //update the exist
@@ -860,6 +914,11 @@ function SendCourseToCheckoutForm(props) {
       dealPaymentPreference,
       requestDealRedemptionCode,
       isAContributoryDeal,
+      dealInitialPercentageContribution,
+      dealMaximumInstallmentAllowed,
+      includeGatewayChargesInPrice,
+      gatewayFixedCharge,
+      gatewayRateCharge,
     };
 
     if (salesPreference === "deal") {
@@ -995,6 +1054,11 @@ function SendCourseToCheckoutForm(props) {
         dealPaymentPreference,
         requestDealRedemptionCode,
         isAContributoryDeal,
+        dealInitialPercentageContribution,
+        dealMaximumInstallmentAllowed,
+        includeGatewayChargesInPrice,
+        gatewayFixedCharge,
+        gatewayRateCharge,
       };
 
       //update the exist
@@ -1069,6 +1133,22 @@ function SendCourseToCheckoutForm(props) {
       return;
     }
 
+    if (dealNumberOfInstallments < 1) {
+      props.handleFailedSnackbar(
+        `Your Preferred Number of Installments cannot be less than 1. Make the correction and try again`
+      );
+      setIsLoading(false);
+      return;
+    }
+
+    if (dealMaximumInstallmentAllowed < +dealNumberOfInstallments) {
+      props.handleFailedSnackbar(
+        `Your Preferred Number of Installments cannot be greater than ${dealMaximumInstallmentAllowed}. Make the correction and try again`
+      );
+      setIsLoading(false);
+      return;
+    }
+
     const data = {
       product: productId,
       refNumber: formValues.refNumber
@@ -1108,7 +1188,17 @@ function SendCourseToCheckoutForm(props) {
       isAContributoryDeal,
       dealOwnerEntity,
       dealOwner,
+      dealInitialPercentageContribution,
+      dealNumberOfInstallments,
+      includeGatewayChargesInPrice,
+      gatewayFixedCharge,
+      gatewayRateCharge,
     };
+
+    console.log(
+      "dealMaximumInstallmentAllowedbbbbbb:",
+      dealMaximumInstallmentAllowed
+    );
 
     //create a new cart and add the product
     if (data) {
@@ -1228,6 +1318,7 @@ function SendCourseToCheckoutForm(props) {
               style={{ width: 300, marginBottom: 20 }}
             />
           </Grid> */}
+          <Container>{renderPreferredNumberOfInstallmentField()}</Container>
         </Grid>
 
         {props.pricingMechanism === "pricing" &&

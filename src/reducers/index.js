@@ -16,6 +16,7 @@ import ordersCompletedReducer from "./ordersCompletedReducer";
 import orderOnTransitReducer from "./orderOnTransitReducer";
 import transactionReducer from "./transactionReducer";
 import targetReducer from "./targetReducer";
+import contributionReducer from "./contributionReducer";
 
 export default combineReducers({
   auth: authReducer,
@@ -35,4 +36,5 @@ export default combineReducers({
   vendor: vendorReducer,
   transaction: transactionReducer,
   target: targetReducer,
+  contribution: contributionReducer,
 });

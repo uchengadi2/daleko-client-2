@@ -347,6 +347,14 @@ function ProductDetails(props) {
           isAContributoryDeal: product[0].isAContributoryDeal,
           dealOwner: product[0].dealOwner,
           dealOwnerEntity: product[0].dealOwnerEntity,
+
+          dealInitialPercentageContribution:
+            product[0].dealInitialPercentageContribution,
+          dealMaximumInstallmentAllowed:
+            product[0].dealMaximumInstallmentAllowed,
+          includeGatewayChargesInPrice: product[0].includeGatewayChargesInPrice,
+          gatewayFixedCharge: product[0].gatewayFixedCharge,
+          gatewayRateCharge: product[0].gatewayRateCharge,
         });
 
         setProduct({
@@ -427,6 +435,14 @@ function ProductDetails(props) {
           isAContributoryDeal: allData[0].isAContributoryDeal,
           dealOwner: allData[0].dealOwner,
           dealOwnerEntity: allData[0].dealOwnerEntity,
+
+          dealInitialPercentageContribution:
+            allData[0].dealInitialPercentageContribution,
+          dealMaximumInstallmentAllowed:
+            allData[0].dealMaximumInstallmentAllowed,
+          includeGatewayChargesInPrice: allData[0].includeGatewayChargesInPrice,
+          gatewayFixedCharge: allData[0].gatewayFixedCharge,
+          gatewayRateCharge: allData[0].gatewayRateCharge,
         });
 
         setIsLoading(false);
@@ -437,6 +453,8 @@ function ProductDetails(props) {
 
     fetchData().catch(console.error);
   }, [slug]);
+
+  console.log("product is:", product);
 
   const Str = require("@supercharge/strings");
 
@@ -526,6 +544,15 @@ function ProductDetails(props) {
             isAContributoryDeal={product.isAContributoryDeal}
             dealOwner={product.dealOwner}
             dealOwnerEntity={product.dealOwnerEntity}
+            dealInitialPercentageContribution={
+              product.dealInitialPercentageContribution
+            }
+            dealMaximumInstallmentAllowed={
+              product.dealMaximumInstallmentAllowed
+            }
+            includeGatewayChargesInPrice={product.includeGatewayChargesInPrice}
+            gatewayFixedCharge={product.gatewayFixedCharge}
+            gatewayRateCharge={product.gatewayRateCharge}
             key={product.id}
             token={props.token}
             userId={props.userId}
@@ -631,6 +658,15 @@ function ProductDetails(props) {
             isAContributoryDeal={product.isAContributoryDeal}
             dealOwner={product.dealOwner}
             dealOwnerEntity={product.dealOwnerEntity}
+            dealInitialPercentageContribution={
+              product.dealInitialPercentageContribution
+            }
+            dealMaximumInstallmentAllowed={
+              product.dealMaximumInstallmentAllowed
+            }
+            includeGatewayChargesInPrice={product.includeGatewayChargesInPrice}
+            gatewayFixedCharge={product.gatewayFixedCharge}
+            gatewayRateCharge={product.gatewayRateCharge}
             key={product.id}
             token={props.token}
             userId={props.userId}

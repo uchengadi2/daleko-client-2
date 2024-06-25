@@ -309,7 +309,7 @@ function OwnTargetsPage(props) {
         params: {
           cartHolder: cartHolder,
           status: "pending",
-          //isDeleted: false,
+          dealStatus: "active",
         },
       });
       const items = response.data.data.data;
@@ -360,6 +360,12 @@ function OwnTargetsPage(props) {
           dealOwnerEntity: target.dealOwnerEntity,
           amountAlreadyContributed: target.amountAlreadyContributed,
           paymentStatus: target.paymentStatus,
+          dealInitialPercentageContribution:
+            target.dealInitialPercentageContribution,
+          dealNumberOfInstallments: target.dealNumberOfInstallments,
+          includeGatewayChargesInPrice: target.includeGatewayChargesInPrice,
+          gatewayFixedCharge: target.gatewayFixedCharge,
+          gatewayRateCharge: target.gatewayRateCharge,
         });
       });
 
@@ -484,6 +490,13 @@ function OwnTargetsPage(props) {
               amountAlreadyContributed={target.amountAlreadyContributed}
               paymentStatus={target.paymentStatus}
               isAContributoryDeal={target.isAContributoryDeal}
+              dealInitialPercentageContribution={
+                target.dealInitialPercentageContribution
+              }
+              dealNumberOfInstallments={target.dealNumberOfInstallments}
+              includeGatewayChargesInPrice={target.includeGatewayChargesInPrice}
+              gatewayFixedCharge={target.gatewayFixedCharge}
+              gatewayRateCharge={target.gatewayRateCharge}
             />
           ))}
         </Grid>
@@ -555,6 +568,13 @@ function OwnTargetsPage(props) {
               amountAlreadyContributed={target.amountAlreadyContributed}
               paymentStatus={target.paymentStatus}
               isAContributoryDeal={target.isAContributoryDeal}
+              dealInitialPercentageContribution={
+                target.dealInitialPercentageContribution
+              }
+              dealNumberOfInstallments={target.dealNumberOfInstallments}
+              includeGatewayChargesInPrice={target.includeGatewayChargesInPrice}
+              gatewayFixedCharge={target.gatewayFixedCharge}
+              gatewayRateCharge={target.gatewayRateCharge}
             />
           ))}
         </Grid>

@@ -317,7 +317,6 @@ function TargetUpdateAndDeliveryForm(props) {
   const [loading, setLoading] = useState();
   const [loadingRemoval, setLoadingRemoval] = useState();
 
-  console.log("amountAlreadyContributed", amountAlreadyContributed);
   useEffect(() => {
     if (!price) {
       return;
@@ -727,8 +726,6 @@ function TargetUpdateAndDeliveryForm(props) {
       return;
     }
 
-    let data = {};
-
     let weightInKg = 0;
 
     if (props.unit === "kg") {
@@ -741,7 +738,7 @@ function TargetUpdateAndDeliveryForm(props) {
       weightInKg = props.weightPerUnit * 1000 * quantity;
     }
 
-    data = {
+    const data = {
       quantity: quantity,
       weightInKg: weightInKg,
       // price: props.price,

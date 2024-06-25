@@ -146,6 +146,11 @@ import {
   FETCH_TARGETS,
   EDIT_TARGET,
   DELETE_TARGET,
+  CREATE_CONTRIBUTION,
+  FETCH_CONTRIBUTIONS,
+  FETCH_CONTRIBUTION,
+  EDIT_CONTRIBUTION,
+  DELETE_CONTRIBUTION,
 } from "./types";
 
 //authentication and authorization  operations
@@ -1534,6 +1539,53 @@ export const deleteTarget = (id) => {
   return async (dispatch) => {
     await data.delete(`/targets/${id}`);
     dispatch({ type: DELETE_TARGET, payload: id });
+    //history.push("/");
+  };
+};
+
+////////////////////////////////////////Contributions///////////////////////////////
+//Contributions resources crud operations
+
+export const createContribution = (formValues) => {
+  return async (dispatch, getState) => {
+    const { userId } = getState().auth;
+    const response = await data.post("/contributions", {
+      ...formValues,
+      userId,
+    });
+
+    //console.log(response);
+    dispatch({ type: CREATE_CONTRIBUTION, payload: response.data });
+    // history.push("/");
+  };
+};
+
+export const fetchContributions = () => {
+  return async (dispatch) => {
+    const response = await data.get("/contributions");
+    dispatch({ type: FETCH_CONTRIBUTIONS, payload: response.data.data.data });
+  };
+};
+
+export const fetchContribution = (id) => {
+  return async (dispatch) => {
+    const response = await data.get(`/contributions/${id}`);
+    dispatch({ type: FETCH_CONTRIBUTION, payload: response.data.data });
+  };
+};
+
+export const editContribution = (id, formValues) => {
+  return async (dispatch) => {
+    const response = await data.patch(`/contributions/${id}`, formValues);
+    dispatch({ type: EDIT_CONTRIBUTION, payload: response.data.data });
+    //history.push("/");
+  };
+};
+
+export const deleteContribution = (id) => {
+  return async (dispatch) => {
+    await data.delete(`/contributions/${id}`);
+    dispatch({ type: DELETE_CONTRIBUTION, payload: id });
     //history.push("/");
   };
 };

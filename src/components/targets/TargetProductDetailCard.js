@@ -778,6 +778,57 @@ export default function TargetProductDetailCard(props) {
                 {product.salesPreference === "deal" && (
                   <Typography>
                     <span style={{ fontSize: 14, marginLeft: 10 }}>
+                      <strong> Number of Contribution Installments:</strong>
+                      <span>{props.dealNumberOfInstallments}</span>
+                    </span>
+                  </Typography>
+                )}
+                {product.salesPreference === "deal" && (
+                  <Typography>
+                    <span style={{ fontSize: 14, marginLeft: 10 }}>
+                      <strong> Target Scheme Initial % Contribution:</strong>
+                      <span>
+                        {props.dealInitialPercentageContribution * 100}%
+                      </span>
+                    </span>
+                  </Typography>
+                )}
+                {product.salesPreference === "deal" && (
+                  <Typography>
+                    <span style={{ fontSize: 14, marginLeft: 10 }}>
+                      <strong>
+                        {`% Contribution of each remaining ${
+                          props.dealNumberOfInstallments <= 1
+                            ? props.dealNumberOfInstallments
+                            : props.dealNumberOfInstallments - 1
+                        } Installment Round(s)`}
+                        :
+                      </strong>
+                      <span>
+                        {props.dealNumberOfInstallments === 1
+                          ? 100
+                          : (100 -
+                              props.dealInitialPercentageContribution * 100) /
+                            (props.dealNumberOfInstallments <= 1
+                              ? props.dealNumberOfInstallments
+                              : props.dealNumberOfInstallments - 1)}
+                        %
+                      </span>
+                    </span>
+                  </Typography>
+                )}
+
+                {product.salesPreference === "deal" && (
+                  <Typography>
+                    <span style={{ fontSize: 14, marginLeft: 10 }}>
+                      <strong> Current Installment Round:</strong>
+                      <span>{props.currentInstallmentRound}</span>
+                    </span>
+                  </Typography>
+                )}
+                {product.salesPreference === "deal" && (
+                  <Typography>
+                    <span style={{ fontSize: 14, marginLeft: 10 }}>
                       <strong> Deal Instruction:</strong>
                       <span>{product.dealComment}</span>
                     </span>
@@ -796,7 +847,6 @@ export default function TargetProductDetailCard(props) {
                   allowDealQuantityChange={product.allowDealQuantityChange}
                   showDealPricePerUnit={product.showDealPricePerUnit}
                   salesPreference={product.salesPreference}
-                  amountAlreadyContributed={props.amountAlreadyContributed}
                   paymentStatus={props.paymentStatus}
                   token={props.token}
                   userId={props.userId}
@@ -820,6 +870,17 @@ export default function TargetProductDetailCard(props) {
                   }
                   handleFailedSnackbar={props.handleFailedSnack}
                   renderCheckoutUpdate={props.renderCheckoutUpdate}
+                  dealInitialPercentageContribution={
+                    props.dealInitialPercentageContribution
+                  }
+                  dealNumberOfInstallments={props.dealNumberOfInstallments}
+                  includeGatewayChargesInPrice={
+                    props.includeGatewayChargesInPrice
+                  }
+                  gatewayFixedCharge={props.gatewayFixedCharge}
+                  gatewayRateCharge={props.gatewayRateCharge}
+                  currentInstallmentRound={props.currentInstallmentRound}
+                  amountAlreadyContributed={props.amountAlreadyContributed}
                 />
               )}
             </Grid>
@@ -1070,6 +1131,65 @@ export default function TargetProductDetailCard(props) {
                 )}
                 {product.salesPreference === "deal" && (
                   <Typography>
+                    <span style={{ fontSize: 14, marginLeft: 10 }}>
+                      <strong> Deal Status:</strong>
+                      <span>{product.dealStatus}</span>
+                    </span>
+                  </Typography>
+                )}
+                {product.salesPreference === "deal" && (
+                  <Typography>
+                    <span style={{ fontSize: 14, marginLeft: 10 }}>
+                      <strong> Number of Contribution Installments:</strong>
+                      <span>{props.dealNumberOfInstallments}</span>
+                    </span>
+                  </Typography>
+                )}
+                {product.salesPreference === "deal" && (
+                  <Typography>
+                    <span style={{ fontSize: 14, marginLeft: 10 }}>
+                      <strong> Target Scheme Initial % Contribution:</strong>
+                      <span>
+                        {props.dealInitialPercentageContribution * 100}%
+                      </span>
+                    </span>
+                  </Typography>
+                )}
+                {product.salesPreference === "deal" && (
+                  <Typography>
+                    <span style={{ fontSize: 14, marginLeft: 10 }}>
+                      <strong>
+                        {`% Contribution of each remaining ${
+                          props.dealNumberOfInstallments <= 1
+                            ? props.dealNumberOfInstallments
+                            : props.dealNumberOfInstallments - 1
+                        } Installment Round(s)`}
+                        :
+                      </strong>
+                      <span>
+                        {props.dealNumberOfInstallments === 1
+                          ? 100
+                          : (100 -
+                              props.dealInitialPercentageContribution * 100) /
+                            (props.dealNumberOfInstallments <= 1
+                              ? props.dealNumberOfInstallments
+                              : props.dealNumberOfInstallments - 1)}
+                        %
+                      </span>
+                    </span>
+                  </Typography>
+                )}
+
+                {product.salesPreference === "deal" && (
+                  <Typography>
+                    <span style={{ fontSize: 14, marginLeft: 10 }}>
+                      <strong> Current Installment Round:</strong>
+                      <span>{props.currentInstallmentRound}</span>
+                    </span>
+                  </Typography>
+                )}
+                {product.salesPreference === "deal" && (
+                  <Typography>
                     <span style={{ fontSize: 14, marginLeft: 5 }}>
                       <strong> Deal Instruction:</strong>
                       <span>{product.dealComment}</span>
@@ -1096,7 +1216,6 @@ export default function TargetProductDetailCard(props) {
                   allowDealQuantityChange={product.allowDealQuantityChange}
                   showDealPricePerUnit={product.showDealPricePerUnit}
                   salesPreference={product.salesPreference}
-                  amountAlreadyContributed={props.amountAlreadyContributed}
                   paymentStatus={props.paymentStatus}
                   // unit={product.unit}
                   token={props.token}
@@ -1121,6 +1240,17 @@ export default function TargetProductDetailCard(props) {
                   }
                   handleFailedSnackbar={props.handleFailedSnack}
                   renderCheckoutUpdate={props.renderCheckoutUpdate}
+                  dealInitialPercentageContribution={
+                    props.dealInitialPercentageContribution
+                  }
+                  dealNumberOfInstallments={props.dealNumberOfInstallments}
+                  includeGatewayChargesInPrice={
+                    props.includeGatewayChargesInPrice
+                  }
+                  gatewayFixedCharge={props.gatewayFixedCharge}
+                  gatewayRateCharge={props.gatewayRateCharge}
+                  currentInstallmentRound={props.currentInstallmentRound}
+                  amountAlreadyContributed={props.amountAlreadyContributed}
                 />
               )}
             </Grid>

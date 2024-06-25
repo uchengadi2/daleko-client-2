@@ -867,6 +867,32 @@ export default function ProductDetailCard(props) {
                   </Typography>
                 )}
                 {props.product.salesPreference === "deal" &&
+                  props.product.isAContributoryDeal && (
+                    <Typography>
+                      <span style={{ fontSize: 14, marginLeft: 10 }}>
+                        <strong> Target Scheme Initial % Contribution:</strong>
+                        <span>
+                          {props.product.dealInitialPercentageContribution *
+                            100}
+                          %
+                        </span>
+                      </span>
+                    </Typography>
+                  )}
+                {props.product.salesPreference === "deal" &&
+                  props.product.isAContributoryDeal && (
+                    <Typography>
+                      <span style={{ fontSize: 14, marginLeft: 10 }}>
+                        <strong>
+                          Maximum Allowable Contribution Installments :
+                        </strong>
+                        <span>
+                          {props.product.dealMaximumInstallmentAllowed}
+                        </span>
+                      </span>
+                    </Typography>
+                  )}
+                {props.product.salesPreference === "deal" &&
                   props.product.dealType === "private" &&
                   props.product.isAContributoryDeal === true && (
                     <Typography>
@@ -976,6 +1002,17 @@ export default function ProductDetailCard(props) {
                   isAContributoryDeal={props.product.isAContributoryDeal}
                   dealOwner={props.product.dealOwner}
                   dealOwnerEntity={props.product.dealOwnerEntity}
+                  dealInitialPercentageContribution={
+                    props.product.dealInitialPercentageContribution
+                  }
+                  dealMaximumInstallmentAllowed={
+                    props.product.dealMaximumInstallmentAllowed
+                  }
+                  includeGatewayChargesInPrice={
+                    props.product.includeGatewayChargesInPrice
+                  }
+                  gatewayFixedCharge={props.product.gatewayFixedCharge}
+                  gatewayRateCharge={props.product.gatewayRateCharge}
                   allowPriceFreezing={props.product.allowPriceFreezing}
                   isVatable={props.product.isVatable}
                   revenueMargin={props.product.revenueMargin}
@@ -1916,6 +1953,32 @@ export default function ProductDetailCard(props) {
                   </Typography>
                 )}
                 {props.product.salesPreference === "deal" &&
+                  props.product.isAContributoryDeal && (
+                    <Typography>
+                      <span style={{ fontSize: 14, marginLeft: 10 }}>
+                        <strong> Target Scheme Initial % Contribution:</strong>
+                        <span>
+                          {props.product.dealInitialPercentageContribution *
+                            100}
+                          %
+                        </span>
+                      </span>
+                    </Typography>
+                  )}
+                {props.product.salesPreference === "deal" &&
+                  props.product.isAContributoryDeal && (
+                    <Typography>
+                      <span style={{ fontSize: 14, marginLeft: 10 }}>
+                        <strong>
+                          Maximum Allowable Contribution Installments :
+                        </strong>
+                        <span>
+                          {props.product.dealMaximumInstallmentAllowed}
+                        </span>
+                      </span>
+                    </Typography>
+                  )}
+                {props.product.salesPreference === "deal" &&
                   props.product.dealType === "private" &&
                   props.product.isAContributoryDeal === true && (
                     <Typography>
@@ -2024,6 +2087,17 @@ export default function ProductDetailCard(props) {
                   isAContributoryDeal={props.product.isAContributoryDeal}
                   dealOwner={props.product.dealOwner}
                   dealOwnerEntity={props.product.dealOwnerEntity}
+                  dealInitialPercentageContribution={
+                    props.product.dealInitialPercentageContribution
+                  }
+                  dealMaximumInstallmentAllowed={
+                    props.product.dealMaximumInstallmentAllowed
+                  }
+                  includeGatewayChargesInPrice={
+                    props.product.includeGatewayChargesInPrice
+                  }
+                  gatewayFixedCharge={props.product.gatewayFixedCharge}
+                  gatewayRateCharge={props.product.gatewayRateCharge}
                   allowPriceFreezing={props.product.allowPriceFreezing}
                   isVatable={props.product.isVatable}
                   revenueMargin={props.product.revenueMargin}

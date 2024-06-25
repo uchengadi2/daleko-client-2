@@ -447,6 +447,13 @@ const DealHome = (props) => {
             isAContributoryDeal: product.isAContributoryDeal,
             dealOwnerEntity: product.dealOwnerEntity,
             dealOwner: product.dealOwner,
+            dealInitialPercentageContribution:
+              product.dealInitialPercentageContribution,
+            dealMaximumInstallmentAllowed:
+              product.dealMaximumInstallmentAllowed,
+            includeGatewayChargesInPrice: product.includeGatewayChargesInPrice,
+            gatewayFixedCharge: product.gatewayFixedCharge,
+            gatewayRateCharge: product.gatewayRateCharge,
           });
         });
         setProductsList(allData);
@@ -535,6 +542,13 @@ const DealHome = (props) => {
             isAContributoryDeal: product.isAContributoryDeal,
             dealOwnerEntity: product.dealOwnerEntity,
             dealOwner: product.dealOwner,
+            dealInitialPercentageContribution:
+              product.dealInitialPercentageContribution,
+            dealMaximumInstallmentAllowed:
+              product.dealMaximumInstallmentAllowed,
+            includeGatewayChargesInPrice: product.includeGatewayChargesInPrice,
+            gatewayFixedCharge: product.gatewayFixedCharge,
+            gatewayRateCharge: product.gatewayRateCharge,
           });
         });
         setProductsList(allData);
@@ -649,6 +663,17 @@ const DealHome = (props) => {
               isAContributoryDeal={product.isAContributoryDeal}
               dealOwnerEntity={product.dealOwnerEntity}
               dealOwner={product.dealOwner}
+              dealInitialPercentageContribution={
+                product.dealInitialPercentageContribution
+              }
+              dealMaximumInstallmentAllowed={
+                product.dealMaximumInstallmentAllowed
+              }
+              includeGatewayChargesInPrice={
+                product.includeGatewayChargesInPrice
+              }
+              gatewayFixedCharge={product.gatewayFixedCharge}
+              gatewayRateCharge={product.gatewayRateCharge}
               allowPriceFreezing={product.allowPriceFreezing}
               keyword1={product.keyword1}
               keyword2={product.keyword2}
@@ -737,6 +762,17 @@ const DealHome = (props) => {
               isAContributoryDeal={product.isAContributoryDeal}
               dealOwnerEntity={product.dealOwnerEntity}
               dealOwner={product.dealOwner}
+              dealInitialPercentageContribution={
+                product.dealInitialPercentageContribution
+              }
+              dealMaximumInstallmentAllowed={
+                product.dealMaximumInstallmentAllowed
+              }
+              includeGatewayChargesInPrice={
+                product.includeGatewayChargesInPrice
+              }
+              gatewayFixedCharge={product.gatewayFixedCharge}
+              gatewayRateCharge={product.gatewayRateCharge}
               allowPriceFreezing={product.allowPriceFreezing}
               deliverability={product.deliverability}
               pickupInfo={product.pickupInfo}

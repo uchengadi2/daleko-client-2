@@ -29,8 +29,10 @@ import {
   DELETE_CART,
   CREATE_TRANSACTION,
   FETCH_TRANSACTION,
+  EDIT_TARGET,
 } from "../../actions/types";
-import Paystack from "../../Paystack";
+import Paystack from "./Paystack";
+import Paystack2 from "../../Paystack";
 import history from "../../history";
 import ThankYou from "../thankyou/ThankYou";
 
@@ -86,6 +88,34 @@ const useStyles = makeStyles((theme) => ({
       backgroundColor: theme.palette.common.green,
     },
   },
+
+  paymentFieldButton: {
+    borderRadius: 10,
+    height: 40,
+    width: 200,
+    marginLeft: 0,
+    marginTop: 20,
+    marginBottom: 20,
+    color: "white",
+    // backgroundColor: theme.palette.common.green,
+    // "&:hover": {
+    //   backgroundColor: theme.palette.common.green,
+    // },
+  },
+
+  amountEmptyFieldButton: {
+    borderRadius: 10,
+    height: 45,
+    width: 200,
+    marginLeft: 80,
+    marginTop: 30,
+    color: "white",
+    backgroundColor: theme.palette.common.green,
+    "&:hover": {
+      backgroundColor: theme.palette.common.green,
+    },
+  },
+
   submitButtonMobile: {
     borderRadius: 10,
     height: 40,
@@ -409,6 +439,18 @@ function TargetDetailsDeliveryAndPayment(props) {
     requestDealRedemptionCode,
     amountAlreadyContributed,
     paymentStatus,
+    dealInitialPercentageContribution,
+    dealNumberOfInstallments,
+    includeGatewayChargesInPrice,
+    gatewayFixedCharge,
+    gatewayRateCharge,
+    currentInstallmentRound,
+    targetId,
+    product,
+    targetHolder,
+    productType,
+    dealOwner,
+    dealExpiryDate,
   } = props;
   const [quantity, setQuantity] = useState(+props.quantity);
   const [productQuantityInCart, setProductQuantityInCart] = useState();
@@ -489,6 +531,36 @@ function TargetDetailsDeliveryAndPayment(props) {
   const [isCorrectDealRedemptionCode, setIsCorrectDealRedemptionCode] =
     useState(true);
   const [isReadyToPlaceOrder, setIsReadyToPlaceOrder] = useState(false);
+  const [contributedAmount, setContributedAmount] = useState(0);
+  const [canMakeContribution, setCanMakeContribution] = useState(false);
+  const [minimumContributableAmount, setMinimumContributableAmount] =
+    useState(5000);
+  const [
+    chargesWhenDealNumberOfInstallmentsIsOne,
+    setChargesWhenDealNumberOfInstallmentsIsOne,
+  ] = useState(gatewayFixedCharge + gatewayRateCharge * productCost);
+
+  const [
+    chargesWhenCurrentInstallmentRoundIsZero,
+    setChargesWhenCurrentInstallmentRoundIsZero,
+  ] = useState(
+    gatewayFixedCharge +
+      gatewayRateCharge * dealInitialPercentageContribution * productCost
+  );
+  const [
+    chargesWhenCurrentInstallmentRoundIsHigherThanZero,
+    setChargesWhenCurrentInstallmentRoundIsHigherThanZero,
+  ] = useState(
+    gatewayFixedCharge +
+      ((gatewayRateCharge * (1 - dealInitialPercentageContribution)) /
+        (dealNumberOfInstallments - 1)) *
+        productCost
+  );
+  const [extraAmountDueForContribution, setExtraAmountDueForContribution] =
+    useState(0);
+
+  const [willCollectDeliveryCharges, setWillCollectDeliveryCharges] =
+    useState(false);
 
   const dispatch = useDispatch();
 
@@ -505,18 +577,37 @@ function TargetDetailsDeliveryAndPayment(props) {
     window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
   }, []);
 
-  //confirm if customer is ready to place  order on the target item
-
   useEffect(() => {
-    if (amountAlreadyContributed < productCost) {
-      setIsReadyToPlaceOrder(false);
-    } else {
-      setIsReadyToPlaceOrder(true);
-    }
-  }, [productCost, amountAlreadyContributed]);
+    let amount = 0;
 
-  console.log("total product cost:", totalCost);
-  console.log("product cost:", productCost);
+    if (currentInstallmentRound === 0) {
+      if (includeGatewayChargesInPrice) {
+        amount =
+          dealInitialPercentageContribution * productCost +
+          (gatewayFixedCharge + gatewayRateCharge * productCost);
+      } else {
+        amount = dealInitialPercentageContribution * productCost;
+      }
+    } else {
+      if (includeGatewayChargesInPrice) {
+        amount =
+          ((1 - dealInitialPercentageContribution) /
+            (dealNumberOfInstallments - 1)) *
+            productCost +
+          (gatewayFixedCharge + gatewayRateCharge * productCost);
+      } else {
+        amount =
+          ((1 - dealInitialPercentageContribution) /
+            (dealNumberOfInstallments - 1)) *
+          productCost;
+      }
+    }
+
+    // setContributedAmount(amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,"));
+    setContributedAmount(amount);
+  }, [productCost]);
+
+  //confirm if customer is ready to place  order on the target item
 
   //get the email address of the customer
 
@@ -582,6 +673,14 @@ function TargetDetailsDeliveryAndPayment(props) {
     // 👇️ scroll to top on page load
     window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
   }, []);
+
+  useEffect(() => {
+    if (amountAlreadyContributed < productCost) {
+      setIsReadyToPlaceOrder(false);
+    } else {
+      setIsReadyToPlaceOrder(true);
+    }
+  }, [productCost, amountAlreadyContributed]);
 
   //get the country name
   useEffect(() => {
@@ -845,7 +944,7 @@ function TargetDetailsDeliveryAndPayment(props) {
     fetchData().catch(console.error);
   }, [props, state]);
 
-  //compute the delivery cost of this order
+  // //compute the delivery cost of this order
   let deliveryCost = 0;
 
   if (baseDeliveryWeight && deliveryMode) {
@@ -1005,16 +1104,16 @@ function TargetDetailsDeliveryAndPayment(props) {
     setPlace(event.target.value);
   };
 
-  const handleDeliveryModeChange = (event) => {
-    setDeliveryMode(event.target.value);
-  };
-
   const handleEntityChange = (event) => {
     setEntity(event.target.value);
   };
 
   const handleDecentralizedEntityLocationChange = (event) => {
     setEntityLocation(event.target.value);
+  };
+
+  const handleDeliveryModeChange = (event) => {
+    setDeliveryMode(event.target.value);
   };
 
   //get the destination list
@@ -1313,7 +1412,7 @@ function TargetDetailsDeliveryAndPayment(props) {
             value={paymentMethod}
             onChange={handlePaymentMethodChange}
             label="Payment Method"
-            style={{ height: 38, width: 300, marginTop: 15, marginLeft: 10 }}
+            style={{ height: 38, width: 300, marginTop: 15, marginLeft: -10 }}
           >
             <MenuItem value={"card"}>Credit/Debit Card</MenuItem>
             <MenuItem value={"payOnDelivery"}>
@@ -1434,6 +1533,8 @@ function TargetDetailsDeliveryAndPayment(props) {
   }
 
   const totalProductCost = parseFloat(totalCost);
+  //const totalProductCost = parseFloat(contributedAmount);
+
   const totalProductCostForUk = totalProductCost / +ukRate;
   const totalProductCostForUS = totalProductCost / +usRate;
   const totalProductCostForDisplay = totalProductCost
@@ -1452,6 +1553,8 @@ function TargetDetailsDeliveryAndPayment(props) {
   // let totalOrderCost = totalProductCost + deliveryCost;
   let totalOrderCost = totalProductCost + totalDeliveryCost;
 
+  // const currentAmountForContribution = contributedAmount
+
   if (implementVatCollection) {
     totalOrderCost = totalOrderCost + vat;
   }
@@ -1462,7 +1565,55 @@ function TargetDetailsDeliveryAndPayment(props) {
 
   const vatForDispplay = vat.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,");
 
-  const amountForPayment = +totalOrderCost.toFixed(2) * 100;
+  // const amountForPayment = +totalOrderCost.toFixed(2) * 100;
+  const amountForPayment = +contributedAmount.toFixed(2) * 100;
+
+  let amountDueForContribution = 0;
+
+  if (currentInstallmentRound === 0) {
+    if (includeGatewayChargesInPrice) {
+      const roundSum = dealInitialPercentageContribution * totalOrderCost;
+      amountDueForContribution =
+        roundSum + (gatewayFixedCharge + gatewayRateCharge * roundSum);
+    } else {
+      amountDueForContribution =
+        dealInitialPercentageContribution * totalOrderCost;
+    }
+  } else {
+    if (includeGatewayChargesInPrice) {
+      const roundSum =
+        ((1 - dealInitialPercentageContribution) /
+          (dealNumberOfInstallments - 1)) *
+        totalOrderCost;
+      amountDueForContribution =
+        roundSum + (gatewayFixedCharge + gatewayRateCharge * roundSum);
+    } else {
+      amountDueForContribution =
+        ((1 - dealInitialPercentageContribution) /
+          (dealNumberOfInstallments - 1)) *
+        totalOrderCost;
+    }
+  }
+
+  if (dealNumberOfInstallments === 1) {
+    amountDueForContribution =
+      totalOrderCost +
+      (gatewayFixedCharge + gatewayRateCharge * totalOrderCost);
+  }
+
+  if (currentInstallmentRound >= dealNumberOfInstallments) {
+    amountDueForContribution =
+      totalDeliveryCost +
+      (gatewayFixedCharge + gatewayRateCharge * totalDeliveryCost);
+  }
+
+  if (amountDueForContribution === gatewayFixedCharge) {
+    amountDueForContribution = 0;
+  }
+
+  const amountDueForContributionForDisplay = amountDueForContribution
+    .toFixed(2)
+    .replace(/\d(?=(\d{3})+\.)/g, "$&,");
 
   const buttonContent = () => {
     return <React.Fragment>Place Order2</React.Fragment>;
@@ -1480,8 +1631,73 @@ function TargetDetailsDeliveryAndPayment(props) {
     return <React.Fragment>Place Order</React.Fragment>;
   };
 
+  const amountButtonEmptyFieldContent = () => {
+    return <React.Fragment>Make A Contribution2</React.Fragment>;
+  };
+
   const renderThankYou = () => {
     return <ThankYou />;
+  };
+
+  // useEffect(() => {
+  //   if (currentInstallmentRound >= dealNumberOfInstallments) {
+  //     if (contributedAmount > 0) {
+  //       setWillCollectDeliveryCharges(true);
+  //     } else {
+  //       setWillCollectDeliveryCharges(false);
+  //     }
+  //   } else {
+  //     setWillCollectDeliveryCharges(false);
+  //   }
+  // }, [currentInstallmentRound, dealNumberOfInstallments, contributedAmount]);
+
+  useEffect(() => {
+    setContributedAmount(amountDueForContribution);
+
+    if (amountDueForContribution > 0) {
+      setCanMakeContribution(true);
+    } else {
+      setCanMakeContribution(false);
+    }
+  }, [amountDueForContribution]);
+
+  const renderAmountToBeContributedField = () => {
+    return (
+      <TextField
+        label="Amount Due for Contribution"
+        helperText={
+          !includeGatewayChargesInPrice
+            ? "Amount Due for Contribution"
+            : `Amount Due for Contribution (Includes Part of Delivery Cost and Payment Gateway charges of =N=${
+                dealNumberOfInstallments === 1
+                  ? chargesWhenDealNumberOfInstallmentsIsOne
+                  : currentInstallmentRound === 0
+                  ? chargesWhenCurrentInstallmentRoundIsZero
+                  : chargesWhenCurrentInstallmentRoundIsHigherThanZero
+              })`
+        }
+        variant="outlined"
+        fullWidth
+        type="text"
+        id="contributedAmount"
+        name="contributedAmount"
+        defaultValue={`=N=${amountDueForContributionForDisplay}`}
+        // defaultValue={amountDueForContribution}
+        InputProps={{
+          inputProps: {
+            readOnly: true,
+          },
+        }}
+        style={{
+          marginTop: 20,
+          marginLeft: -13,
+          marginBottom: 60,
+          width: 300,
+          height: 30,
+        }}
+        //onChange={contributionAmoutChange}
+      />
+    );
   };
 
   //calculate the sales tax for this transaction
@@ -1972,6 +2188,26 @@ function TargetDetailsDeliveryAndPayment(props) {
     }
   };
 
+  //when contributed amount is 0, empty or less than the minimum contributable amunt"
+  const onAmountEmptyFieldSubmit = () => {
+    setLoading(true);
+
+    if (!canMakeContribution) {
+      if (contributedAmount < minimumContributableAmount) {
+        props.handleFailedSnackbar(
+          `The contributable amount cannot be lower than ${minimumContributableAmount}, Please rectify and try again`
+        );
+      } else {
+        props.handleFailedSnackbar(
+          "The amount field cannot be empty or 0. Please enter the amount you want to contribute and try again"
+        );
+      }
+
+      setLoading(false);
+      return;
+    }
+  };
+
   const onSubmit = () => {
     setLoading(true);
 
@@ -2036,7 +2272,7 @@ function TargetDetailsDeliveryAndPayment(props) {
       requestDealRedemptionCode,
     };
 
-    // write to the transaction table first
+    //write to the transaction table first
     if (transData) {
       const createForm = async () => {
         api.defaults.headers.common["Authorization"] = `Bearer ${props.token}`;
@@ -2177,36 +2413,101 @@ function TargetDetailsDeliveryAndPayment(props) {
       });
     }
 
-    const cartData = {
-      status: "checkedout",
+    //update the target status
+
+    const targetData = {
+      dealStatus: "inactive",
     };
 
     //change the status of this cart items
-    props.productList.map((cart, index) => {
-      const createForm = async () => {
-        api.defaults.headers.common["Authorization"] = `Bearer ${props.token}`;
-        await api.delete(`/carts/${cart.id}`);
 
+    const createForm = async () => {
+      api.defaults.headers.common["Authorization"] = `Bearer ${props.token}`;
+      const response2 = await api.patch(`/targets/${targetId}`, targetData);
+
+      if (response2.data.status === "success") {
         dispatch({
-          type: DELETE_CART,
-          //payload: response2.data.data.data,
+          type: EDIT_TARGET,
+          payload: response2.data.data.data,
         });
-      };
-      createForm().catch((err) => {
-        props.handleFailedSnackbar();
-        console.log("err:", err.message);
-      });
+
+        // setLoading(false);
+
+        //props.renderPageUpdate();
+      } else {
+        props.handleFailedSnackbar("Something went wrong, please try again!!!");
+      }
+    };
+    createForm().catch((err) => {
+      props.handleFailedSnackbar();
+      console.log("err:", err.message);
     });
+
     props.handleSuccessfulCreateSnackbar(
-      `Thank you for your patronage, we will process your request as soon as possible`
+      `We have recieved you Orders. We will process it and get back to you as soon as possible. Thank you always for your patronage.`
     );
-    history.push(`/thankyou/orders/${orderNumber}`);
+    // history.push(`/thankyou/orders/${orderNumber}`);
+    history.push(`/targets/targets`);
   };
 
   const originSalesTaxRate = prevailingSalesTax;
   const destSalesTaxRate = destinationSalesTax;
 
   const renderOnlinePayment = (
+    email,
+    amount,
+    orderNumber,
+    phoneNumber,
+    name
+  ) => {
+    const data = {};
+
+    return (
+      <Paystack
+        email={email}
+        amount={parseInt(amount)}
+        phoneNumber={phoneNumber}
+        name={name}
+        text={"MAKE A CONTRIBUTION"}
+        orderNumber={orderNumber}
+        amountAlreadyContributed={amountAlreadyContributed}
+        currentInstallmentRound={currentInstallmentRound}
+        includeGatewayChargesInPrice={includeGatewayChargesInPrice}
+        gatewayFixedCharge={gatewayFixedCharge}
+        gatewayRateCharge={gatewayRateCharge}
+        contributedAmount={contributedAmount}
+        dealStatus={dealStatus}
+        dealCode={dealCode}
+        dealDeliveryMode={dealDeliveryMode}
+        dealType={dealType}
+        salesPreference={salesPreference}
+        dealPaymentPreference={dealPaymentPreference}
+        dealOwnerEntity={dealOwnerEntity}
+        paymentStatus={"unconfirmed"}
+        product={product}
+        targetHolder={targetHolder}
+        productType={productType}
+        dealOwner={dealOwner}
+        dealExpiryDate={dealExpiryDate}
+        targetId={targetId}
+        modeOfPayment="online"
+        data={data}
+        productList={props.productList}
+        policy={props.policy}
+        prevailingSalesTax={prevailingSalesTax}
+        destinationSalesTax={destinationSalesTax}
+        token={props.token}
+        userId={userId}
+        handleSuccessfulCreateSnackbar={props.handleSuccessfulCreateSnackbar}
+        handleFailedSnackbar={props.handleFailedSnackbar}
+        renderPageUpdate={props.renderPageUpdate}
+      />
+    );
+  };
+
+  //This is the payment function for Place Orders
+
+  const renderOnlinePaymentForOrders = (
     email,
     amount,
     orderNumber,
@@ -2271,10 +2572,10 @@ function TargetDetailsDeliveryAndPayment(props) {
       requestDealRedemptionCode,
     };
     return (
-      <Paystack
+      <Paystack2
         email={email}
         amount={parseInt(amount)}
-        text={"MAKE A CONTRIBUTION"}
+        text={"Make Delivery Payment"}
         orderNumber={orderNumber}
         data={data}
         productList={props.productList}
@@ -3459,7 +3760,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                             marginLeft: 10,
                           }}
                         >
-                          Total Cost:{getCurrencyCode()}
+                          Total Co0st:{getCurrencyCode()}
                           {totalOrderCostForDisplay}
                         </Typography>
 
@@ -3484,7 +3785,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -3514,6 +3817,27 @@ function TargetDetailsDeliveryAndPayment(props) {
                             )}
                           </Button>
                         )}
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
 
                         {isOnlinePayment &&
                           // recipientName &&
@@ -3522,7 +3846,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // country &&
                           // (state || entity) &&
                           // (city || place) &&
-                          // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -3547,21 +3871,6 @@ function TargetDetailsDeliveryAndPayment(props) {
                               )}
                             </Button>
                           )}
-                        {/* {isOnlinePayment &&
-                          recipientName &&
-                          recipientPhoneNumber &&
-                          recipientAddress &&
-                          country &&
-                          state &&
-                          city &&
-                          deliveryMode &&
-                          renderOnlinePayment(
-                            customerEmail,
-                            amountForPayment,
-                            orderNumber,
-                            customerPhoneNumber,
-                            customerName
-                          )} */}
 
                         {isOnlinePayment &&
                           recipientName &&
@@ -3584,6 +3893,23 @@ function TargetDetailsDeliveryAndPayment(props) {
                               )}
                             </Button>
                           )}
+
+                        {/* {isOnlinePayment &&
+                          recipientName &&
+                          recipientPhoneNumber &&
+                          recipientAddress &&
+                          country &&
+                          state &&
+                          city &&
+                          deliveryMode &&
+                          isReadyToPlaceOrder &&
+                          renderOnlinePaymentForOrders(
+                            customerEmail,
+                            amountForPayment,
+                            orderNumber,
+                            customerPhoneNumber,
+                            customerName
+                          )} */}
                       </Container>
                     ) : (
                       <Container>
@@ -3677,7 +4003,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {/* {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -3708,6 +4036,28 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Button>
                         )}
 
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
                         {isOnlinePayment &&
                           // recipientName &&
                           // recipientPhoneNumber &&
@@ -3715,7 +4065,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // country &&
                           // (state || entity) &&
                           // (city || place) &&
-                          // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -3856,7 +4206,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -3887,6 +4239,28 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Button>
                         )}
 
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
                         {isOnlinePayment &&
                           // recipientName &&
                           // recipientPhoneNumber &&
@@ -3894,7 +4268,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // country &&
                           // (state || entity) &&
                           // (city || place) &&
-                          // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -4047,7 +4421,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -4078,6 +4454,28 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Button>
                         )}
 
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
                         {isOnlinePayment &&
                           // recipientName &&
                           // recipientPhoneNumber &&
@@ -4085,7 +4483,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // country &&
                           // (state || entity) &&
                           // (city || place) &&
-                          // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -4225,7 +4623,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -4255,6 +4655,27 @@ function TargetDetailsDeliveryAndPayment(props) {
                             )}
                           </Button>
                         )}
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
 
                         {isOnlinePayment &&
                           // recipientName &&
@@ -4263,7 +4684,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // country &&
                           // (state || entity) &&
                           // (city || place) &&
-                          // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -4416,7 +4837,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {/* {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -4447,6 +4870,28 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Button>
                         )}
 
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
                         {isOnlinePayment &&
                           // recipientName &&
                           // recipientPhoneNumber &&
@@ -4454,7 +4899,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // country &&
                           // (state || entity) &&
                           // (city || place) &&
-                          // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -4594,7 +5039,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -4625,6 +5072,28 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Button>
                         )}
 
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
                         {isOnlinePayment &&
                           // recipientName &&
                           // recipientPhoneNumber &&
@@ -4632,7 +5101,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // country &&
                           // (state || entity) &&
                           // (city || place) &&
-                          // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -4786,7 +5255,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {/* {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -4817,6 +5288,28 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Button>
                         )}
 
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
                         {isOnlinePayment &&
                           // recipientName &&
                           // recipientPhoneNumber &&
@@ -4824,7 +5317,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // country &&
                           // (state || entity) &&
                           // (city || place) &&
-                          // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -4981,7 +5474,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -5011,6 +5506,27 @@ function TargetDetailsDeliveryAndPayment(props) {
                             )}
                           </Button>
                         )}
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
 
                         {isOnlinePayment &&
                           // recipientName &&
@@ -5020,6 +5536,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // (state || entity) &&
                           // (city || place) &&
                           // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -5152,7 +5669,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {/* {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -5183,6 +5702,28 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Button>
                         )}
 
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
                         {isOnlinePayment &&
                           // recipientName &&
                           // recipientPhoneNumber &&
@@ -5191,6 +5732,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // (state || entity) &&
                           // (city || place) &&
                           // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -5333,7 +5875,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -5363,6 +5907,27 @@ function TargetDetailsDeliveryAndPayment(props) {
                             )}
                           </Button>
                         )}
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
 
                         {isOnlinePayment &&
                           // recipientName &&
@@ -5371,7 +5936,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // country &&
                           // (state || entity) &&
                           // (city || place) &&
-                          // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -5504,8 +6069,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                             {`Your can pick up your order from any of our locations that is nearest to you. Call our contact numbers for guidance `}
                           </Typography>
                         )}
-
-                        {/* {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -5536,6 +6102,28 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Button>
                         )}
 
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
                         {isOnlinePayment &&
                           // recipientName &&
                           // recipientPhoneNumber &&
@@ -5543,7 +6131,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // country &&
                           // (state || entity) &&
                           // (city || place) &&
-                          // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -5687,7 +6275,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -5718,6 +6308,28 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Button>
                         )}
 
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
                         {isOnlinePayment &&
                           // recipientName &&
                           // recipientPhoneNumber &&
@@ -5725,7 +6337,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // country &&
                           // (state || entity) &&
                           // (city || place) &&
-                          // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -5859,7 +6471,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {/* {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -5890,6 +6504,28 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Button>
                         )}
 
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
                         {isOnlinePayment &&
                           // recipientName &&
                           // recipientPhoneNumber &&
@@ -5897,7 +6533,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // country &&
                           // (state || entity) &&
                           // (city || place) &&
-                          // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -6041,7 +6677,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -6072,6 +6710,28 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Button>
                         )}
 
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
                         {isOnlinePayment &&
                           // recipientName &&
                           // recipientPhoneNumber &&
@@ -6079,7 +6739,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // country &&
                           // (state || entity) &&
                           // (city || place) &&
-                          // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -6213,7 +6873,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {/* {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -6243,6 +6905,27 @@ function TargetDetailsDeliveryAndPayment(props) {
                             )}
                           </Button>
                         )}
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
 
                         {isOnlinePayment &&
                           // recipientName &&
@@ -6251,7 +6934,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // country &&
                           // (state || entity) &&
                           // (city || place) &&
-                          // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -6409,7 +7092,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -6440,6 +7125,28 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Button>
                         )}
 
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
                         {isOnlinePayment &&
                           // recipientName &&
                           // recipientPhoneNumber &&
@@ -6447,7 +7154,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // country &&
                           // (state || entity) &&
                           // (city || place) &&
-                          // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -6579,7 +7286,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {/* {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -6610,6 +7319,28 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Button>
                         )}
 
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
                         {isOnlinePayment &&
                           // recipientName &&
                           // recipientPhoneNumber &&
@@ -6617,7 +7348,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // country &&
                           // (state || entity) &&
                           // (city || place) &&
-                          // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -6759,7 +7490,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -6789,6 +7522,28 @@ function TargetDetailsDeliveryAndPayment(props) {
                             )}
                           </Button>
                         )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
                         {isOnlinePayment &&
                           // recipientName &&
                           // recipientPhoneNumber &&
@@ -6796,7 +7551,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // country &&
                           // (state || entity) &&
                           // (city || place) &&
-                          // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -6928,7 +7683,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {/* {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -6958,6 +7715,28 @@ function TargetDetailsDeliveryAndPayment(props) {
                             )}
                           </Button>
                         )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
                         {isOnlinePayment &&
                           // recipientName &&
                           // recipientPhoneNumber &&
@@ -6965,7 +7744,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // country &&
                           // (state || entity) &&
                           // (city || place) &&
-                          // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -7108,7 +7887,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -7139,6 +7920,28 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Button>
                         )}
 
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
                         {isOnlinePayment &&
                           // recipientName &&
                           // recipientPhoneNumber &&
@@ -7146,7 +7949,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // country &&
                           // (state || entity) &&
                           // (city || place) &&
-                          // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -7278,7 +8081,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {/* {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -7308,6 +8113,28 @@ function TargetDetailsDeliveryAndPayment(props) {
                             )}
                           </Button>
                         )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
                         {isOnlinePayment &&
                           // recipientName &&
                           // recipientPhoneNumber &&
@@ -7315,7 +8142,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // country &&
                           // (state || entity) &&
                           // (city || place) &&
-                          // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -7457,7 +8284,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -7488,6 +8317,28 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Button>
                         )}
 
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
                         {isOnlinePayment &&
                           // recipientName &&
                           // recipientPhoneNumber &&
@@ -7495,7 +8346,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // country &&
                           // (state || entity) &&
                           // (city || place) &&
-                          // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -7627,7 +8478,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {/* {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -7658,6 +8511,28 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Button>
                         )}
 
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
                         {isOnlinePayment &&
                           // recipientName &&
                           // recipientPhoneNumber &&
@@ -7665,7 +8540,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // country &&
                           // (state || entity) &&
                           // (city || place) &&
-                          // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -7826,7 +8701,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -7856,9 +8733,31 @@ function TargetDetailsDeliveryAndPayment(props) {
                             )}
                           </Button>
                         )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
                         {isOnlinePayment &&
                           // recipientName &&
-                          // recipientPhoneNumber &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -7992,7 +8891,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {/* {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -8022,14 +8923,35 @@ function TargetDetailsDeliveryAndPayment(props) {
                             )}
                           </Button>
                         )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
                         {isOnlinePayment &&
                           // recipientName &&
                           // recipientPhoneNumber &&
                           // recipientAddress &&
                           // country &&
                           // (state || entity) &&
-                          // (city || place) &&
-
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -8168,7 +9090,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -8198,6 +9122,28 @@ function TargetDetailsDeliveryAndPayment(props) {
                             )}
                           </Button>
                         )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
                         {isOnlinePayment &&
                           // recipientName &&
                           // recipientPhoneNumber &&
@@ -8205,7 +9151,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // country &&
                           // (state || entity) &&
                           // (city || place) &&
-                          // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -8339,7 +9285,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {/* {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -8370,6 +9318,28 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Button>
                         )}
 
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
                         {isOnlinePayment &&
                           // recipientName &&
                           // recipientPhoneNumber &&
@@ -8377,7 +9347,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // country &&
                           // (state || entity) &&
                           // (city || place) &&
-                          // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -8516,7 +9486,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -8547,6 +9519,28 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Button>
                         )}
 
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
                         {isOnlinePayment &&
                           // recipientName &&
                           // recipientPhoneNumber &&
@@ -8554,7 +9548,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // country &&
                           // (state || entity) &&
                           // (city || place) &&
-                          // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -8688,7 +9682,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {/* {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -8719,6 +9715,28 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Button>
                         )}
 
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
                         {isOnlinePayment &&
                           // recipientName &&
                           // recipientPhoneNumber &&
@@ -8726,7 +9744,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // country &&
                           // (state || entity) &&
                           // (city || place) &&
-                          // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -8865,7 +9883,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -8896,6 +9916,28 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Button>
                         )}
 
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
                         {isOnlinePayment &&
                           // recipientName &&
                           // recipientPhoneNumber &&
@@ -8903,7 +9945,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // country &&
                           // (state || entity) &&
                           // (city || place) &&
-                          // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -9037,7 +10079,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {/* {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -9068,6 +10112,28 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Button>
                         )}
 
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
                         {isOnlinePayment &&
                           // recipientName &&
                           // recipientPhoneNumber &&
@@ -9075,7 +10141,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // country &&
                           // (state || entity) &&
                           // (city || place) &&
-                          // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -9229,7 +10295,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -9260,6 +10328,28 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Button>
                         )}
 
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
                         {isOnlinePayment &&
                           // recipientName &&
                           // recipientPhoneNumber &&
@@ -9267,7 +10357,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // country &&
                           // (state || entity) &&
                           // (city || place) &&
-                          // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -9401,7 +10491,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {/* {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -9432,6 +10524,28 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Button>
                         )}
 
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
                         {isOnlinePayment &&
                           // recipientName &&
                           // recipientPhoneNumber &&
@@ -9439,7 +10553,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // country &&
                           // (state || entity) &&
                           // (city || place) &&
-                          // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -9582,7 +10696,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -9613,6 +10729,28 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Button>
                         )}
 
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
                         {isOnlinePayment &&
                           // recipientName &&
                           // recipientPhoneNumber &&
@@ -9620,7 +10758,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // country &&
                           // (state || entity) &&
                           // (city || place) &&
-                          // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -9754,7 +10892,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {/* {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -9785,6 +10925,28 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Button>
                         )}
 
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
                         {isOnlinePayment &&
                           // recipientName &&
                           // recipientPhoneNumber &&
@@ -9792,7 +10954,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // country &&
                           // (state || entity) &&
                           // (city || place) &&
-                          // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -9934,7 +11096,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -9965,6 +11129,28 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Button>
                         )}
 
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
                         {isOnlinePayment &&
                           // recipientName &&
                           // recipientPhoneNumber &&
@@ -9972,7 +11158,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // country &&
                           // (state || entity) &&
                           // (city || place) &&
-                          // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -10126,7 +11312,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {/* {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -10157,6 +11345,28 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Button>
                         )}
 
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
                         {isOnlinePayment &&
                           // recipientName &&
                           // recipientPhoneNumber &&
@@ -10164,7 +11374,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // country &&
                           // (state || entity) &&
                           // (city || place) &&
-                          // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -10306,7 +11516,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -10337,6 +11549,28 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Button>
                         )}
 
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
                         {isOnlinePayment &&
                           // recipientName &&
                           // recipientPhoneNumber &&
@@ -10344,7 +11578,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // country &&
                           // (state || entity) &&
                           // (city || place) &&
-                          // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -10498,7 +11732,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {/* {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -10529,6 +11765,28 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Button>
                         )}
 
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
                         {isOnlinePayment &&
                           // recipientName &&
                           // recipientPhoneNumber &&
@@ -10536,7 +11794,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // country &&
                           // (state || entity) &&
                           // (city || place) &&
-                          // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -10695,7 +11953,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -10726,6 +11986,28 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Button>
                         )}
 
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
                         {isOnlinePayment &&
                           // recipientName &&
                           // recipientPhoneNumber &&
@@ -10733,7 +12015,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // country &&
                           // (state || entity) &&
                           // (city || place) &&
-                          // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -10887,7 +12169,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {/* {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -10918,6 +12202,28 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Button>
                         )}
 
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
                         {isOnlinePayment &&
                           // recipientName &&
                           // recipientPhoneNumber &&
@@ -10925,7 +12231,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // country &&
                           // (state || entity) &&
                           // (city || place) &&
-                          // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -11067,7 +12373,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -11098,6 +12406,28 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Button>
                         )}
 
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
                         {isOnlinePayment &&
                           // recipientName &&
                           // recipientPhoneNumber &&
@@ -11105,7 +12435,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // country &&
                           // (state || entity) &&
                           // (city || place) &&
-                          // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -11259,7 +12589,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {/* {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -11290,6 +12622,28 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Button>
                         )}
 
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
                         {isOnlinePayment &&
                           // recipientName &&
                           // recipientPhoneNumber &&
@@ -11297,7 +12651,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // country &&
                           // (state || entity) &&
                           // (city || place) &&
-                          // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -11438,7 +12792,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -11469,6 +12825,28 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Button>
                         )}
 
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
                         {isOnlinePayment &&
                           // recipientName &&
                           // recipientPhoneNumber &&
@@ -11476,7 +12854,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // country &&
                           // (state || entity) &&
                           // (city || place) &&
-                          // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -11630,7 +13008,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {/* {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -11661,6 +13041,28 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Button>
                         )}
 
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
                         {isOnlinePayment &&
                           // recipientName &&
                           // recipientPhoneNumber &&
@@ -11668,7 +13070,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // country &&
                           // (state || entity) &&
                           // (city || place) &&
-                          // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -11809,7 +13211,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -11840,6 +13244,28 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Button>
                         )}
 
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
                         {isOnlinePayment &&
                           // recipientName &&
                           // recipientPhoneNumber &&
@@ -11847,7 +13273,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // country &&
                           // (state || entity) &&
                           // (city || place) &&
-                          // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -12001,7 +13427,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {/* {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -12032,6 +13460,28 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Button>
                         )}
 
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
                         {isOnlinePayment &&
                           // recipientName &&
                           // recipientPhoneNumber &&
@@ -12039,7 +13489,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // country &&
                           // (state || entity) &&
                           // (city || place) &&
-                          // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -12197,7 +13647,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -12228,6 +13680,28 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Button>
                         )}
 
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
                         {isOnlinePayment &&
                           // recipientName &&
                           // recipientPhoneNumber &&
@@ -12235,7 +13709,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // country &&
                           // (state || entity) &&
                           // (city || place) &&
-                          // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -12379,7 +13853,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {/* {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -12410,6 +13886,28 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Button>
                         )}
 
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
                         {isOnlinePayment &&
                           // recipientName &&
                           // recipientPhoneNumber &&
@@ -12417,7 +13915,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // country &&
                           // (state || entity) &&
                           // (city || place) &&
-                          // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -12557,7 +14055,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -12588,6 +14088,28 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Button>
                         )}
 
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
                         {isOnlinePayment &&
                           // recipientName &&
                           // recipientPhoneNumber &&
@@ -12595,7 +14117,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // country &&
                           // (state || entity) &&
                           // (city || place) &&
-                          // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -12739,7 +14261,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {/* {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -12770,6 +14294,28 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Button>
                         )}
 
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
                         {isOnlinePayment &&
                           // recipientName &&
                           // recipientPhoneNumber &&
@@ -12777,7 +14323,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // country &&
                           // (state || entity) &&
                           // (city || place) &&
-                          // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -12916,7 +14462,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -12947,6 +14495,28 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Button>
                         )}
 
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
                         {isOnlinePayment &&
                           // recipientName &&
                           // recipientPhoneNumber &&
@@ -12954,7 +14524,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // country &&
                           // (state || entity) &&
                           // (city || place) &&
-                          // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -13098,7 +14668,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {/* {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -13129,6 +14701,28 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Button>
                         )}
 
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
                         {isOnlinePayment &&
                           // recipientName &&
                           // recipientPhoneNumber &&
@@ -13136,7 +14730,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // country &&
                           // (state || entity) &&
                           // (city || place) &&
-                          // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -13275,7 +14869,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -13306,6 +14902,28 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Button>
                         )}
 
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
                         {isOnlinePayment &&
                           // recipientName &&
                           // recipientPhoneNumber &&
@@ -13313,7 +14931,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // country &&
                           // (state || entity) &&
                           // (city || place) &&
-                          // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -13457,7 +15075,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {/* {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -13488,6 +15108,28 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Button>
                         )}
 
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
                         {isOnlinePayment &&
                           // recipientName &&
                           // recipientPhoneNumber &&
@@ -13495,7 +15137,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // country &&
                           // (state || entity) &&
                           // (city || place) &&
-                          // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -13649,7 +15291,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -13680,6 +15324,28 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Button>
                         )}
 
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
                         {isOnlinePayment &&
                           // recipientName &&
                           // recipientPhoneNumber &&
@@ -13687,7 +15353,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // country &&
                           // (state || entity) &&
                           // (city || place) &&
-                          // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -13835,7 +15501,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {/* {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -13866,6 +15534,28 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Button>
                         )}
 
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
                         {isOnlinePayment &&
                           // recipientName &&
                           // recipientPhoneNumber &&
@@ -13873,7 +15563,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // country &&
                           // (state || entity) &&
                           // (city || place) &&
-                          // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -14016,7 +15706,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -14047,6 +15739,28 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Button>
                         )}
 
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
                         {isOnlinePayment &&
                           // recipientName &&
                           // recipientPhoneNumber &&
@@ -14054,7 +15768,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // country &&
                           // (state || entity) &&
                           // (city || place) &&
-                          // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -14201,7 +15915,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {/* {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -14232,6 +15948,28 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Button>
                         )}
 
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
                         {isOnlinePayment &&
                           // recipientName &&
                           // recipientPhoneNumber &&
@@ -14239,7 +15977,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // country &&
                           // (state || entity) &&
                           // (city || place) &&
-                          // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -14381,7 +16119,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -14412,6 +16152,28 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Button>
                         )}
 
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
                         {isOnlinePayment &&
                           // recipientName &&
                           // recipientPhoneNumber &&
@@ -14419,7 +16181,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // country &&
                           // (state || entity) &&
                           // (city || place) &&
-                          // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -14551,7 +16313,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {/* {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -14582,6 +16346,28 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Button>
                         )}
 
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
                         {isOnlinePayment &&
                           // recipientName &&
                           // recipientPhoneNumber &&
@@ -14589,7 +16375,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // country &&
                           // (state || entity) &&
                           // (city || place) &&
-                          // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -14731,7 +16517,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -14762,6 +16550,28 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Button>
                         )}
 
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
                         {isOnlinePayment &&
                           // recipientName &&
                           // recipientPhoneNumber &&
@@ -14769,7 +16579,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // country &&
                           // (state || entity) &&
                           // (city || place) &&
-                          // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -14916,7 +16726,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {/* {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -14946,6 +16758,27 @@ function TargetDetailsDeliveryAndPayment(props) {
                             )}
                           </Button>
                         )}
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
 
                         {isOnlinePayment &&
                           // recipientName &&
@@ -14954,7 +16787,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // country &&
                           // (state || entity) &&
                           // (city || place) &&
-                          // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -15115,7 +16948,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -15146,6 +16981,28 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Button>
                         )}
 
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
                         {isOnlinePayment &&
                           // recipientName &&
                           // recipientPhoneNumber &&
@@ -15153,7 +17010,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // country &&
                           // (state || entity) &&
                           // (city || place) &&
-                          // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -15301,7 +17158,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {/* {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -15332,6 +17191,28 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Button>
                         )}
 
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
                         {isOnlinePayment &&
                           // recipientName &&
                           // recipientPhoneNumber &&
@@ -15339,7 +17220,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // country &&
                           // (state || entity) &&
                           // (city || place) &&
-                          // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -15479,7 +17360,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -15510,6 +17393,28 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Button>
                         )}
 
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
                         {isOnlinePayment &&
                           // recipientName &&
                           // recipientPhoneNumber &&
@@ -15517,7 +17422,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // country &&
                           // (state || entity) &&
                           // (city || place) &&
-                          // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -15665,7 +17570,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {/* {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -15695,6 +17602,28 @@ function TargetDetailsDeliveryAndPayment(props) {
                             )}
                           </Button>
                         )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
                         {isOnlinePayment &&
                           // recipientName &&
                           // recipientPhoneNumber &&
@@ -15702,7 +17631,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // country &&
                           // (state || entity) &&
                           // (city || place) &&
-                          // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -15841,7 +17770,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -15872,6 +17803,28 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Button>
                         )}
 
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
                         {isOnlinePayment &&
                           // recipientName &&
                           // recipientPhoneNumber &&
@@ -15879,7 +17832,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // country &&
                           // (state || entity) &&
                           // (city || place) &&
-                          // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -16026,8 +17979,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                             {`Your can pick up your order from any of our locations that is nearest to you. Call our contact numbers for guidance `}
                           </Typography>
                         )}
-
-                        {/* {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -16058,6 +18012,28 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Button>
                         )}
 
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
                         {isOnlinePayment &&
                           // recipientName &&
                           // recipientPhoneNumber &&
@@ -16065,7 +18041,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // country &&
                           // (state || entity) &&
                           // (city || place) &&
-                          // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -16204,7 +18180,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -16235,6 +18213,28 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Button>
                         )}
 
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
                         {isOnlinePayment &&
                           // recipientName &&
                           // recipientPhoneNumber &&
@@ -16242,7 +18242,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // country &&
                           // (state || entity) &&
                           // (city || place) &&
-                          // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -16389,7 +18389,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {/* {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -16420,6 +18422,28 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Button>
                         )}
 
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
                         {isOnlinePayment &&
                           // recipientName &&
                           // recipientPhoneNumber &&
@@ -16427,7 +18451,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // country &&
                           // (state || entity) &&
                           // (city || place) &&
-                          // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -16583,7 +18607,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -16614,6 +18640,28 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Button>
                         )}
 
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
                         {isOnlinePayment &&
                           // recipientName &&
                           // recipientPhoneNumber &&
@@ -16621,7 +18669,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // country &&
                           // (state || entity) &&
                           // (city || place) &&
-                          // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -16648,6 +18696,21 @@ function TargetDetailsDeliveryAndPayment(props) {
                               )}
                             </Button>
                           )}
+                        {/* {isOnlinePayment && isReadyToPlaceOrder && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitEmptyFieldButton}
+                            onClick={
+                              onPrivateDealDecentralizedAtCostEmptyFieldSubmit
+                            }
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonEmptyFieldsContent()
+                            )}
+                          </Button>
+                        )} */}
                         {/* {isOnlinePayment &&
                           recipientName &&
                           recipientPhoneNumber &&
@@ -16775,7 +18838,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {/* {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -16806,6 +18871,28 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Button>
                         )}
 
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
                         {isOnlinePayment &&
                           // recipientName &&
                           // recipientPhoneNumber &&
@@ -16813,7 +18900,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // country &&
                           // (state || entity) &&
                           // (city || place) &&
-                          // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -16956,7 +19043,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -16987,6 +19076,28 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Button>
                         )}
 
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
                         {isOnlinePayment &&
                           // recipientName &&
                           // recipientPhoneNumber &&
@@ -16994,7 +19105,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // country &&
                           // (state || entity) &&
                           // (city || place) &&
-                          // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -17148,7 +19259,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {/* {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -17179,27 +19292,69 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Button>
                         )}
 
-                        {isOnlinePayment && !deliveryMode && (
-                          <Button
-                            variant="contained"
-                            className={classes.submitEmptyFieldButton}
-                            onClick={
-                              onPrivateDealDecentralizedAtCostEmptyFieldSubmit
-                            }
-                          >
-                            {loading ? (
-                              <CircularProgress size={30} color="inherit" />
-                            ) : (
-                              buttonEmptyFieldsClaimContent()
-                            )}
-                          </Button>
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
                         )}
+
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+                        {isOnlinePayment &&
+                          // recipientName &&
+                          // recipientPhoneNumber &&
+                          // recipientAddress &&
+                          // country &&
+                          // (state || entity) &&
+                          // (city || place) &&
+                          canMakeContribution &&
+                          !isReadyToPlaceOrder &&
+                          renderOnlinePayment(
+                            customerEmail,
+                            amountForPayment,
+                            orderNumber,
+                            customerPhoneNumber,
+                            customerName
+                          )}
+
+                        {isOnlinePayment &&
+                          isReadyToPlaceOrder &&
+                          !deliveryMode && (
+                            <Button
+                              variant="contained"
+                              className={classes.submitEmptyFieldButton}
+                              onClick={
+                                onPrivateDealDecentralizedAtCostEmptyFieldSubmit
+                              }
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                buttonEmptyFieldsClaimContent()
+                              )}
+                            </Button>
+                          )}
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           recipientName &&
                           recipientPhoneNumber &&
                           country &&
                           entity &&
                           place &&
+                          isReadyToPlaceOrder &&
                           deliveryMode && (
                             <Button
                               variant="contained"
@@ -17308,7 +19463,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -17338,6 +19495,27 @@ function TargetDetailsDeliveryAndPayment(props) {
                             )}
                           </Button>
                         )}
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
 
                         {isOnlinePayment &&
                           // recipientName &&
@@ -17346,7 +19524,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // country &&
                           // (state || entity) &&
                           // (city || place) &&
-                          // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -17499,7 +19677,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {/* {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -17529,6 +19709,27 @@ function TargetDetailsDeliveryAndPayment(props) {
                             )}
                           </Button>
                         )}
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
 
                         {isOnlinePayment &&
                           // recipientName &&
@@ -17537,7 +19738,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // country &&
                           // (state || entity) &&
                           // (city || place) &&
-                          // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -17679,7 +19880,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -17710,6 +19913,28 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Button>
                         )}
 
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
                         {isOnlinePayment &&
                           // recipientName &&
                           // recipientPhoneNumber &&
@@ -17717,7 +19942,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // country &&
                           // (state || entity) &&
                           // (city || place) &&
-                          // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -17870,7 +20095,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {/* {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -17900,6 +20127,28 @@ function TargetDetailsDeliveryAndPayment(props) {
                             )}
                           </Button>
                         )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
                         {isOnlinePayment &&
                           // recipientName &&
                           // recipientPhoneNumber &&
@@ -17907,7 +20156,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                           // country &&
                           // (state || entity) &&
                           // (city || place) &&
-                          // deliveryMode &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -19128,7 +21377,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -19144,7 +21395,42 @@ function TargetDetailsDeliveryAndPayment(props) {
                               )}
                             </Button>
                           )}
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -19283,7 +21569,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {/* {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -19299,7 +21587,44 @@ function TargetDetailsDeliveryAndPayment(props) {
                               )}
                             </Button>
                           )}
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -19440,7 +21765,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -19457,7 +21784,44 @@ function TargetDetailsDeliveryAndPayment(props) {
                             </Button>
                           )}
 
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -19610,7 +21974,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {/* {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -19627,7 +21993,44 @@ function TargetDetailsDeliveryAndPayment(props) {
                             </Button>
                           )}
 
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -19767,7 +22170,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -19784,7 +22189,44 @@ function TargetDetailsDeliveryAndPayment(props) {
                             </Button>
                           )}
 
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -19937,7 +22379,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {/* {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -19954,7 +22398,44 @@ function TargetDetailsDeliveryAndPayment(props) {
                             </Button>
                           )}
 
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -20094,7 +22575,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -20111,7 +22594,44 @@ function TargetDetailsDeliveryAndPayment(props) {
                             </Button>
                           )}
 
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -20265,7 +22785,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {/* {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -20281,7 +22803,44 @@ function TargetDetailsDeliveryAndPayment(props) {
                               )}
                             </Button>
                           )}
+
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -20438,7 +22997,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -20454,7 +23015,44 @@ function TargetDetailsDeliveryAndPayment(props) {
                               )}
                             </Button>
                           )}
+
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -20603,7 +23201,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {/* {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -20619,7 +23219,45 @@ function TargetDetailsDeliveryAndPayment(props) {
                               )}
                             </Button>
                           )}
+
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -20764,7 +23402,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -20781,7 +23421,44 @@ function TargetDetailsDeliveryAndPayment(props) {
                             </Button>
                           )}
 
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -20930,7 +23607,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {/* {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -20947,7 +23626,44 @@ function TargetDetailsDeliveryAndPayment(props) {
                             </Button>
                           )}
 
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -21091,7 +23807,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -21107,7 +23825,44 @@ function TargetDetailsDeliveryAndPayment(props) {
                               )}
                             </Button>
                           )}
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -21256,7 +24011,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {/* {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -21272,7 +24029,45 @@ function TargetDetailsDeliveryAndPayment(props) {
                               )}
                             </Button>
                           )}
+
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -21415,7 +24210,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -21432,7 +24229,44 @@ function TargetDetailsDeliveryAndPayment(props) {
                             </Button>
                           )}
 
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -21581,7 +24415,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {/* {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -21598,7 +24434,43 @@ function TargetDetailsDeliveryAndPayment(props) {
                             </Button>
                           )}
 
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -21755,7 +24627,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -21772,7 +24646,44 @@ function TargetDetailsDeliveryAndPayment(props) {
                             </Button>
                           )}
 
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -21920,7 +24831,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {/* {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -21937,7 +24850,44 @@ function TargetDetailsDeliveryAndPayment(props) {
                             </Button>
                           )}
 
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -22079,7 +25029,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -22096,7 +25048,22 @@ function TargetDetailsDeliveryAndPayment(props) {
                             </Button>
                           )}
 
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+
                         {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -22104,6 +25071,28 @@ function TargetDetailsDeliveryAndPayment(props) {
                             orderNumber,
                             customerPhoneNumber,
                             customerName
+                          )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
                           )}
 
                         {isOnlinePayment &&
@@ -22243,7 +25232,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {/* {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -22260,7 +25251,22 @@ function TargetDetailsDeliveryAndPayment(props) {
                             </Button>
                           )}
 
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+
                         {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -22268,6 +25274,27 @@ function TargetDetailsDeliveryAndPayment(props) {
                             orderNumber,
                             customerPhoneNumber,
                             customerName
+                          )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+                        {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
                           )}
 
                         {isOnlinePayment &&
@@ -22401,7 +25428,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -22418,7 +25447,44 @@ function TargetDetailsDeliveryAndPayment(props) {
                             </Button>
                           )}
 
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -22565,7 +25631,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {/* {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -22582,7 +25650,43 @@ function TargetDetailsDeliveryAndPayment(props) {
                             </Button>
                           )}
 
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -22723,7 +25827,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -22740,7 +25846,43 @@ function TargetDetailsDeliveryAndPayment(props) {
                             </Button>
                           )}
 
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -22887,7 +26029,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {/* {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -22903,8 +26047,44 @@ function TargetDetailsDeliveryAndPayment(props) {
                               )}
                             </Button>
                           )}
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
 
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -23064,7 +26244,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -23081,7 +26263,44 @@ function TargetDetailsDeliveryAndPayment(props) {
                             </Button>
                           )}
 
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -23228,7 +26447,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {/* {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -23245,7 +26466,44 @@ function TargetDetailsDeliveryAndPayment(props) {
                             </Button>
                           )}
 
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -23384,7 +26642,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -23401,7 +26661,44 @@ function TargetDetailsDeliveryAndPayment(props) {
                             </Button>
                           )}
 
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -23549,7 +26846,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {/* {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -23565,8 +26864,44 @@ function TargetDetailsDeliveryAndPayment(props) {
                               )}
                             </Button>
                           )}
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
 
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -23704,7 +27039,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -23721,7 +27058,44 @@ function TargetDetailsDeliveryAndPayment(props) {
                             </Button>
                           )}
 
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -23869,7 +27243,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {/* {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -23886,7 +27262,44 @@ function TargetDetailsDeliveryAndPayment(props) {
                             </Button>
                           )}
 
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -24024,7 +27437,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -24041,7 +27456,44 @@ function TargetDetailsDeliveryAndPayment(props) {
                             </Button>
                           )}
 
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -24188,7 +27640,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {/* {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -24205,7 +27659,44 @@ function TargetDetailsDeliveryAndPayment(props) {
                             </Button>
                           )}
 
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -24360,8 +27851,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                             {`Your can pick up your order from any of our locations that is nearest to you. Call our contact numbers for guidance `}
                           </Typography>
                         )}
-
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -24378,7 +27870,44 @@ function TargetDetailsDeliveryAndPayment(props) {
                             </Button>
                           )}
 
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -24531,8 +28060,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {/* {renderPaymentMethodField()} */}
-
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
                             <Button
@@ -24547,8 +28077,44 @@ function TargetDetailsDeliveryAndPayment(props) {
                               )}
                             </Button>
                           )}
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
 
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -24691,7 +28257,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -24708,7 +28276,44 @@ function TargetDetailsDeliveryAndPayment(props) {
                             </Button>
                           )}
 
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -24862,7 +28467,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {/* {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -24879,7 +28486,44 @@ function TargetDetailsDeliveryAndPayment(props) {
                             </Button>
                           )}
 
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -25019,8 +28663,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                             {`Your can pick up your order from any of our locations that is nearest to you. Call our contact numbers for guidance `}
                           </Typography>
                         )}
-
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -25037,7 +28682,44 @@ function TargetDetailsDeliveryAndPayment(props) {
                             </Button>
                           )}
 
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -25191,7 +28873,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {/* {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -25208,7 +28892,44 @@ function TargetDetailsDeliveryAndPayment(props) {
                             </Button>
                           )}
 
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -25349,7 +29070,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -25366,7 +29089,44 @@ function TargetDetailsDeliveryAndPayment(props) {
                             </Button>
                           )}
 
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -25519,7 +29279,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {/* {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -25536,7 +29298,44 @@ function TargetDetailsDeliveryAndPayment(props) {
                             </Button>
                           )}
 
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -25694,7 +29493,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -25711,7 +29512,44 @@ function TargetDetailsDeliveryAndPayment(props) {
                             </Button>
                           )}
 
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -25865,7 +29703,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {/* {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -25882,7 +29722,44 @@ function TargetDetailsDeliveryAndPayment(props) {
                             </Button>
                           )}
 
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -26023,7 +29900,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -26040,7 +29919,44 @@ function TargetDetailsDeliveryAndPayment(props) {
                             </Button>
                           )}
 
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -26193,7 +30109,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {/* {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -26210,7 +30128,44 @@ function TargetDetailsDeliveryAndPayment(props) {
                             </Button>
                           )}
 
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -26351,7 +30306,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -26368,7 +30325,44 @@ function TargetDetailsDeliveryAndPayment(props) {
                             </Button>
                           )}
 
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -26522,7 +30516,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {/* {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -26539,7 +30535,44 @@ function TargetDetailsDeliveryAndPayment(props) {
                             </Button>
                           )}
 
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -26679,7 +30712,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -26696,7 +30731,44 @@ function TargetDetailsDeliveryAndPayment(props) {
                             </Button>
                           )}
 
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -26849,7 +30921,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {/* {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -26866,7 +30940,44 @@ function TargetDetailsDeliveryAndPayment(props) {
                             </Button>
                           )}
 
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -27023,7 +31134,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -27040,7 +31153,44 @@ function TargetDetailsDeliveryAndPayment(props) {
                             </Button>
                           )}
 
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -27186,7 +31336,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {/* {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -27203,7 +31355,44 @@ function TargetDetailsDeliveryAndPayment(props) {
                             </Button>
                           )}
 
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -27343,7 +31532,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -27360,7 +31551,44 @@ function TargetDetailsDeliveryAndPayment(props) {
                             </Button>
                           )}
 
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -27506,7 +31734,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {/* {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -27523,7 +31753,44 @@ function TargetDetailsDeliveryAndPayment(props) {
                             </Button>
                           )}
 
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -27661,7 +31928,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -27678,7 +31947,44 @@ function TargetDetailsDeliveryAndPayment(props) {
                             </Button>
                           )}
 
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -27824,7 +32130,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {/* {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -27841,7 +32149,44 @@ function TargetDetailsDeliveryAndPayment(props) {
                             </Button>
                           )}
 
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -27980,7 +32325,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -27997,7 +32344,44 @@ function TargetDetailsDeliveryAndPayment(props) {
                             </Button>
                           )}
 
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -28142,7 +32526,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {/* {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -28159,7 +32545,44 @@ function TargetDetailsDeliveryAndPayment(props) {
                             </Button>
                           )}
 
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -28313,7 +32736,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -28330,7 +32755,44 @@ function TargetDetailsDeliveryAndPayment(props) {
                             </Button>
                           )}
 
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -28478,7 +32940,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {/* {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -28495,7 +32959,44 @@ function TargetDetailsDeliveryAndPayment(props) {
                             </Button>
                           )}
 
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -28638,7 +33139,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -28655,7 +33158,44 @@ function TargetDetailsDeliveryAndPayment(props) {
                             </Button>
                           )}
 
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -28802,7 +33342,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {/* {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -28819,7 +33361,44 @@ function TargetDetailsDeliveryAndPayment(props) {
                             </Button>
                           )}
 
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -28961,7 +33540,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -28978,7 +33559,44 @@ function TargetDetailsDeliveryAndPayment(props) {
                             </Button>
                           )}
 
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -29125,7 +33743,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {/* {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -29142,7 +33762,44 @@ function TargetDetailsDeliveryAndPayment(props) {
                             </Button>
                           )}
 
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -29284,7 +33941,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -29301,7 +33960,44 @@ function TargetDetailsDeliveryAndPayment(props) {
                             </Button>
                           )}
 
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -29449,7 +34145,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {/* {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -29466,7 +34164,44 @@ function TargetDetailsDeliveryAndPayment(props) {
                             </Button>
                           )}
 
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -29627,7 +34362,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -29644,7 +34381,44 @@ function TargetDetailsDeliveryAndPayment(props) {
                             </Button>
                           )}
 
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -29792,7 +34566,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {/* {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -29809,7 +34585,44 @@ function TargetDetailsDeliveryAndPayment(props) {
                             </Button>
                           )}
 
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -29949,7 +34762,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -29966,7 +34781,44 @@ function TargetDetailsDeliveryAndPayment(props) {
                             </Button>
                           )}
 
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -30113,8 +34965,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                             {`Your can pick up your order from any of our locations that is nearest to you. Call our contact numbers for guidance `}
                           </Typography>
                         )}
-                        {/* 
-                    {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -30131,7 +34984,44 @@ function TargetDetailsDeliveryAndPayment(props) {
                             </Button>
                           )}
 
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -30270,7 +35160,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -30287,7 +35179,44 @@ function TargetDetailsDeliveryAndPayment(props) {
                             </Button>
                           )}
 
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -30435,8 +35364,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {/* {renderPaymentMethodField()} */}
-
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
                             <Button
@@ -30452,7 +35382,44 @@ function TargetDetailsDeliveryAndPayment(props) {
                             </Button>
                           )}
 
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -30591,7 +35558,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -30608,7 +35577,44 @@ function TargetDetailsDeliveryAndPayment(props) {
                             </Button>
                           )}
 
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -30756,7 +35762,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {/* {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -30773,7 +35781,44 @@ function TargetDetailsDeliveryAndPayment(props) {
                             </Button>
                           )}
 
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -30929,7 +35974,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -30946,7 +35993,44 @@ function TargetDetailsDeliveryAndPayment(props) {
                             </Button>
                           )}
 
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -31100,7 +36184,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {/* {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -31117,7 +36203,44 @@ function TargetDetailsDeliveryAndPayment(props) {
                             </Button>
                           )}
 
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -31260,7 +36383,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -31277,7 +36402,44 @@ function TargetDetailsDeliveryAndPayment(props) {
                             </Button>
                           )}
 
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -31431,7 +36593,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {/* {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -31448,7 +36612,44 @@ function TargetDetailsDeliveryAndPayment(props) {
                             </Button>
                           )}
 
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -31590,7 +36791,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -31607,7 +36810,44 @@ function TargetDetailsDeliveryAndPayment(props) {
                             </Button>
                           )}
 
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -31760,7 +37000,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {/* {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -31777,7 +37019,44 @@ function TargetDetailsDeliveryAndPayment(props) {
                             </Button>
                           )}
 
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -31919,7 +37198,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {renderPaymentMethodField()}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -31936,7 +37217,44 @@ function TargetDetailsDeliveryAndPayment(props) {
                             </Button>
                           )}
 
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,
@@ -32090,7 +37408,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Typography>
                         )}
 
-                        {/* {renderPaymentMethodField()} */}
+                        {!isReadyToPlaceOrder && (
+                          <Container>{renderPaymentMethodField()}</Container>
+                        )}
 
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
@@ -32107,7 +37427,44 @@ function TargetDetailsDeliveryAndPayment(props) {
                             </Button>
                           )}
 
+                        {!isOnlinePayment && paymentMethod === "pickup" && (
+                          <Button
+                            variant="contained"
+                            className={classes.submitButton}
+                            onClick={onSubmit}
+                          >
+                            {loading ? (
+                              <CircularProgress size={30} color="inherit" />
+                            ) : (
+                              buttonContent()
+                            )}
+                          </Button>
+                        )}
+
+                        {!isReadyToPlaceOrder && (
+                          <Container>
+                            {renderAmountToBeContributedField()}
+                          </Container>
+                        )}
+
                         {isOnlinePayment &&
+                          !isReadyToPlaceOrder &&
+                          !canMakeContribution && (
+                            <Button
+                              variant="contained"
+                              className={classes.amountEmptyFieldButton}
+                              onClick={onAmountEmptyFieldSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                amountButtonEmptyFieldContent()
+                              )}
+                            </Button>
+                          )}
+
+                        {isOnlinePayment &&
+                          canMakeContribution &&
                           !isReadyToPlaceOrder &&
                           renderOnlinePayment(
                             customerEmail,

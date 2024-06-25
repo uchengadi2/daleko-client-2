@@ -937,6 +937,22 @@ function ProductEditForm(props) {
   const [communityList, setCommunityList] = useState([]);
   const [entityList, setEntityList] = useState([]);
   const [entity, setEntity] = useState(params[0].dealOwnerEntity);
+
+  const [
+    dealInitialPercentageContribution,
+    setDealInitialPercentageContribution,
+  ] = useState(params[0].dealInitialPercentageContribution);
+  const [dealMaximumInstallmentAllowed, setDealMaximumInstallmentAllowed] =
+    useState(params[0].dealMaximumInstallmentAllowed);
+  const [includeGatewayChargesInPrice, setIncludeGatewayChargesInPrice] =
+    useState(params[0].includeGatewayChargesInPrice);
+  const [gatewayFixedCharge, setGatewayFixedCharge] = useState(
+    params[0].gatewayFixedCharge
+  );
+  const [gatewayRateCharge, setGatewayRateCharge] = useState(
+    params[0].gatewayRateCharge
+  );
+
   const [loading, setLoading] = useState(false);
 
   const dispatch = useDispatch();
@@ -1283,6 +1299,10 @@ function ProductEditForm(props) {
     setEntity(event.target.value);
   };
 
+  const handleShouldIncludeGatewayChargesInPriceChange = (event) => {
+    setIncludeGatewayChargesInPrice(event.target.value);
+  };
+
   const handleUploadFiles = (files) => {
     const uploaded = [...uploadedFiles];
     let limitExceeded = false;
@@ -1305,6 +1325,21 @@ function ProductEditForm(props) {
     const chosenFiles = Array.prototype.slice.call(e.target.files);
     handleUploadFiles(chosenFiles);
   };
+
+  // const onGatewayFixedChargeValue = (e) => {
+  //   if (e.target.value < 0) {
+  //     setGatewayFixedChargeValue(0);
+  //   }
+  // };
+
+  // const onGatewayRateChargeValueChange = (e) => {
+  //   if (e.target.value < 0) {
+  //     setGatewayRateChargeValue(0);
+  //   }
+  //   if (e.target.value > 1) {
+  //     setGatewayRateChargeValue(1);
+  //   }
+  // };
 
   const renderIsProductFeatureField = ({
     input,
@@ -2164,6 +2199,40 @@ function ProductEditForm(props) {
     );
   };
 
+  const renderShouldIncludeGatewayChargesInPriceField = ({
+    input,
+    label,
+    meta: { touched, error, invalid },
+    type,
+    id,
+    ...custom
+  }) => {
+    return (
+      <Box>
+        <FormControl variant="outlined">
+          {/* <InputLabel id="vendor_city">City</InputLabel> */}
+          <Select
+            labelId="includeGatewayChargesInPrice"
+            id="includeGatewayChargesInPrice"
+            value={includeGatewayChargesInPrice}
+            onChange={handleShouldIncludeGatewayChargesInPriceChange}
+            //label=""
+            style={{ width: 500, marginTop: 0, height: 38 }}
+            //{...input}
+          >
+            <MenuItem value={"false"}>No</MenuItem>
+            <MenuItem value={"true"}>Yes</MenuItem>
+          </Select>
+          <FormHelperText>
+            Include Gateway Charges to Product Price?
+          </FormHelperText>
+        </FormControl>
+      </Box>
+    );
+  };
+
+  console.log("includeGatewayChargesInPrice:", includeGatewayChargesInPrice);
+
   const buttonContent = () => {
     return <React.Fragment> Submit</React.Fragment>;
   };
@@ -2224,6 +2293,46 @@ function ProductEditForm(props) {
       setLoading(false);
       return;
     }
+
+    if (includeGatewayChargesInPrice) {
+      if (formValues.gatewayFixedCharge < 0) {
+        props.handleFailedSnackbar(
+          "The Gateway Fixed Charge cannot be lower than 0"
+        );
+        setLoading(false);
+        return;
+      }
+
+      if (formValues.gatewayRateCharge < 0) {
+        props.handleFailedSnackbar(
+          "The Gateway Rate Charge cannot be lower than 0. It is between 0.00 to 1.00"
+        );
+        setLoading(false);
+        return;
+      }
+
+      if (formValues.gatewayRateCharge > 1) {
+        props.handleFailedSnackbar(
+          "The Gateway Rate Charge cannot be greater than 1. It is between 0.00 to 1.00"
+        );
+        setLoading(false);
+        return;
+      }
+
+      if (salesPreference === "deal") {
+        if (isAContributoryDeal) {
+          if (formValues.dealMaximumInstallmentAllowed < 1) {
+            props.handleFailedSnackbar(
+              "The Target Scheme Maximum Number of Installment cannot be lower than 1"
+            );
+            setLoading(false);
+            return;
+          }
+        }
+      }
+    }
+
+    console.log("includeGatewayChargesInPrice:", includeGatewayChargesInPrice);
 
     const form = new FormData();
     form.append("name", formValues.name ? formValues.name : params[0].name);
@@ -2523,6 +2632,47 @@ function ProductEditForm(props) {
     );
     form.append("dealOwnerEntity", entity ? entity : params[0].dealOwnerEntity);
     form.append("dealOwner", community ? community : params[0].dealOwner);
+    // form.append(
+    //   "includeGatewayChargesInPrice",
+    //   includeGatewayChargesInPrice
+    //     ? includeGatewayChargesInPrice
+    //     : params[0].includeGatewayChargesInPrice
+    // );
+
+    form.append(
+      "dealInitialPercentageContribution",
+      formValues.dealInitialPercentageContribution
+        ? formValues.dealInitialPercentageContribution
+        : params[0].dealInitialPercentageContribution
+    );
+
+    form.append(
+      "dealMaximumInstallmentAllowed",
+      formValues.dealMaximumInstallmentAllowed
+        ? formValues.dealMaximumInstallmentAllowed
+        : params[0].dealMaximumInstallmentAllowed
+    );
+
+    form.append(
+      "includeGatewayChargesInPrice",
+      includeGatewayChargesInPrice
+        ? includeGatewayChargesInPrice
+        : params[0].includeGatewayChargesInPrice
+    );
+
+    form.append(
+      "gatewayFixedCharge",
+      formValues.gatewayFixedCharge
+        ? formValues.gatewayFixedCharge
+        : params[0].gatewayFixedCharge
+    );
+
+    form.append(
+      "gatewayRateCharge",
+      formValues.gatewayRateCharge
+        ? formValues.gatewayRateCharge
+        : params[0].gatewayRateCharge
+    );
 
     if (formValues.imageCover) {
       form.append("imageCover", formValues.imageCover[0]);
@@ -3306,6 +3456,40 @@ function ProductEditForm(props) {
               <Grid item style={{ width: "50%" }}>
                 <Field
                   label=""
+                  id="dealInitialPercentageContribution"
+                  name="dealInitialPercentageContribution"
+                  defaultValue={params[0].dealInitialPercentageContribution}
+                  type="number"
+                  InputProps={{
+                    inputProps: { min: 0.0, max: 1.0 },
+                    style: { height: 38 },
+                  }}
+                  helperText="Percentage of Initial Contribution for Target Scheme Deal(between 0.00 to 1.00)"
+                  component={renderEditableSingleLineField}
+                />
+              </Grid>
+              <Grid item style={{ marginLeft: 15, width: "47%" }}>
+                <Field
+                  label=""
+                  id="dealMaximumInstallmentAllowed"
+                  name="dealMaximumInstallmentAllowed"
+                  defaultValue={params[0].dealMaximumInstallmentAllowed}
+                  type="number"
+                  InputProps={{
+                    inputProps: { min: 1 },
+                    style: { height: 38 },
+                  }}
+                  helperText="Maximum Installment Allowed for Target Scheme Deal "
+                  component={renderEditableSingleLineField}
+                />
+              </Grid>
+            </Grid>
+          )}
+          {salesPreference === "deal" && (
+            <Grid container direction="row" style={{ marginTop: 20 }}>
+              <Grid item style={{ width: "50%" }}>
+                <Field
+                  label=""
                   id="entity"
                   name="entity"
                   type="text"
@@ -3337,6 +3521,63 @@ function ProductEditForm(props) {
               component={renderEditableMultilineField}
             />
           )}
+
+          <Grid item container style={{ marginTop: 20, marginBottom: 20 }}>
+            <FormLabel style={{ color: "blue" }} component="legend">
+              Payment Gateway Charges
+            </FormLabel>
+          </Grid>
+
+          <Field
+            label=""
+            id="includeGatewayChargesInPrice"
+            name="includeGatewayChargesInPrice"
+            type="text"
+            //helperText="Allow the Customer to Change Deal Quantity"
+            component={renderShouldIncludeGatewayChargesInPriceField}
+          />
+
+          <Grid container direction="row" style={{ marginTop: 20 }}>
+            <Grid item style={{ width: "50%" }}>
+              <Field
+                label=""
+                id="gatewayFixedCharge"
+                name="gatewayFixedCharge"
+                type="number"
+                InputProps={{ inputProps: { min: 0 }, style: { height: 38 } }}
+                helperText="Applicable Gateway Fixed Charge"
+                component={renderEditableSingleLineField}
+                // value={gatewayFixedChargeValue}
+                // onChange={onGatewayFixedChargeValue}
+                defaultValue={params[0].gatewayFixedCharge}
+                // onChange={(e) => {
+                //   var value = parseInt(e.target.value, 10);
+
+                //   // if (value > max) value = max;
+                //   if (value < 0) value = 0;
+
+                //   setGatewayFixedChargeValue(value);
+                // }}
+              />
+            </Grid>
+            <Grid item style={{ marginLeft: 15, width: "47%" }}>
+              <Field
+                label=""
+                id="gatewayRateCharge"
+                name="gatewayRateCharge"
+                type="number"
+                InputProps={{
+                  inputProps: { min: 0.0, max: 1.0 },
+                  style: { height: 38 },
+                }}
+                helperText="Applicable Gateway Rate Charge (between 0.00 t0 1.00) "
+                component={renderEditableSingleLineField}
+                defaultValue={params[0].gatewayRateCharge}
+                // value={gatewayRateChargeValue}
+                // onChange={onGatewayRateChargeValueChange}
+              />
+            </Grid>
+          </Grid>
           <Grid item container style={{ marginTop: 20 }}>
             <FormLabel style={{ color: "blue" }} component="legend">
               Product images

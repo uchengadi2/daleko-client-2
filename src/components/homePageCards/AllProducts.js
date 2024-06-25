@@ -722,6 +722,28 @@ export default function AllProducts(props) {
                     </span>
                   </Typography>
                 )}
+                {props.salesPreference === "deal" &&
+                  props.isAContributoryDeal && (
+                    <Typography>
+                      <span style={{ fontSize: 14, marginLeft: 10 }}>
+                        <strong>Target Scheme Initial % Contribution:</strong>
+                        <span>
+                          {props.dealInitialPercentageContribution * 100}%
+                        </span>
+                      </span>
+                    </Typography>
+                  )}
+                {props.salesPreference === "deal" &&
+                  props.isAContributoryDeal && (
+                    <Typography>
+                      <span style={{ fontSize: 14, marginLeft: 10 }}>
+                        <strong>
+                          Maximum Allowable Contribution Installments:
+                        </strong>
+                        <span>{props.dealMaximumInstallmentAllowed}</span>
+                      </span>
+                    </Typography>
+                  )}
                 {props.salesPreference === "deal" && (
                   <Typography>
                     <span style={{ fontSize: 14, marginLeft: 10 }}>

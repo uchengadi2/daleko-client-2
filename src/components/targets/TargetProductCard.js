@@ -332,6 +332,8 @@ export default function TargetProductCard(props) {
     fetchData().catch(console.error);
   }, [props.product]);
 
+  console.log("the cardholder is:", props.cartHolder);
+
   useEffect(() => {
     const fetchData = async () => {
       let allData = [];
@@ -809,6 +811,27 @@ export default function TargetProductCard(props) {
                     </span>
                   </Typography>
                 )}
+
+                {product.salesPreference === "deal" &&
+                  props.isAContributoryDeal && (
+                    <Typography>
+                      <span style={{ fontSize: 14, marginLeft: 10 }}>
+                        <strong> Target Scheme Initial % Contribution:</strong>
+                        <span>
+                          {props.dealInitialPercentageContribution * 100}%
+                        </span>
+                      </span>
+                    </Typography>
+                  )}
+                {product.salesPreference === "deal" &&
+                  props.isAContributoryDeal && (
+                    <Typography>
+                      <span style={{ fontSize: 14, marginLeft: 10 }}>
+                        <strong> Number of Contribution Installments:</strong>
+                        <span>{props.dealNumberOfInstallments}</span>
+                      </span>
+                    </Typography>
+                  )}
                 {product.salesPreference === "deal" && (
                   <Typography>
                     <span style={{ fontSize: 14, marginLeft: 10 }}>
@@ -883,6 +906,16 @@ export default function TargetProductCard(props) {
                   dealOwnerEntity={props.dealOwnerEntity}
                   paymentStatus={props.paymentStatus}
                   amountAlreadyContributed={props.amountAlreadyContributed}
+                  dealNumberOfInstallments={props.dealNumberOfInstallments}
+                  dealInitialPercentageContribution={
+                    props.dealInitialPercentageContribution
+                  }
+                  includeGatewayChargesInPrice={
+                    props.includeGatewayChargesInPrice
+                  }
+                  gatewayFixedCharge={props.gatewayFixedCharge}
+                  gatewayRateCharge={props.gatewayRateCharge}
+                  cartHolder={props.cartHolder}
                 />
               )}
             </Grid>
@@ -1123,6 +1156,26 @@ export default function TargetProductCard(props) {
                     </span>
                   </Typography>
                 )}
+                {product.salesPreference === "deal" &&
+                  props.isAContributoryDeal && (
+                    <Typography>
+                      <span style={{ fontSize: 14, marginLeft: 10 }}>
+                        <strong> Target Scheme Initial % Contribution:</strong>
+                        <span>
+                          {props.dealInitialPercentageContribution * 100}%
+                        </span>
+                      </span>
+                    </Typography>
+                  )}
+                {product.salesPreference === "deal" &&
+                  props.isAContributoryDeal && (
+                    <Typography>
+                      <span style={{ fontSize: 14, marginLeft: 10 }}>
+                        <strong> Number of Contribution Installments:</strong>
+                        <span>{props.dealNumberOfInstallments}</span>
+                      </span>
+                    </Typography>
+                  )}
                 {product.salesPreference === "deal" && (
                   <Typography>
                     <span style={{ fontSize: 14, marginLeft: 5 }}>
@@ -1197,6 +1250,16 @@ export default function TargetProductCard(props) {
                   dealOwnerEntity={props.dealOwnerEntity}
                   paymentStatus={props.paymentStatus}
                   amountAlreadyContributed={props.amountAlreadyContributed}
+                  dealNumberOfInstallments={props.dealNumberOfInstallments}
+                  dealInitialPercentageContribution={
+                    props.dealInitialPercentageContribution
+                  }
+                  includeGatewayChargesInPrice={
+                    props.includeGatewayChargesInPrice
+                  }
+                  gatewayFixedCharge={props.gatewayFixedCharge}
+                  gatewayRateCharge={props.gatewayRateCharge}
+                  cartHolder={props.cartHolder}
                 />
               )}
             </Grid>

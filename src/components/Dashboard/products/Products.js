@@ -164,6 +164,12 @@ function Products(props) {
           isAContributoryDeal: product.isAContributoryDeal,
           dealOwner: product.dealOwner,
           dealOwnerEntity: product.dealOwnerEntity,
+          dealInitialPercentageContribution:
+            product.dealInitialPercentageContribution,
+          dealMaximumInstallmentAllowed: product.dealMaximumInstallmentAllowed,
+          includeGatewayChargesInPrice: product.includeGatewayChargesInPrice,
+          gatewayFixedCharge: product.gatewayFixedCharge,
+          gatewayRateCharge: product.gatewayRateCharge,
         });
       });
       setProductsList(allData);
@@ -478,6 +484,12 @@ function Products(props) {
         isAContributoryDeal: product.isAContributoryDeal,
         dealOwner: product.dealOwner,
         dealOwnerEntity: product.dealOwnerEntity,
+        dealInitialPercentageContribution:
+          product.dealInitialPercentageContribution,
+        dealMaximumInstallmentAllowed: product.dealMaximumInstallmentAllowed,
+        includeGatewayChargesInPrice: product.includeGatewayChargesInPrice,
+        gatewayFixedCharge: product.gatewayFixedCharge,
+        gatewayRateCharge: product.gatewayRateCharge,
       };
       rows.push(row);
     });

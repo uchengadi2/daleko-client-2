@@ -295,6 +295,9 @@ function SendProductToCartForm(props) {
       isDeleted: false,
       price: price,
       currency: props.currency,
+      includeGatewayChargesInPrice: props.includeGatewayChargesInPrice,
+      gatewayFixedCharge: props.gatewayFixedCharge,
+      gatewayRateCharge: props.gatewayRateCharge,
     };
 
     if (sameProductAlreadyInCart === false) {

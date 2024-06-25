@@ -252,6 +252,22 @@ function TargetProductDetailPage(props) {
   const [paymentStatus, setPaymentStatus] = useState();
   const [dealOwnerEntity, setDealOwnerEntity] = useState();
   const [productCost, setProductCost] = useState();
+  const [
+    dealInitialPercentageContribution,
+    setDealInitialPercentageContribution,
+  ] = useState();
+  const [dealNumberOfInstallments, setDealNumberOfInstallments] = useState();
+  const [includeGatewayChargesInPrice, setIncludeGatewayChargesInPrice] =
+    useState();
+  const [gatewayFixedCharge, setGatewayFixedCharge] = useState();
+  const [gatewayRateCharge, setGatewayRateCharge] = useState();
+  const [currentInstallmentRound, setCurrentInstallmentRound] = useState();
+  const [updatePage, setUpdatePage] = useState(false);
+  const [product, setProduct] = useState();
+  const [targetHolder, setTargetHolder] = useState();
+  const [productType, setProductType] = useState();
+  const [dealOwner, setDealOwner] = useState();
+  const [dealExpiryDate, setDealExpiryDate] = useState();
   const [alert, setAlert] = useState({
     open: false,
     message: "",
@@ -270,11 +286,12 @@ function TargetProductDetailPage(props) {
   //   setUpdateCheckout(value);
   // };
 
-  const renderCheckoutUpdate = () => {
-    setUpdateCheckout((prevState) => !prevState);
+  const renderPageUpdate = () => {
+    console.log("stuff happened here");
+    setUpdatePage((prevState) => !prevState);
   };
 
-  const targetHolder = props.userId;
+  //const targetHolder = props.userId;
   const targetId = params.target;
 
   //   console.log("params:", params);
@@ -318,7 +335,7 @@ function TargetProductDetailPage(props) {
       allData.push({
         id: target._id,
         product: target.product,
-        targetHolder: target.targetHolder,
+        targetHolder: target.cartHolder,
         dateAddedToCart: target.dateAddedToCart,
         refNumber: target.refNumber,
         quantity: target.quantity,
@@ -358,16 +375,23 @@ function TargetProductDetailPage(props) {
         paymentStatus: target.paymentStatus,
         isAContributoryDeal: target.isAContributoryDeal,
         amountAlreadyContributed: target.amountAlreadyContributed,
+        dealInitialPercentageContribution:
+          target.dealInitialPercentageContribution,
+        dealNumberOfInstallments: target.dealNumberOfInstallments,
+        includeGatewayChargesInPrice: target.includeGatewayChargesInPrice,
+        gatewayFixedCharge: target.gatewayFixedCharge,
+        gatewayRateCharge: target.gatewayRateCharge,
+        currentInstallmentRound: target.currentInstallmentRound,
       });
 
       if (allData.length === 0) {
         setIsLoading(false);
-        return;
+        //return;
       }
 
       if (!allData) {
         setIsLoading(false);
-        return;
+        // return;
       }
 
       setTargetProductList(allData);
@@ -393,15 +417,31 @@ function TargetProductDetailPage(props) {
         allData[0].dealDecentralizedAgreedDeliveryCost
       );
       setAmountAlreadyContributed(allData[0].amountAlreadyContributed);
+      setDealInitialPercentageContribution(
+        allData[0].dealInitialPercentageContribution
+      );
+      setDealNumberOfInstallments(allData[0].dealNumberOfInstallments);
+      setIncludeGatewayChargesInPrice(allData[0].includeGatewayChargesInPrice);
+      setGatewayFixedCharge(allData[0].gatewayFixedCharge);
+      setGatewayRateCharge(allData[0].gatewayRateCharge);
+      setCurrentInstallmentRound(allData[0].currentInstallmentRound);
       setPaymentStatus(allData[0].paymentStatus);
       setProductCost(allData[0].price * allData[0].quantity);
+      setProduct(allData[0].product);
+      setTargetHolder(allData[0].targetHolder);
+      setProductType(allData[0].productType);
+      setDealOwner(allData[0].dealOwner);
+      setDealExpiryDate(allData[0].dealExpiryDate);
+
       setIsLoading(false);
     };
 
     //call the function
 
     fetchData().catch(console.error);
-  }, [updateCheckout]);
+  }, [updatePage]);
+
+  console.log("targetHolder isssssssss:", targetHolder);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -496,6 +536,14 @@ function TargetProductDetailPage(props) {
               revenueMargin={target.revenueMargin}
               revenueMarginShouldPrevail={target.revenueMarginShouldPrevail}
               preferredStartDate={target.preferredStartDate}
+              dealInitialPercentageContribution={
+                target.dealInitialPercentageContribution
+              }
+              dealNumberOfInstallments={target.dealNumberOfInstallments}
+              includeGatewayChargesInPrice={target.includeGatewayChargesInPrice}
+              gatewayFixedCharge={target.gatewayFixedCharge}
+              gatewayRateCharge={target.gatewayRateCharge}
+              currentInstallmentRound={target.currentInstallmentRound}
               currency={currency}
               status={target.status}
               token={props.token}
@@ -507,7 +555,7 @@ function TargetProductDetailPage(props) {
                 props.handleSuccessfulCreateSnackbar
               }
               handleFailedSnackbar={props.handleFailedSnackbar}
-              renderCheckoutUpdate={renderCheckoutUpdate}
+              renderPageUpdate={renderPageUpdate}
             />
           ))}
         </Grid>
@@ -568,6 +616,14 @@ function TargetProductDetailPage(props) {
               revenueMargin={target.revenueMargin}
               revenueMarginShouldPrevail={target.revenueMarginShouldPrevail}
               preferredStartDate={target.preferredStartDate}
+              dealInitialPercentageContribution={
+                target.dealInitialPercentageContribution
+              }
+              dealNumberOfInstallments={target.dealNumberOfInstallments}
+              includeGatewayChargesInPrice={target.includeGatewayChargesInPrice}
+              gatewayFixedCharge={target.gatewayFixedCharge}
+              gatewayRateCharge={target.gatewayRateCharge}
+              currentInstallmentRound={target.currentInstallmentRound}
               currency={currency}
               status={target.status}
               token={props.token}
@@ -579,7 +635,7 @@ function TargetProductDetailPage(props) {
                 props.handleSuccessfulCreateSnackbar
               }
               handleFailedSnackbar={props.handleFailedSnackbar}
-              renderCheckoutUpdate={renderCheckoutUpdate}
+              renderPageUpdate={renderPageUpdate}
             />
           ))}
         </Grid>
@@ -639,6 +695,7 @@ function TargetProductDetailPage(props) {
             ""
           ) : (
             <TargetDetailsDeliveryAndPayment
+              targetId={targetId}
               productList={targetProductList}
               totalCost={total}
               totalWeight={totalWeightInKg}
@@ -666,6 +723,14 @@ function TargetProductDetailPage(props) {
               }
               implementSalesTaxCollection={implementSalesTaxCollection}
               implementVatCollection={implementVatCollection}
+              dealInitialPercentageContribution={
+                dealInitialPercentageContribution
+              }
+              dealNumberOfInstallments={dealNumberOfInstallments}
+              includeGatewayChargesInPrice={includeGatewayChargesInPrice}
+              gatewayFixedCharge={gatewayFixedCharge}
+              gatewayRateCharge={gatewayRateCharge}
+              currentInstallmentRound={currentInstallmentRound}
               currency={currency}
               token={props.token}
               userId={props.userId}
@@ -678,6 +743,12 @@ function TargetProductDetailPage(props) {
               amountAlreadyContributed={amountAlreadyContributed}
               paymentStatus={paymentStatus}
               productCost={productCost}
+              renderPageUpdate={renderPageUpdate}
+              product={product}
+              targetHolder={targetHolder}
+              productType={productType}
+              dealOwner={dealOwner}
+              dealExpiryDate={dealExpiryDate}
             />
           ))}
       </Grid>
