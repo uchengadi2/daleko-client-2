@@ -315,7 +315,7 @@ function OwnTargetsPage(props) {
       const items = response.data.data.data;
 
       if (!items) {
-        return;
+        setIsLoading(false);
       }
 
       items.map((target) => {
@@ -369,8 +369,12 @@ function OwnTargetsPage(props) {
         });
       });
 
+      if (allData.length === 0) {
+        setIsLoading(false);
+      }
+
       if (!allData) {
-        return;
+        setIsLoading(false);
       }
       setTargetProductList(allData);
       setSalesPreference(allData[0].salesPreference);
@@ -383,6 +387,10 @@ function OwnTargetsPage(props) {
 
     fetchData().catch(console.error);
   }, [updateCart]);
+
+  console.log("targetProductList:", targetProductList.length);
+
+  console.log("is loading is:", isLoading);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -700,7 +708,7 @@ function OwnTargetsPage(props) {
 
         {!isLoading && targetProductList.length === 0 ? (
           <p style={{ marginTop: 20, marginLeft: 10 }}>
-            There are no items in your cart
+            There are no items in your target
           </p>
         ) : (
           <Grid item>{targetList}</Grid>

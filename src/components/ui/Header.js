@@ -1062,6 +1062,27 @@ const Header = (props) => {
                 className={classes.drawerItem}
                 onClick={() => [
                   setOpenDrawer(false),
+                  props.setValue(7),
+                  <OwnTargetsPage />,
+                ]}
+                divider
+                button
+                component={Link}
+                to={`/targets/targets`}
+                classes={{
+                  root: classes.drawerItem,
+                  selected: classes.drawerItemSelected,
+                }}
+                selected={props.value === 5}
+              >
+                <ListItemText className={classes.drawerItem} disableTypography>
+                  Target Scheme
+                </ListItemText>
+              </ListItem>
+              <ListItem
+                className={classes.drawerItem}
+                onClick={() => [
+                  setOpenDrawer(false),
                   props.setValue(5),
                   <ProfileLayout />,
                 ]}

@@ -51,7 +51,7 @@ const useStyles = makeStyles((theme) => ({
     //marginLeft: "-10px",
     //borderRadius: 30,
     marginTop: "2em",
-    marginBottom: "3em",
+    marginBottom: "7em",
     padding: 0,
     backgroundColor: "#FFFFFF",
 
@@ -1616,24 +1616,34 @@ function TargetDetailsDeliveryAndPayment(props) {
     .replace(/\d(?=(\d{3})+\.)/g, "$&,");
 
   const buttonContent = () => {
-    return <React.Fragment>Place Order2</React.Fragment>;
+    return <React.Fragment>Place Order</React.Fragment>;
   };
+  // const buttonContent = () => {
+  //   return <React.Fragment>Place Order2</React.Fragment>;
+  // };
 
   const buttonEmptyFieldsContent = () => {
     return <React.Fragment>Place Order</React.Fragment>;
   };
 
   const buttonClaimContent = () => {
-    return <React.Fragment>Place OrderAA</React.Fragment>;
+    return <React.Fragment>Place Order</React.Fragment>;
   };
+  // const buttonClaimContent = () => {
+  //   return <React.Fragment>Place OrderAA</React.Fragment>;
+  // };
 
   const buttonEmptyFieldsClaimContent = () => {
     return <React.Fragment>Place Order</React.Fragment>;
   };
 
   const amountButtonEmptyFieldContent = () => {
-    return <React.Fragment>Make A Contribution2</React.Fragment>;
+    return <React.Fragment>Make A Contribution</React.Fragment>;
   };
+
+  // const amountButtonEmptyFieldContent = () => {
+  //   return <React.Fragment>Make A Contribution2</React.Fragment>;
+  // };
 
   const renderThankYou = () => {
     return <ThankYou />;
@@ -2242,7 +2252,7 @@ function TargetDetailsDeliveryAndPayment(props) {
       totalDeliveryCost: deliveryCost ? deliveryCost : 0,
       totalProductCost: totalProductCost,
       paymentMethod: paymentMethod,
-      paymentStatus: "collect-payment-on-delivery",
+      paymentStatus: "paid",
       orderedBy: userId,
       salesTax: transactionSalesTax,
       origin: policy.onlineOrigin,
@@ -2270,6 +2280,15 @@ function TargetDetailsDeliveryAndPayment(props) {
       showDealPaymentDetails,
       dealPaymentPreference,
       requestDealRedemptionCode,
+      //showDealDeliveryCost,
+      isAContributoryDeal: true,
+      dealOwner,
+      dealOwnerEntity,
+      dealInitialPercentageContribution,
+      dealMaximumInstallmentAllowed: dealNumberOfInstallments,
+      includeGatewayChargesInPrice,
+      gatewayFixedCharge,
+      gatewayRateCharge,
     };
 
     //write to the transaction table first
@@ -2322,7 +2341,7 @@ function TargetDetailsDeliveryAndPayment(props) {
               totalDeliveryCost: deliveryCost ? deliveryCost : 0,
               totalProductCost: totalProductCost,
               paymentMethod: paymentMethod,
-              paymentStatus: "collect-payment-on-delivery",
+              paymentStatus: "paid",
 
               cartId: cart.id,
               quantityAdddedToCart: cart.quantity,
@@ -2331,7 +2350,7 @@ function TargetDetailsDeliveryAndPayment(props) {
               currency: props.currency,
               paymentMethod: paymentMethod,
 
-              orderedBy: cart.cartHolder,
+              orderedBy: userId,
               salesTax: policy.implementSalesTaxCollection
                 ? policy.allowOriginSalesTax
                   ? (cart.price * cart.quantity * prevailingSalesTax) / 100
@@ -2371,7 +2390,18 @@ function TargetDetailsDeliveryAndPayment(props) {
               showDealPaymentDetails,
               dealPaymentPreference,
               requestDealRedemptionCode,
+
+              //showDealDeliveryCost,
+              isAContributoryDeal: true,
+              dealOwner,
+              dealOwnerEntity,
+              dealInitialPercentageContribution,
+              dealMaximumInstallmentAllowed: dealNumberOfInstallments,
+              includeGatewayChargesInPrice,
+              gatewayFixedCharge,
+              gatewayRateCharge,
             };
+            console.log("data:", data);
 
             if (data) {
               const createForm = async () => {
