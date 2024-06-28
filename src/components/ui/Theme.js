@@ -5,7 +5,7 @@ const arcBlue = "#0B72B9";
 const arcOrange = "#FD841F";
 
 const arcGrey = "#EEEEEE";
-//const arcGrey = "#868686";
+const arcGrey2 = "#868686";
 const arcWhite = "#ffffff";
 const arcPrimary = "#1A5D1A";
 //const arcPrimary = "#DC0000";
@@ -91,7 +91,7 @@ export default createTheme({
     subtitle1: {
       fontSize: "1.25rem",
       fontWeight: 300,
-      color: arcGrey,
+      color: arcGrey2,
     },
     subtitle2: {
       color: "white",

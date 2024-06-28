@@ -708,7 +708,7 @@ function OwnTargetsPage(props) {
 
         {!isLoading && targetProductList.length === 0 ? (
           <p style={{ marginTop: 20, marginLeft: 10 }}>
-            There are no items in your target
+            There are no items in your cart
           </p>
         ) : (
           <Grid item>{targetList}</Grid>

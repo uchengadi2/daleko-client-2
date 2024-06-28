@@ -1,8 +1,12 @@
+// export default ProfileLayout;
+
 import React, { useState, useEffect } from "react";
 import { Field, reduxForm } from "redux-form";
 import CallToAction from "./ui/CallToAction";
 import Snackbar from "@material-ui/core/Snackbar";
 import CircularProgress from "@material-ui/core/CircularProgress";
+// import UserMembershipForm from "./membership/UserMembershipForm";
+// import UpdateUserMembershipForm from "./membership/UpdateUserMembershipForm";
 
 import revolutionBackground from "./../assets/repeatingBackground.svg";
 import infoBackground from "./../assets/infoBackground.svg";
@@ -50,6 +54,84 @@ const useStyles = makeStyles((theme) => ({
       width: 225,
     },
   },
+  membershipButton: {
+    ...theme.typography.estimate,
+    borderRadius: 10,
+    height: 40,
+    width: 300,
+    marginLeft: 15,
+    marginTop: 30,
+    marginBottom: 10,
+    fontSize: "1.25rem",
+    backgroundColor: theme.palette.common.green,
+    color: "white",
+    "&:hover": {
+      backgroundColor: theme.palette.common.green,
+    },
+    [theme.breakpoints.down("sm")]: {
+      height: 40,
+      width: 225,
+    },
+  },
+  updateMembershipButton: {
+    ...theme.typography.estimate,
+    borderRadius: 10,
+    height: 40,
+    width: 300,
+    marginLeft: 15,
+    marginTop: 30,
+    marginBottom: 10,
+    fontSize: "1.25rem",
+    backgroundColor: theme.palette.common.grey,
+    color: "white",
+    "&:hover": {
+      backgroundColor: theme.palette.common.grey,
+    },
+    [theme.breakpoints.down("sm")]: {
+      height: 40,
+      width: 225,
+    },
+  },
+
+  updateMembershipMobileButton: {
+    ...theme.typography.estimate,
+    borderRadius: 10,
+    height: 40,
+    width: 400,
+    marginLeft: 10,
+    marginTop: 30,
+    marginBottom: 10,
+    fontSize: "0.85rem",
+    backgroundColor: theme.palette.common.grey,
+    color: "white",
+    "&:hover": {
+      backgroundColor: theme.palette.common.grey,
+    },
+    [theme.breakpoints.down("sm")]: {
+      height: 40,
+      width: 225,
+    },
+  },
+
+  membershipMobileButton: {
+    ...theme.typography.estimate,
+    borderRadius: 10,
+    height: 40,
+    width: 400,
+    marginLeft: 15,
+    marginTop: 30,
+    marginBottom: 10,
+    fontSize: "0.85rem",
+    backgroundColor: theme.palette.common.green,
+    color: "white",
+    "&:hover": {
+      backgroundColor: theme.palette.common.green,
+    },
+    [theme.breakpoints.down("sm")]: {
+      height: 40,
+      width: 225,
+    },
+  },
   // root: {
   //   maxWidth: 600,
   //   marginTop: 70,
@@ -60,7 +142,7 @@ const useStyles = makeStyles((theme) => ({
     backgroundSize: "cover",
     //backgroundAttachment: "fixed",
     backgroundRepeat: "no-repeat",
-    height: "10em",
+    height: "15em",
     width: "100%",
     [theme.breakpoints.down("md")]: {
       // backgroundImage: `url(${mobileBackground})`,
@@ -71,7 +153,7 @@ const useStyles = makeStyles((theme) => ({
     maxWidth: "100%",
     width: "100%",
     height: "80vh",
-    marginTop: "2.5rem",
+    marginTop: "0.5rem",
     // height: "100%",
     position: "relative",
     "& video": {
@@ -217,20 +299,21 @@ const useStyles = makeStyles((theme) => ({
     height: "100%",
     width: "100%",
   },
+  rootMobile: {
+    maxWidth: "100%",
+    //height: 440,
+    //height: 800,
+    width: "100%",
 
-  // background: {
-  //   backgroundImage: `url(${background})`,
-  //   backgroundPosition: "center",
-  //   backgroundSize: "cover",
-  //   //backgroundAttachment: "fixed",
-  //   backgroundRepeat: "no-repeat",
-  //   height: "60em",
-  //   width: "100%",
-  //   [theme.breakpoints.down("md")]: {
-  //     // backgroundImage: `url(${mobileBackground})`,
-  //     backgroundAttachment: "inherit",
-  //   },
-  // },
+    marginLeft: "0px",
+    //borderRadius: 30,
+    marginTop: "0.2em",
+    marginBottom: "3em",
+    padding: 0,
+    backgroundColor: "#FFFFFF",
+
+    "&:hover": {},
+  },
 }));
 
 const ProfileLayout = (props) => {
@@ -249,6 +332,8 @@ const ProfileLayout = (props) => {
   const [nameFormOpen, setNameFormOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(null);
   const [updateUser, setUpdateUser] = useState(false);
+  const [membershipInfo, setMembershipInfo] = useState(false);
+  const [updateMembershipInfo, setUpdateMembershipInfo] = useState(false);
 
   const getUserIdFromLocatStorage = () => {
     const tokenString = localStorage.getItem("token");
@@ -327,6 +412,14 @@ const ProfileLayout = (props) => {
     setPasswordFormOpen(false);
   };
 
+  const handleMembershipDialogForm = () => {
+    setMembershipInfo(false);
+  };
+
+  const handleUpdatedMembershipDialogForm = () => {
+    setUpdateMembershipInfo(false);
+  };
+
   const renderChangePasswordForm = () => {
     return (
       <Dialog
@@ -371,6 +464,55 @@ const ProfileLayout = (props) => {
             handleFailedSnackbar={handleFailedSnackbar}
             user={user}
           />
+        </DialogContent>
+      </Dialog>
+    );
+  };
+
+  const renderMembershipForm = () => {
+    return (
+      <Dialog
+        fullScreen={matchesXS}
+        open={membershipInfo}
+        onClose={() => [setMembershipInfo(false), history.push("/profile")]}
+      >
+        <DialogContent>
+          {/* <UserMembershipForm
+            token={props.token}
+            userId={props.userId}
+            updateUserInfoHandler={updateUserInfoHandler}
+            handleMembershipDialogForm={handleMembershipDialogForm}
+            handleSuccessfulCreateSnackbar={handleSuccessfulCreateSnackbar}
+            handleFailedSnackbar={handleFailedSnackbar}
+            user={user}
+          /> */}
+        </DialogContent>
+      </Dialog>
+    );
+  };
+
+  const renderUpdateMembershipForm = () => {
+    return (
+      <Dialog
+        fullScreen={matchesXS}
+        open={updateMembershipInfo}
+        onClose={() => [
+          setUpdateMembershipInfo(false),
+          history.push("/profile"),
+        ]}
+      >
+        <DialogContent>
+          {/* <UpdateUserMembershipForm
+            token={props.token}
+            userId={props.userId}
+            updateUserInfoHandler={updateUserInfoHandler}
+            handleUpdatedMembershipDialogForm={
+              handleUpdatedMembershipDialogForm
+            }
+            handleSuccessfulCreateSnackbar={handleSuccessfulCreateSnackbar}
+            handleFailedSnackbar={handleFailedSnackbar}
+            user={user}
+          /> */}
         </DialogContent>
       </Dialog>
     );
@@ -432,9 +574,47 @@ const ProfileLayout = (props) => {
                     </Grid>
                     <Grid item>
                       <Typography variant="subtitle1">
-                        {user.phoneNumber}
+                        Phone Number: {user.phoneNumber}
                       </Typography>
+                      {user.isAMember && (
+                        <Grid item>
+                          <Typography variant="subtitle1">
+                            Membership Number: {user.membershipNo}
+                          </Typography>
+                        </Grid>
+                      )}
+                      {user.isAMember && (
+                        <Grid item>
+                          <Typography variant="subtitle1">
+                            Membership Status: {user.membershipStatus}
+                          </Typography>
+                        </Grid>
+                      )}
                     </Grid>
+
+                    {/* {!user.isAMember && (
+                      <Grid item>
+                        <Button
+                          variant="contained"
+                          className={classes.membershipButton}
+                          onClick={() => [setMembershipInfo(true)]}
+                        >
+                          Complete Membership Form
+                        </Button>
+                      </Grid>
+                    )} */}
+
+                    {/* {user.isAMember && (
+                      <Grid item>
+                        <Button
+                          variant="contained"
+                          className={classes.updateMembershipButton}
+                          onClick={() => [setUpdateMembershipInfo(true)]}
+                        >
+                          Update Membership Form
+                        </Button>
+                      </Grid>
+                    )} */}
 
                     <Grid item>
                       <Button
@@ -473,10 +653,144 @@ const ProfileLayout = (props) => {
             </Grid>
             {renderChangePasswordForm()}
             {renderChangeNameForm()}
+            {/* {renderMembershipForm()}
+            {renderUpdateMembershipForm()} */}
           </Grid>
         )
       ) : (
-        <></>
+        <>
+          {!isLoading && (
+            <Grid container direction="row" className={classes.rootMobile}>
+              <Grid item>
+                <Box className={classes.rootMobile}>
+                  <Box
+                    component="div"
+                    id="profileLayout"
+                    // onSubmit={onSubmit}
+                    sx={{
+                      width: 400,
+                      height: 480,
+                    }}
+                    noValidate
+                    autoComplete="off"
+                    // style={{ marginTop: 20 }}
+                  >
+                    <Grid
+                      container
+                      direction="row"
+                      className={classes.background}
+                    >
+                      <Box
+                        sx={{
+                          width: 350,
+                          height: 180,
+                        }}
+                        noValidate
+                        autoComplete="off"
+                      ></Box>
+                    </Grid>
+
+                    <Grid
+                      container
+                      direction="column"
+                      justifyContent="center"
+                      alignItems="center"
+                      style={{ marginTop: 15 }}
+                    >
+                      <Grid item>
+                        <Typography variant="subtitle1">{user.name}</Typography>
+                      </Grid>
+                      <Grid item>
+                        <Typography variant="subtitle1">
+                          {user.email}
+                        </Typography>
+                      </Grid>
+                      <Grid item>
+                        <Typography variant="subtitle1">
+                          Phone Number: {user.phoneNumber}
+                        </Typography>
+                        {user.isAMember && (
+                          <Grid item>
+                            <Typography variant="subtitle1">
+                              Membership Number: {user.membershipNo}
+                            </Typography>
+                          </Grid>
+                        )}
+                        {user.isAMember && (
+                          <Grid item>
+                            <Typography variant="subtitle1">
+                              Membership Status: {user.membershipStatus}
+                            </Typography>
+                          </Grid>
+                        )}
+                      </Grid>
+
+                      {/* {!user.isAMember && (
+                        <Grid item>
+                          <Button
+                            variant="contained"
+                            className={classes.membershipMobileButton}
+                            onClick={() => [setMembershipInfo(true)]}
+                          >
+                            Complete Membership Form
+                          </Button>
+                        </Grid>
+                      )} */}
+
+                      {/* {user.isAMember && (
+                        <Grid item>
+                          <Button
+                            variant="contained"
+                            className={classes.updateMembershipMobileButton}
+                            onClick={() => [setUpdateMembershipInfo(true)]}
+                          >
+                            Update Membership Form
+                          </Button>
+                        </Grid>
+                      )} */}
+
+                      <Grid item>
+                        <Button
+                          variant="contained"
+                          className={classes.sendButton}
+                          // onClick={() => setPasswordFormOpen(true)}
+                          onClick={() => [setPasswordFormOpen(true)]}
+                        >
+                          Change Password
+                        </Button>
+                      </Grid>
+                      <Grid
+                        item
+                        container
+                        alignItems="center"
+                        justifyContent="center"
+                        style={{ marginTop: 20 }}
+                      >
+                        <Button
+                          variant="text"
+                          onClick={() => [setNameFormOpen(true)]}
+                        >
+                          Update User Details
+                        </Button>
+                      </Grid>
+                    </Grid>
+                  </Box>
+                </Box>
+              </Grid>
+              <Grid item style={{ width: "100%", marginTop: "20px" }}>
+                {" "}
+                {/*....INFORMATION BLOCK....*/}
+              </Grid>
+              <Grid item className={classes.footer}>
+                <UpperFooter />
+              </Grid>
+              {renderChangePasswordForm()}
+              {renderChangeNameForm()}
+              {/* {renderMembershipForm()}
+              {renderUpdateMembershipForm()} */}
+            </Grid>
+          )}
+        </>
       )}
       <Snackbar
         open={alert.open}
