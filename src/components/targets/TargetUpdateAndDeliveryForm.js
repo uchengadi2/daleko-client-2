@@ -885,7 +885,7 @@ function TargetUpdateAndDeliveryForm(props) {
           )}
         </Button>
 
-        <Button
+        {/* <Button
           variant="outlined"
           //component={Link}
           // to="/mobileapps"
@@ -898,7 +898,7 @@ function TargetUpdateAndDeliveryForm(props) {
           ) : (
             checkoutButtonContent()
           )}
-        </Button>
+        </Button> */}
 
         <Button
           variant="outlined"

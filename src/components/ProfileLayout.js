@@ -142,7 +142,20 @@ const useStyles = makeStyles((theme) => ({
     backgroundSize: "cover",
     //backgroundAttachment: "fixed",
     backgroundRepeat: "no-repeat",
-    height: "15em",
+    height: "18em",
+    width: "100%",
+    [theme.breakpoints.down("md")]: {
+      // backgroundImage: `url(${mobileBackground})`,
+      backgroundAttachment: "inherit",
+    },
+  },
+  backgroundMobile: {
+    backgroundImage: `url(${background})`,
+    backgroundPosition: "center",
+    backgroundSize: "cover",
+    //backgroundAttachment: "fixed",
+    backgroundRepeat: "no-repeat",
+    height: "7em",
     width: "100%",
     [theme.breakpoints.down("md")]: {
       // backgroundImage: `url(${mobileBackground})`,
@@ -426,7 +439,10 @@ const ProfileLayout = (props) => {
         //style={{ zIndex: 1302 }}
         fullScreen={matchesXS}
         open={passwordFormOpen}
-        onClose={() => [setPasswordFormOpen(false), history.push("/profile")]}
+        onClose={() => [
+          setPasswordFormOpen(false),
+          history.push("/profile/profile"),
+        ]}
       >
         <DialogContent>
           <UserChangePasswordForm
@@ -452,7 +468,10 @@ const ProfileLayout = (props) => {
         //style={{ zIndex: 1302 }}
         fullScreen={matchesXS}
         open={nameFormOpen}
-        onClose={() => [setNameFormOpen(false), history.push("/profile")]}
+        onClose={() => [
+          setNameFormOpen(false),
+          history.push("/profile/profile"),
+        ]}
       >
         <DialogContent>
           <UserOwnNameChangeContainer
@@ -498,7 +517,7 @@ const ProfileLayout = (props) => {
         open={updateMembershipInfo}
         onClose={() => [
           setUpdateMembershipInfo(false),
-          history.push("/profile"),
+          history.push("/profile/profile"),
         ]}
       >
         <DialogContent>
@@ -551,7 +570,7 @@ const ProfileLayout = (props) => {
                   >
                     <Box
                       sx={{
-                        width: 350,
+                        width: 400,
                         height: 180,
                       }}
                       noValidate
@@ -678,11 +697,11 @@ const ProfileLayout = (props) => {
                     <Grid
                       container
                       direction="row"
-                      className={classes.background}
+                      className={classes.backgroundMobile}
                     >
                       <Box
                         sx={{
-                          width: 350,
+                          width: 400,
                           height: 180,
                         }}
                         noValidate
