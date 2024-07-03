@@ -137,6 +137,7 @@ function ProductInfo(props) {
     pricingMechanism,
     policy,
     allowPriceFreezing,
+    isACreditDeal,
 
     slug,
   } = props;
@@ -189,8 +190,6 @@ function ProductInfo(props) {
   const buttonFreezePriceContent = () => {
     return <React.Fragment>Freeze Price</React.Fragment>;
   };
-
-  console.log("allowPriceFreezing is:", allowPriceFreezing);
 
   return (
     <form id="courseInfo">

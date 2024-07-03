@@ -56,6 +56,7 @@ import ProfileLayout from "../ProfileLayout";
 import Dashboard from "../Dashboard/Dashboard";
 import MainDashboard from "../Dashboard/MainDashboard";
 import OwnTargetsPage from "../targets/OwnTargetsPage";
+import OwnCreditScheme from "../credits/OwnCreditScheme";
 
 function ElevationScroll(props) {
   const { children } = props;
@@ -209,10 +210,24 @@ const useStyles = makeStyles((theme) => ({
   target: {
     ...theme.typography.estimate,
     borderRadius: "250px",
-    marginLeft: "3px",
-    marginRight: "2px",
+    marginLeft: "2px",
+    marginRight: "1px",
     height: "45px",
-    width: "135px",
+    width: "70px",
+    fontSize: "13px",
+    fontWeight: "500px",
+    "&:hover": {
+      backgroundColor: theme.palette.secondary.light,
+      color: "white",
+    },
+  },
+  credit: {
+    ...theme.typography.estimate,
+    borderRadius: "250px",
+    marginLeft: "2px",
+    marginRight: "1px",
+    height: "45px",
+    width: "70px",
     fontSize: "13px",
     fontWeight: "500px",
     "&:hover": {
@@ -636,6 +651,17 @@ const Header = (props) => {
           >
             {/* <img alt="company logo" src={logo} className={classes.logo} /> */}
             Target Scheme
+          </Button>
+          <Button
+            onClick={() => <OwnCreditScheme />}
+            disableRipple
+            component={Link}
+            // to={`/checkouts/${props.userId}`}
+            to={`/targets/credits`}
+            className={classes.credit}
+          >
+            {/* <img alt="company logo" src={logo} className={classes.logo} /> */}
+            Credit Scheme
           </Button>
           <Button
             onClick={() => <ProfileLayout />}
@@ -1077,6 +1103,27 @@ const Header = (props) => {
               >
                 <ListItemText className={classes.drawerItem} disableTypography>
                   Target Scheme
+                </ListItemText>
+              </ListItem>
+              <ListItem
+                className={classes.drawerItem}
+                onClick={() => [
+                  setOpenDrawer(false),
+                  props.setValue(7),
+                  <OwnCreditScheme />,
+                ]}
+                divider
+                button
+                component={Link}
+                to={`/targets/credits`}
+                classes={{
+                  root: classes.drawerItem,
+                  selected: classes.drawerItemSelected,
+                }}
+                selected={props.value === 5}
+              >
+                <ListItemText className={classes.drawerItem} disableTypography>
+                  Credit Scheme
                 </ListItemText>
               </ListItem>
               <ListItem

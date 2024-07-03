@@ -754,7 +754,8 @@ export default function AllProducts(props) {
                 )}
                 {props.salesPreference === "deal" &&
                   props.isAContributoryDeal === true &&
-                  props.dealType === "private" && (
+                  props.dealType === "private" &&
+                  props.isACreditDeal === false && (
                     <Typography>
                       <span
                         style={{
@@ -772,14 +773,42 @@ export default function AllProducts(props) {
                             marginTop: 20,
                           }}
                         >
-                          This Is A Private TARGET SCHEME
+                          This Is A Private TARGET SCHEME Without Credit
+                          Facility
                         </span>
                       </span>
                     </Typography>
                   )}
                 {props.salesPreference === "deal" &&
                   props.isAContributoryDeal === true &&
-                  props.dealType === "public" && (
+                  props.dealType === "private" &&
+                  props.isACreditDeal === true && (
+                    <Typography>
+                      <span
+                        style={{
+                          fontSize: 14,
+                          fontWeight: 700,
+                          marginLeft: 10,
+                        }}
+                      >
+                        {/* <strong> Note:</strong> */}
+                        <span
+                          style={{
+                            fontSize: 20,
+                            fontWeight: 700,
+                            marginLeft: 10,
+                            marginTop: 20,
+                          }}
+                        >
+                          This Is A Private TARGET SCHEME With Credit Facility
+                        </span>
+                      </span>
+                    </Typography>
+                  )}
+                {props.salesPreference === "deal" &&
+                  props.isAContributoryDeal === true &&
+                  props.dealType === "public" &&
+                  props.isACreditDeal === false && (
                     <Typography>
                       <span
                         style={{
@@ -798,7 +827,34 @@ export default function AllProducts(props) {
                             marginTop: 20,
                           }}
                         >
-                          This Is A Public TARGET SCHEME
+                          This Is A Public TARGET SCHEME without Credit Facility
+                        </span>
+                      </span>
+                    </Typography>
+                  )}
+                {props.salesPreference === "deal" &&
+                  props.isAContributoryDeal === true &&
+                  props.dealType === "public" &&
+                  props.isACreditDeal === true && (
+                    <Typography>
+                      <span
+                        style={{
+                          fontSize: 20,
+                          fontWeight: 700,
+                          marginLeft: 10,
+                          marginTop: 10,
+                        }}
+                      >
+                        {/* <strong> Note:</strong> */}
+                        <span
+                          style={{
+                            fontSize: 20,
+                            fontWeight: 700,
+                            marginLeft: 10,
+                            marginTop: 20,
+                          }}
+                        >
+                          This Is A Public TARGET SCHEME With Credit Facility
                         </span>
                       </span>
                     </Typography>
@@ -835,6 +891,7 @@ export default function AllProducts(props) {
                 dealType={props.dealType}
                 isAContributoryDeal={props.isAContributoryDeal}
                 allowPriceFreezing={props.allowPriceFreezing}
+                isACreditDeal={props.isACreditDeal}
                 //tools={props.tools}
                 //policy={props.policy}
                 currency={props.currency}
@@ -1141,7 +1198,8 @@ export default function AllProducts(props) {
                   )}
                   {props.salesPreference === "deal" &&
                     props.isAContributoryDeal === true &&
-                    props.dealType === "private" && (
+                    props.dealType === "private" &&
+                    props.isACreditDeal === false && (
                       <Typography>
                         <span
                           style={{
@@ -1159,14 +1217,43 @@ export default function AllProducts(props) {
                               marginTop: 20,
                             }}
                           >
-                            This Is A Private TARGET SCHEME
+                            This Is A Private TARGET SCHEME without Credit
+                            Facility
+                          </span>
+                        </span>
+                      </Typography>
+                    )}
+
+                  {props.salesPreference === "deal" &&
+                    props.isAContributoryDeal === true &&
+                    props.dealType === "private" &&
+                    props.isACreditDeal === true && (
+                      <Typography>
+                        <span
+                          style={{
+                            fontSize: 14,
+                            fontWeight: 700,
+                            marginLeft: 10,
+                          }}
+                        >
+                          {/* <strong> Note:</strong> */}
+                          <span
+                            style={{
+                              fontSize: 20,
+                              fontWeight: 700,
+                              marginLeft: 10,
+                              marginTop: 20,
+                            }}
+                          >
+                            This Is A Private TARGET SCHEME with Credit Facility
                           </span>
                         </span>
                       </Typography>
                     )}
                   {props.salesPreference === "deal" &&
                     props.isAContributoryDeal === true &&
-                    props.dealType === "public" && (
+                    props.dealType === "public" &&
+                    props.isACreditDeal === false && (
                       <Typography>
                         <span
                           style={{
@@ -1185,7 +1272,36 @@ export default function AllProducts(props) {
                               marginTop: 20,
                             }}
                           >
-                            This Is A Public TARGET SCHEME
+                            This Is A Public TARGET SCHEME without Credit
+                            Facility
+                          </span>
+                        </span>
+                      </Typography>
+                    )}
+
+                  {props.salesPreference === "deal" &&
+                    props.isAContributoryDeal === true &&
+                    props.dealType === "public" &&
+                    props.isACreditDeal === true && (
+                      <Typography>
+                        <span
+                          style={{
+                            fontSize: 20,
+                            fontWeight: 700,
+                            marginLeft: 10,
+                            marginTop: 10,
+                          }}
+                        >
+                          {/* <strong> Note:</strong> */}
+                          <span
+                            style={{
+                              fontSize: 20,
+                              fontWeight: 700,
+                              marginLeft: 10,
+                              marginTop: 20,
+                            }}
+                          >
+                            This Is A Public TARGET SCHEME with Credit Facility
                           </span>
                         </span>
                       </Typography>
@@ -1222,6 +1338,7 @@ export default function AllProducts(props) {
                   dealType={props.dealType}
                   isAContributoryDeal={props.isAContributoryDeal}
                   allowPriceFreezing={props.allowPriceFreezing}
+                  isACreditDeal={props.isACreditDeal}
                   //tools={props.tools}
                   // policy={props.policy}
                   currency={props.currency}

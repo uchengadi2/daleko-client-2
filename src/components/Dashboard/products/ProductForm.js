@@ -921,6 +921,7 @@ function ProductForm(props) {
     useState(false);
   const [gatewayFixedChargeValue, setGatewayFixedChargeValue] = useState(0);
   const [gatewayRateChargeValue, setGatewayRateChargeValue] = useState(0);
+  const [isACreditDeal, setIsACreditDeal] = useState(false);
 
   const dispatch = useDispatch();
 
@@ -1275,6 +1276,10 @@ function ProductForm(props) {
 
   const handleIsAContibutoryDealChange = (event) => {
     setIsAContributoryDeal(event.target.value);
+  };
+
+  const handleIsACreditDealChange = (event) => {
+    setIsACreditDeal(event.target.value);
   };
 
   const handleCommunityChange = (event) => {
@@ -2218,6 +2223,37 @@ function ProductForm(props) {
     );
   };
 
+  const renderIsACreditDealField = ({
+    input,
+    label,
+    meta: { touched, error, invalid },
+    type,
+    id,
+    ...custom
+  }) => {
+    return (
+      <Box>
+        <FormControl variant="outlined">
+          {/* <InputLabel id="vendor_city">City</InputLabel> */}
+          <Select
+            labelId="isACreditDeal"
+            id="isACreditDeal"
+            value={isACreditDeal}
+            onChange={handleIsACreditDealChange}
+            //label="Allow Price Freezing"
+
+            style={{ width: 500, marginTop: 10, height: 38 }}
+            //{...input}
+          >
+            <MenuItem value={"false"}>No</MenuItem>
+            <MenuItem value={"true"}>Yes</MenuItem>
+          </Select>
+          <FormHelperText>Is this on Credit Deal?</FormHelperText>
+        </FormControl>
+      </Box>
+    );
+  };
+
   const buttonContent = () => {
     return <React.Fragment> Submit</React.Fragment>;
   };
@@ -2535,6 +2571,7 @@ function ProductForm(props) {
       "gatewayRateCharge",
       formValues.gatewayRateCharge ? formValues.gatewayRateCharge : 0
     );
+    form.append("isACreditDeal", isACreditDeal);
 
     // if (!formValues["sku"]) {
     //   const sku =
@@ -3286,6 +3323,17 @@ function ProductForm(props) {
               type="text"
               //helperText="Allow the Customer to Change Deal Quantity"
               component={renderIsAContributoryDealField}
+            />
+          )}
+
+          {salesPreference === "deal" && (
+            <Field
+              label=""
+              id="isACreditDeal"
+              name="isACreditDeal"
+              type="text"
+              //helperText="Allow the Customer to Change Deal Quantity"
+              component={renderIsACreditDealField}
             />
           )}
 

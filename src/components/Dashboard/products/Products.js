@@ -170,6 +170,7 @@ function Products(props) {
           includeGatewayChargesInPrice: product.includeGatewayChargesInPrice,
           gatewayFixedCharge: product.gatewayFixedCharge,
           gatewayRateCharge: product.gatewayRateCharge,
+          isACreditDeal: product.isACreditDeal,
         });
       });
       setProductsList(allData);
@@ -490,6 +491,7 @@ function Products(props) {
         includeGatewayChargesInPrice: product.includeGatewayChargesInPrice,
         gatewayFixedCharge: product.gatewayFixedCharge,
         gatewayRateCharge: product.gatewayRateCharge,
+        isACreditDeal: product.isACreditDeal,
       };
       rows.push(row);
     });

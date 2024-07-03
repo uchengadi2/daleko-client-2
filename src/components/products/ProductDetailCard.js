@@ -894,7 +894,8 @@ export default function ProductDetailCard(props) {
                   )}
                 {props.product.salesPreference === "deal" &&
                   props.product.dealType === "private" &&
-                  props.product.isAContributoryDeal === true && (
+                  props.product.isAContributoryDeal === true &&
+                  props.product.isACreditDeal === false && (
                     <Typography>
                       <span style={{ fontSize: 14, marginLeft: 10 }}>
                         {/* <strong> Deal Instruction:</strong> */}
@@ -906,14 +907,36 @@ export default function ProductDetailCard(props) {
                             fontWeight: 700,
                           }}
                         >
-                          This Is A Private Target Scheme
+                          This Is A Private Target Scheme without a Credit
+                          Facility
+                        </span>
+                      </span>
+                    </Typography>
+                  )}
+                {props.product.salesPreference === "deal" &&
+                  props.product.dealType === "private" &&
+                  props.product.isAContributoryDeal === true &&
+                  props.product.isACreditDeal === true && (
+                    <Typography>
+                      <span style={{ fontSize: 14, marginLeft: 10 }}>
+                        {/* <strong> Deal Instruction:</strong> */}
+                        <span
+                          style={{
+                            fontSize: 14,
+                            marginLeft: 10,
+                            marginTop: 20,
+                            fontWeight: 700,
+                          }}
+                        >
+                          This Is A Private Target Scheme with a Credit Facility
                         </span>
                       </span>
                     </Typography>
                   )}
                 {props.product.salesPreference === "deal" &&
                   props.product.dealType === "public" &&
-                  props.product.isAContributoryDeal === true && (
+                  props.product.isAContributoryDeal === true &&
+                  props.product.isACreditDeal === false && (
                     <Typography>
                       <span style={{ fontSize: 14, marginLeft: 10 }}>
                         {/* <strong> Deal Instruction:</strong> */}
@@ -925,7 +948,28 @@ export default function ProductDetailCard(props) {
                             fontWeight: 700,
                           }}
                         >
-                          This Is A Public Target Scheme
+                          This Is A Public Target Scheme without a Credit
+                          Facility
+                        </span>
+                      </span>
+                    </Typography>
+                  )}
+                {props.product.salesPreference === "deal" &&
+                  props.product.dealType === "public" &&
+                  props.product.isAContributoryDeal === true &&
+                  props.product.isACreditDeal === true && (
+                    <Typography>
+                      <span style={{ fontSize: 14, marginLeft: 10 }}>
+                        {/* <strong> Deal Instruction:</strong> */}
+                        <span
+                          style={{
+                            fontSize: 14,
+                            marginLeft: 10,
+                            marginTop: 20,
+                            fontWeight: 700,
+                          }}
+                        >
+                          This Is A Public Target Scheme with a Credit Facility
                         </span>
                       </span>
                     </Typography>
@@ -1000,6 +1044,7 @@ export default function ProductDetailCard(props) {
                     props.product.requestDealRedemptionCode
                   }
                   isAContributoryDeal={props.product.isAContributoryDeal}
+                  isACreditDeal={props.product.isACreditDeal}
                   dealOwner={props.product.dealOwner}
                   dealOwnerEntity={props.product.dealOwnerEntity}
                   dealInitialPercentageContribution={
@@ -1980,7 +2025,8 @@ export default function ProductDetailCard(props) {
                   )}
                 {props.product.salesPreference === "deal" &&
                   props.product.dealType === "private" &&
-                  props.product.isAContributoryDeal === true && (
+                  props.product.isAContributoryDeal === true &&
+                  props.product.isACreditDeal === false && (
                     <Typography>
                       <span style={{ fontSize: 14, marginLeft: 10 }}>
                         {/* <strong> Deal Instruction:</strong> */}
@@ -1992,14 +2038,36 @@ export default function ProductDetailCard(props) {
                             fontWeight: 700,
                           }}
                         >
-                          This Is A Private Target Scheme
+                          This Is A Private Target Scheme without a Credit
+                          Facility
+                        </span>
+                      </span>
+                    </Typography>
+                  )}
+                {props.product.salesPreference === "deal" &&
+                  props.product.dealType === "private" &&
+                  props.product.isAContributoryDeal === true &&
+                  props.product.isACreditDeal === true && (
+                    <Typography>
+                      <span style={{ fontSize: 14, marginLeft: 10 }}>
+                        {/* <strong> Deal Instruction:</strong> */}
+                        <span
+                          style={{
+                            fontSize: 14,
+                            marginLeft: 10,
+                            marginTop: 20,
+                            fontWeight: 700,
+                          }}
+                        >
+                          This Is A Private Target Scheme with a Credit Facility
                         </span>
                       </span>
                     </Typography>
                   )}
                 {props.product.salesPreference === "deal" &&
                   props.product.dealType === "public" &&
-                  props.product.isAContributoryDeal === true && (
+                  props.product.isAContributoryDeal === true &&
+                  props.product.isACreditDeal === false && (
                     <Typography>
                       <span style={{ fontSize: 14, marginLeft: 10 }}>
                         {/* <strong> Deal Instruction:</strong> */}
@@ -2011,7 +2079,28 @@ export default function ProductDetailCard(props) {
                             fontWeight: 700,
                           }}
                         >
-                          This Is A Public Target Scheme
+                          This Is A Public Target Scheme without a Credit
+                          Facility
+                        </span>
+                      </span>
+                    </Typography>
+                  )}
+                {props.product.salesPreference === "deal" &&
+                  props.product.dealType === "public" &&
+                  props.product.isAContributoryDeal === true &&
+                  props.product.isACreditDeal === true && (
+                    <Typography>
+                      <span style={{ fontSize: 14, marginLeft: 10 }}>
+                        {/* <strong> Deal Instruction:</strong> */}
+                        <span
+                          style={{
+                            fontSize: 14,
+                            marginLeft: 10,
+                            marginTop: 20,
+                            fontWeight: 700,
+                          }}
+                        >
+                          This Is A Public Target Scheme with a Credit Facility
                         </span>
                       </span>
                     </Typography>
@@ -2085,6 +2174,7 @@ export default function ProductDetailCard(props) {
                     props.product.requestDealRedemptionCode
                   }
                   isAContributoryDeal={props.product.isAContributoryDeal}
+                  isACreditDeal={props.product.isACreditDeal}
                   dealOwner={props.product.dealOwner}
                   dealOwnerEntity={props.product.dealOwnerEntity}
                   dealInitialPercentageContribution={

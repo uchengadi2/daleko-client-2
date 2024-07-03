@@ -355,6 +355,7 @@ function ProductDetails(props) {
           includeGatewayChargesInPrice: product[0].includeGatewayChargesInPrice,
           gatewayFixedCharge: product[0].gatewayFixedCharge,
           gatewayRateCharge: product[0].gatewayRateCharge,
+          isACreditDeal: product[0].isACreditDeal,
         });
 
         setProduct({
@@ -443,6 +444,7 @@ function ProductDetails(props) {
           includeGatewayChargesInPrice: allData[0].includeGatewayChargesInPrice,
           gatewayFixedCharge: allData[0].gatewayFixedCharge,
           gatewayRateCharge: allData[0].gatewayRateCharge,
+          isACreditDeal: allData[0].isACreditDeal,
         });
 
         setIsLoading(false);
@@ -453,8 +455,6 @@ function ProductDetails(props) {
 
     fetchData().catch(console.error);
   }, [slug]);
-
-  console.log("product is:", product);
 
   const Str = require("@supercharge/strings");
 
@@ -542,6 +542,7 @@ function ProductDetails(props) {
             showDealPaymentDetails={product.showDealPaymentDetails}
             requestDealRedemptionCode={product.requestDealRedemptionCode}
             isAContributoryDeal={product.isAContributoryDeal}
+            isACreditDeal={product.isACreditDeal}
             dealOwner={product.dealOwner}
             dealOwnerEntity={product.dealOwnerEntity}
             dealInitialPercentageContribution={
@@ -656,6 +657,7 @@ function ProductDetails(props) {
             showDealPaymentDetails={product.showDealPaymentDetails}
             requestDealRedemptionCode={product.requestDealRedemptionCode}
             isAContributoryDeal={product.isAContributoryDeal}
+            isACreditDeal={product.isACreditDeal}
             dealOwner={product.dealOwner}
             dealOwnerEntity={product.dealOwnerEntity}
             dealInitialPercentageContribution={

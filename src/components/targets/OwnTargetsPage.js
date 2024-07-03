@@ -310,6 +310,7 @@ function OwnTargetsPage(props) {
           cartHolder: cartHolder,
           status: "pending",
           dealStatus: "active",
+          isACreditDeal: false,
         },
       });
       const items = response.data.data.data;
@@ -387,10 +388,6 @@ function OwnTargetsPage(props) {
 
     fetchData().catch(console.error);
   }, [updateCart]);
-
-  console.log("targetProductList:", targetProductList.length);
-
-  console.log("is loading is:", isLoading);
 
   useEffect(() => {
     const fetchData = async () => {

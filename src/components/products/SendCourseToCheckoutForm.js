@@ -279,6 +279,7 @@ function SendCourseToCheckoutForm(props) {
     includeGatewayChargesInPrice,
     gatewayFixedCharge,
     gatewayRateCharge,
+    isACreditDeal,
   } = props;
   const [quantity, setQuantity] = useState(props.minQuantity);
   const [newQuantity, setNewQuantity] = useState(props.minQuantity);
@@ -478,6 +479,7 @@ function SendCourseToCheckoutForm(props) {
     );
   };
   console.log("dealNumberOfInstallments:", dealNumberOfInstallments);
+  console.log("isACreditDeal is:", isACreditDeal);
 
   const renderTotalField = ({
     input,
@@ -562,6 +564,10 @@ function SendCourseToCheckoutForm(props) {
 
   const targetButtonContent = () => {
     return <React.Fragment>Add to My Target Scheme</React.Fragment>;
+  };
+
+  const creditButtonContent = () => {
+    return <React.Fragment>Add to My Credit Scheme</React.Fragment>;
   };
 
   const subscriptionButtonContent = () => {
@@ -1186,6 +1192,7 @@ function SendCourseToCheckoutForm(props) {
       dealPaymentPreference,
       requestDealRedemptionCode,
       isAContributoryDeal,
+      isACreditDeal,
       dealOwnerEntity,
       dealOwner,
       dealInitialPercentageContribution,
@@ -1194,11 +1201,6 @@ function SendCourseToCheckoutForm(props) {
       gatewayFixedCharge,
       gatewayRateCharge,
     };
-
-    console.log(
-      "dealMaximumInstallmentAllowedbbbbbb:",
-      dealMaximumInstallmentAllowed
-    );
 
     //create a new cart and add the product
     if (data) {
@@ -1353,7 +1355,8 @@ function SendCourseToCheckoutForm(props) {
 
         {props.pricingMechanism === "pricing" &&
           salesPreference === "deal" &&
-          isAContributoryDeal === true && (
+          isAContributoryDeal === true &&
+          isACreditDeal === false && (
             <Button
               variant="contained"
               className={classes.submitTargetButton}
@@ -1363,6 +1366,23 @@ function SendCourseToCheckoutForm(props) {
                 <CircularProgress size={30} color="inherit" />
               ) : (
                 targetButtonContent()
+              )}
+            </Button>
+          )}
+
+        {props.pricingMechanism === "pricing" &&
+          salesPreference === "deal" &&
+          isAContributoryDeal === true &&
+          isACreditDeal === true && (
+            <Button
+              variant="contained"
+              className={classes.submitTargetButton}
+              onClick={props.handleSubmit(onSubmitToTarget)}
+            >
+              {loading ? (
+                <CircularProgress size={30} color="inherit" />
+              ) : (
+                creditButtonContent()
               )}
             </Button>
           )}

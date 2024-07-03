@@ -454,6 +454,7 @@ const DealHome = (props) => {
             includeGatewayChargesInPrice: product.includeGatewayChargesInPrice,
             gatewayFixedCharge: product.gatewayFixedCharge,
             gatewayRateCharge: product.gatewayRateCharge,
+            isACreditDeal: product.isACreditDeal,
           });
         });
         setProductsList(allData);
@@ -549,6 +550,7 @@ const DealHome = (props) => {
             includeGatewayChargesInPrice: product.includeGatewayChargesInPrice,
             gatewayFixedCharge: product.gatewayFixedCharge,
             gatewayRateCharge: product.gatewayRateCharge,
+            isACreditDeal: product.isACreditDeal,
           });
         });
         setProductsList(allData);
@@ -661,6 +663,7 @@ const DealHome = (props) => {
               showDealPaymentDetails={product.showDealPaymentDetails}
               requestDealRedemptionCode={product.requestDealRedemptionCode}
               isAContributoryDeal={product.isAContributoryDeal}
+              isACreditDeal={product.isACreditDeal}
               dealOwnerEntity={product.dealOwnerEntity}
               dealOwner={product.dealOwner}
               dealInitialPercentageContribution={
@@ -760,6 +763,7 @@ const DealHome = (props) => {
               showDealPaymentDetails={product.showDealPaymentDetails}
               requestDealRedemptionCode={product.requestDealRedemptionCode}
               isAContributoryDeal={product.isAContributoryDeal}
+              isACreditDeal={product.isACreditDeal}
               dealOwnerEntity={product.dealOwnerEntity}
               dealOwner={product.dealOwner}
               dealInitialPercentageContribution={

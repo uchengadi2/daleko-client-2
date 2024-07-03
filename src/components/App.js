@@ -51,7 +51,9 @@ import FreezePriceCommunityPageAd from "./freeze/FreezePriceCommunityPageAd";
 import FreezePriceDealPageAd from "./freeze/FreezePriceDealPageAdPage";
 import DealPropositionAdPage from "./deals/DealPropositionAdPage";
 import OwnTargetsPage from "./targets/OwnTargetsPage";
+import OwnCreditScheme from "./credits/OwnCreditScheme";
 import TargetProductDetailPage from "./targets/TargetProductDetailPage";
+import CreditProductDetailPage from "./credits/TargetProductDetailPage";
 
 function App() {
   const { token, setToken } = useToken();
@@ -265,8 +267,31 @@ function App() {
               />
             </Route>
 
+            <Route path="/targets/credits">
+              <OwnCreditScheme
+                token={token}
+                userId={userId}
+                setToken={setToken ? setToken : {}}
+                setUserId={setUserId ? setUserId : {}}
+                handleCartItemForCheckoutBox={handleCartItemForCheckoutBox}
+                handleSuccessfulCreateSnackbar={handleSuccessfulCreateSnackbar}
+                handleFailedSnackbar={handleFailedSnackbar}
+              />
+            </Route>
+
             <Route path="/targets/target/:target">
               <TargetProductDetailPage
+                token={token}
+                userId={userId}
+                setToken={setToken ? setToken : {}}
+                setUserId={setUserId ? setUserId : {}}
+                handleCartItemForCheckoutBox={handleCartItemForCheckoutBox}
+                handleSuccessfulCreateSnackbar={handleSuccessfulCreateSnackbar}
+                handleFailedSnackbar={handleFailedSnackbar}
+              />
+            </Route>
+            <Route path="/targets/credit/:target">
+              <CreditProductDetailPage
                 token={token}
                 userId={userId}
                 setToken={setToken ? setToken : {}}
