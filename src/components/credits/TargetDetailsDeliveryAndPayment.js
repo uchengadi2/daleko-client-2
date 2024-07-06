@@ -29,10 +29,14 @@ import {
   DELETE_CART,
   CREATE_TRANSACTION,
   FETCH_TRANSACTION,
+  CREATE_TARGET,
   EDIT_TARGET,
+  FETCH_TARGETS,
+  CREATE_CONTRIBUTION,
 } from "../../actions/types";
 import Paystack from "./Paystack";
 import Paystack2 from "../../Paystack";
+import PaystackCredit from "./PaystackCredit";
 import history from "../../history";
 import ThankYou from "../thankyou/ThankYou";
 
@@ -48,10 +52,10 @@ const useStyles = makeStyles((theme) => ({
     height: 950,
     width: "100%",
 
-    //marginLeft: "-10px",
+    marginLeft: "-10px",
     //borderRadius: 30,
     marginTop: "2em",
-    marginBottom: "7em",
+    marginBottom: "9em",
     padding: 0,
     backgroundColor: "#FFFFFF",
 
@@ -120,8 +124,9 @@ const useStyles = makeStyles((theme) => ({
     borderRadius: 10,
     height: 40,
     width: 180,
-    marginLeft: 150,
+    marginLeft: 110,
     marginTop: 10,
+    marginBottom: 40,
     color: "white",
     backgroundColor: theme.palette.common.green,
     "&:hover": {
@@ -530,9 +535,7 @@ function TargetDetailsDeliveryAndPayment(props) {
   const [dealRedemptionCode, setDealRedemptionCode] = useState(null);
   const [isCorrectDealRedemptionCode, setIsCorrectDealRedemptionCode] =
     useState(true);
-  const [isReadyToPlaceOrder, setIsReadyToPlaceOrder] = useState(
-    currentInstallmentRound === 0 ? true : false
-  );
+
   const [contributedAmount, setContributedAmount] = useState(0);
   const [canMakeContribution, setCanMakeContribution] = useState(false);
   const [minimumContributableAmount, setMinimumContributableAmount] =
@@ -564,6 +567,8 @@ function TargetDetailsDeliveryAndPayment(props) {
   const [willCollectDeliveryCharges, setWillCollectDeliveryCharges] =
     useState(false);
 
+  const [isReadyToPlaceOrder, setIsReadyToPlaceOrder] = useState(false);
+
   const dispatch = useDispatch();
 
   const classes = useStyles();
@@ -584,19 +589,21 @@ function TargetDetailsDeliveryAndPayment(props) {
 
     if (currentInstallmentRound === 0) {
       if (includeGatewayChargesInPrice) {
-        amount =
-          dealInitialPercentageContribution * productCost +
-          (gatewayFixedCharge + gatewayRateCharge * productCost);
+        amount = dealInitialPercentageContribution * productCost;
+        // (gatewayFixedCharge +
+        //   gatewayRateCharge *
+        //     productCost *
+        //     dealInitialPercentageContribution);
       } else {
         amount = dealInitialPercentageContribution * productCost;
       }
     } else {
       if (includeGatewayChargesInPrice) {
-        amount =
+        const sum =
           ((1 - dealInitialPercentageContribution) /
             (dealNumberOfInstallments - 1)) *
-            productCost +
-          (gatewayFixedCharge + gatewayRateCharge * productCost);
+          productCost;
+        amount = sum + (gatewayFixedCharge + gatewayRateCharge * sum);
       } else {
         amount =
           ((1 - dealInitialPercentageContribution) /
@@ -677,10 +684,19 @@ function TargetDetailsDeliveryAndPayment(props) {
   }, []);
 
   useEffect(() => {
-    if (amountAlreadyContributed < productCost) {
-      setIsReadyToPlaceOrder(false);
-    } else {
+    // if (currentInstallmentRound === 0) {
+    //   setIsReadyToPlaceOrder(true);
+    // } else {
+    //   if (amountAlreadyContributed < productCost) {
+    //     setIsReadyToPlaceOrder(false);
+    //   } else {
+    //     setIsReadyToPlaceOrder(true);
+    //   }
+    // }
+    if (currentInstallmentRound === 0) {
       setIsReadyToPlaceOrder(true);
+    } else {
+      setIsReadyToPlaceOrder(false);
     }
   }, [productCost, amountAlreadyContributed]);
 
@@ -922,6 +938,21 @@ function TargetDetailsDeliveryAndPayment(props) {
 
     fetchData().catch(console.error);
   }, [props]);
+
+  useEffect(() => {
+    // setContributedAmount(amountDueForContribution);
+    // if (amountDueForContribution > 0) {
+    //   setCanMakeContribution(true);
+    // } else {
+    //   setCanMakeContribution(false);
+    // }
+
+    if (currentInstallmentRound === 0) {
+      setCanMakeContribution(false);
+    } else {
+      setCanMakeContribution(true);
+    }
+  }, [currentInstallmentRound]);
 
   //destination sales tax
 
@@ -1567,9 +1598,6 @@ function TargetDetailsDeliveryAndPayment(props) {
 
   const vatForDispplay = vat.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,");
 
-  // const amountForPayment = +totalOrderCost.toFixed(2) * 100;
-  const amountForPayment = +contributedAmount.toFixed(2) * 100;
-
   let amountDueForContribution = 0;
 
   if (currentInstallmentRound === 0) {
@@ -1613,9 +1641,25 @@ function TargetDetailsDeliveryAndPayment(props) {
     amountDueForContribution = 0;
   }
 
+  let newContributedAmount = 0;
+
+  if (currentInstallmentRound === 0) {
+    const sum = contributedAmount + totalDeliveryCost;
+
+    newContributedAmount = sum + (gatewayFixedCharge + gatewayRateCharge * sum);
+  } else {
+    newContributedAmount = contributedAmount;
+  }
+  // const amountForPayment = +totalOrderCost.toFixed(2) * 100;
+  const amountForPayment = +newContributedAmount.toFixed(2) * 100;
+
   const amountDueForContributionForDisplay = amountDueForContribution
     .toFixed(2)
     .replace(/\d(?=(\d{3})+\.)/g, "$&,");
+
+  // const amountDueForContributionForDisplay = newContributedAmount
+  //   .toFixed(2)
+  //   .replace(/\d(?=(\d{3})+\.)/g, "$&,");
 
   const buttonContent = () => {
     return <React.Fragment>Place Order</React.Fragment>;
@@ -1663,15 +1707,15 @@ function TargetDetailsDeliveryAndPayment(props) {
   //   }
   // }, [currentInstallmentRound, dealNumberOfInstallments, contributedAmount]);
 
-  useEffect(() => {
-    setContributedAmount(amountDueForContribution);
+  // useEffect(() => {
+  //   setContributedAmount(amountDueForContribution);
+  //   if (amountDueForContribution > 0) {
+  //     setCanMakeContribution(true);
+  //   } else {
+  //     setCanMakeContribution(false);
+  //   }
 
-    if (amountDueForContribution > 0) {
-      setCanMakeContribution(true);
-    } else {
-      setCanMakeContribution(false);
-    }
-  }, [amountDueForContribution]);
+  // }, [amountDueForContribution]);
 
   const renderAmountToBeContributedField = () => {
     return (
@@ -1680,7 +1724,7 @@ function TargetDetailsDeliveryAndPayment(props) {
         helperText={
           !includeGatewayChargesInPrice
             ? "Amount Due for Contribution"
-            : `Amount Due for Contribution (Includes Part of Delivery Cost and Payment Gateway charges of =N=${
+            : `Amount Due for Contribution (Includes Payment Gateway charges of =N=${
                 dealNumberOfInstallments === 1
                   ? chargesWhenDealNumberOfInstallmentsIsOne
                   : currentInstallmentRound === 0
@@ -2284,6 +2328,7 @@ function TargetDetailsDeliveryAndPayment(props) {
       requestDealRedemptionCode,
       //showDealDeliveryCost,
       isAContributoryDeal: true,
+      isACreditDeal: true,
       dealOwner,
       dealOwnerEntity,
       dealInitialPercentageContribution,
@@ -2403,7 +2448,6 @@ function TargetDetailsDeliveryAndPayment(props) {
               gatewayFixedCharge,
               gatewayRateCharge,
             };
-            console.log("data:", data);
 
             if (data) {
               const createForm = async () => {
@@ -2447,39 +2491,127 @@ function TargetDetailsDeliveryAndPayment(props) {
 
     //update the target status
 
+    // const targetData = {
+    //   dealStatus: "inactive",
+    // };
+
+    // //change the status of this cart items
+
+    // const createForm = async () => {
+    //   api.defaults.headers.common["Authorization"] = `Bearer ${props.token}`;
+    //   const response2 = await api.patch(`/targets/${targetId}`, targetData);
+
+    //   if (response2.data.status === "success") {
+    //     dispatch({
+    //       type: EDIT_TARGET,
+    //       payload: response2.data.data.data,
+    //     });
+
+    //     // setLoading(false);
+
+    //     //props.renderPageUpdate();
+    //   } else {
+    //     props.handleFailedSnackbar("Something went wrong, please try again!!!");
+    //   }
+    // };
+    // createForm().catch((err) => {
+    //   props.handleFailedSnackbar();
+    //   console.log("err:", err.message);
+    // });
+
     const targetData = {
+      amountAlreadyContributed: 0,
+      currentInstallmentRound: currentInstallmentRound + 1,
       dealStatus: "inactive",
+      paymentStatus: "incomplete",
     };
 
-    //change the status of this cart items
+    if (targetData) {
+      const createForm = async () => {
+        api.defaults.headers.common["Authorization"] = `Bearer ${props.token}`;
+        const response = await api.patch(`/targets/${targetId}`, targetData);
 
-    const createForm = async () => {
-      api.defaults.headers.common["Authorization"] = `Bearer ${props.token}`;
-      const response2 = await api.patch(`/targets/${targetId}`, targetData);
+        if (response.data.status === "success") {
+          dispatch({
+            type: EDIT_TARGET,
+            payload: response.data.data.data,
+          });
+          const contributionData = {
+            refNumber: orderNumber,
+            product: product,
+            target: targetId,
+            contributedAmount: 0,
+            targetHolder: targetHolder,
+            dealCode: dealCode,
+            dealExpiryDate: dealExpiryDate,
+            dealType: dealType,
+            dealStatus: dealStatus,
+            dealDeliveryMode: dealDeliveryMode,
+            productType: productType,
+            salesPreference: salesPreference,
+            dealPaymentPreference: dealPaymentPreference,
+            dealOwner: dealOwner,
+            dealOwnerEntity: dealOwnerEntity,
+            paymentStatus: "source-from-third-party",
+            modeOfPayment: "to-be-determined",
+            postedBy: props.userId,
+            installementRound: currentInstallmentRound,
+            includeGatewayChargesInPrice: includeGatewayChargesInPrice,
+            gatewayFixedCharge: gatewayFixedCharge,
+            gatewayRateCharge: gatewayRateCharge,
+          };
 
-      if (response2.data.status === "success") {
-        dispatch({
-          type: EDIT_TARGET,
-          payload: response2.data.data.data,
-        });
+          if (contributionData) {
+            const createConForm = async () => {
+              api.defaults.headers.common[
+                "Authorization"
+              ] = `Bearer ${props.token}`;
+              const response2 = await api.post(
+                `/contributions`,
+                contributionData
+              );
 
-        // setLoading(false);
+              if (response2.data.status === "success") {
+                dispatch({
+                  type: CREATE_CONTRIBUTION,
+                  payload: response2.data.data.data,
+                });
 
-        //props.renderPageUpdate();
-      } else {
-        props.handleFailedSnackbar("Something went wrong, please try again!!!");
-      }
-    };
-    createForm().catch((err) => {
-      props.handleFailedSnackbar();
-      console.log("err:", err.message);
-    });
+                // setLoading(false);
+
+                props.renderPageUpdate();
+              } else {
+                props.handleFailedSnackbar(
+                  "Something went wrong, please try again!!!"
+                );
+              }
+            };
+            createConForm().catch((err) => {
+              //props.handleFailedSnackbar();
+              console.log("err:", err.message);
+            });
+          } else {
+            //props.handleFailedSnackbar("Something went wrong, please try again!!!");
+          }
+
+          //setLoading(false);
+        } else {
+          // props.handleFailedSnackbar(
+          //   "Something went wrong, please try again!!!"
+          // );
+        }
+      };
+      createForm().catch((err) => {
+        //props.handleFailedSnackbar();
+        console.log("err:", err.message);
+      });
+    }
 
     props.handleSuccessfulCreateSnackbar(
       `We have recieved you Orders. We will process it and get back to you as soon as possible. Thank you always for your patronage.`
     );
     // history.push(`/thankyou/orders/${orderNumber}`);
-    history.push(`/targets/targets`);
+    history.push(`/targets/credits`);
   };
 
   const originSalesTaxRate = prevailingSalesTax;
@@ -2504,6 +2636,7 @@ function TargetDetailsDeliveryAndPayment(props) {
         orderNumber={orderNumber}
         amountAlreadyContributed={amountAlreadyContributed}
         currentInstallmentRound={currentInstallmentRound}
+        dealNumberOfInstallments={dealNumberOfInstallments}
         includeGatewayChargesInPrice={includeGatewayChargesInPrice}
         gatewayFixedCharge={gatewayFixedCharge}
         gatewayRateCharge={gatewayRateCharge}
@@ -2533,6 +2666,7 @@ function TargetDetailsDeliveryAndPayment(props) {
         handleSuccessfulCreateSnackbar={props.handleSuccessfulCreateSnackbar}
         handleFailedSnackbar={props.handleFailedSnackbar}
         renderPageUpdate={props.renderPageUpdate}
+        isACreditDeal={true}
       />
     );
   };
@@ -2602,21 +2736,54 @@ function TargetDetailsDeliveryAndPayment(props) {
       dealPaymentPreference,
       dealRedemptionCode,
       requestDealRedemptionCode,
+
+      isAContributoryDeal: true,
+      isACreditDeal: true,
+      dealOwner,
+      dealOwnerEntity,
+      dealInitialPercentageContribution,
+      dealMaximumInstallmentAllowed: dealNumberOfInstallments,
+      includeGatewayChargesInPrice,
+      gatewayFixedCharge,
+      gatewayRateCharge,
     };
     return (
-      <Paystack2
+      <PaystackCredit
         email={email}
         amount={parseInt(amount)}
-        text={"Make Delivery Payment"}
+        text={"Place Order"}
         orderNumber={orderNumber}
+        amountAlreadyContributed={amountAlreadyContributed}
+        currentInstallmentRound={currentInstallmentRound}
+        includeGatewayChargesInPrice={includeGatewayChargesInPrice}
+        gatewayFixedCharge={gatewayFixedCharge}
+        gatewayRateCharge={gatewayRateCharge}
+        contributedAmount={contributedAmount}
+        dealStatus={dealStatus}
+        dealCode={dealCode}
+        dealDeliveryMode={dealDeliveryMode}
+        dealType={dealType}
+        salesPreference={salesPreference}
+        dealPaymentPreference={dealPaymentPreference}
+        dealOwnerEntity={dealOwnerEntity}
+        paymentStatus={"unconfirmed"}
+        product={product}
+        targetHolder={targetHolder}
+        productType={productType}
+        dealOwner={dealOwner}
+        dealExpiryDate={dealExpiryDate}
+        targetId={targetId}
+        modeOfPayment="online"
         data={data}
         productList={props.productList}
         policy={props.policy}
         prevailingSalesTax={prevailingSalesTax}
         destinationSalesTax={destinationSalesTax}
         token={props.token}
+        userId={userId}
         handleSuccessfulCreateSnackbar={props.handleSuccessfulCreateSnackbar}
         handleFailedSnackbar={props.handleFailedSnackbar}
+        renderPageUpdate={props.renderPageUpdate}
       />
     );
   };
@@ -3760,7 +3927,6 @@ function TargetDetailsDeliveryAndPayment(props) {
                             {vatForDispplay}
                           </Typography>
                         )}
-
                         {deliveryMode && (
                           <Typography
                             style={{
@@ -3782,7 +3948,6 @@ function TargetDetailsDeliveryAndPayment(props) {
                             {totalDeliveryCostForDisplay}
                           </Typography>
                         )}
-
                         <Typography
                           style={{
                             //width: 200,
@@ -3792,10 +3957,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                             marginLeft: 10,
                           }}
                         >
-                          Total Co0st:{getCurrencyCode()}
+                          Total Cost:{getCurrencyCode()}
                           {totalOrderCostForDisplay}
                         </Typography>
-
                         {deliveryMode === "standard" && (
                           <Typography className={classes.bankDetails}>
                             {`Your order will be delivered in ${daysToStandardDelivery} from the day it was placed`}
@@ -3816,11 +3980,9 @@ function TargetDetailsDeliveryAndPayment(props) {
                             {`Your can pick up your order from any of our locations that is nearest to you. Call our contact numbers for guidance `}
                           </Typography>
                         )}
-
                         {!isReadyToPlaceOrder && (
                           <Container>{renderPaymentMethodField()}</Container>
                         )}
-
                         {!isOnlinePayment &&
                           paymentMethod === "payOnDelivery" && (
                             <Button
@@ -3835,7 +3997,6 @@ function TargetDetailsDeliveryAndPayment(props) {
                               )}
                             </Button>
                           )}
-
                         {!isOnlinePayment && paymentMethod === "pickup" && (
                           <Button
                             variant="contained"
@@ -3854,7 +4015,12 @@ function TargetDetailsDeliveryAndPayment(props) {
                             {renderAmountToBeContributedField()}
                           </Container>
                         )}
-
+                        {isReadyToPlaceOrder &&
+                          currentInstallmentRound === 0 && (
+                            <Container>
+                              {renderAmountToBeContributedField()}
+                            </Container>
+                          )}
                         {isOnlinePayment &&
                           !isReadyToPlaceOrder &&
                           !canMakeContribution && (
@@ -3870,7 +4036,6 @@ function TargetDetailsDeliveryAndPayment(props) {
                               )}
                             </Button>
                           )}
-
                         {isOnlinePayment &&
                           // recipientName &&
                           // recipientPhoneNumber &&
@@ -3887,7 +4052,6 @@ function TargetDetailsDeliveryAndPayment(props) {
                             customerPhoneNumber,
                             customerName
                           )}
-
                         {isOnlinePayment &&
                           isReadyToPlaceOrder &&
                           !deliveryMode && (
@@ -3903,8 +4067,27 @@ function TargetDetailsDeliveryAndPayment(props) {
                               )}
                             </Button>
                           )}
-
                         {isOnlinePayment &&
+                          recipientName &&
+                          recipientPhoneNumber &&
+                          recipientAddress &&
+                          country &&
+                          state &&
+                          city &&
+                          deliveryMode &&
+                          isReadyToPlaceOrder && (
+                            <Container>
+                              {renderOnlinePaymentForOrders(
+                                customerEmail,
+                                amountForPayment,
+                                orderNumber,
+                                customerPhoneNumber,
+                                customerName
+                              )}
+                            </Container>
+                          )}
+
+                        {/* {isOnlinePayment &&
                           recipientName &&
                           recipientPhoneNumber &&
                           recipientAddress &&
@@ -3924,23 +4107,6 @@ function TargetDetailsDeliveryAndPayment(props) {
                                 buttonContent()
                               )}
                             </Button>
-                          )}
-
-                        {/* {isOnlinePayment &&
-                          recipientName &&
-                          recipientPhoneNumber &&
-                          recipientAddress &&
-                          country &&
-                          state &&
-                          city &&
-                          deliveryMode &&
-                          isReadyToPlaceOrder &&
-                          renderOnlinePaymentForOrders(
-                            customerEmail,
-                            amountForPayment,
-                            orderNumber,
-                            customerPhoneNumber,
-                            customerName
                           )} */}
                       </Container>
                     ) : (
@@ -4122,7 +4288,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                               )}
                             </Button>
                           )}
-                        {recipientName &&
+                        {/* {recipientName &&
                           isReadyToPlaceOrder &&
                           recipientPhoneNumber &&
                           recipientAddress &&
@@ -4141,6 +4307,26 @@ function TargetDetailsDeliveryAndPayment(props) {
                                 buttonClaimContent()
                               )}
                             </Button>
+                          )} */}
+
+                        {isOnlinePayment &&
+                          recipientName &&
+                          recipientPhoneNumber &&
+                          recipientAddress &&
+                          country &&
+                          state &&
+                          city &&
+                          deliveryMode &&
+                          isReadyToPlaceOrder && (
+                            <Container>
+                              {renderOnlinePaymentForOrders(
+                                customerEmail,
+                                amountForPayment,
+                                orderNumber,
+                                customerPhoneNumber,
+                                customerName
+                              )}
+                            </Container>
                           )}
                       </Container>
                     )}
@@ -4277,6 +4463,13 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Container>
                         )}
 
+                        {isReadyToPlaceOrder &&
+                          currentInstallmentRound === 0 && (
+                            <Container>
+                              {renderAmountToBeContributedField()}
+                            </Container>
+                          )}
+
                         {isOnlinePayment &&
                           !isReadyToPlaceOrder &&
                           !canMakeContribution && (
@@ -4325,21 +4518,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                               )}
                             </Button>
                           )}
-                        {/* {isOnlinePayment &&
-                          recipientName &&
-                          recipientPhoneNumber &&
-                          recipientAddress &&
-                          country &&
-                          state &&
-                          city &&
-                          deliveryMode &&
-                          renderOnlinePayment(
-                            customerEmail,
-                            amountForPayment,
-                            orderNumber,
-                            customerPhoneNumber,
-                            customerName
-                          )} */}
+
                         {isOnlinePayment &&
                           recipientName &&
                           recipientPhoneNumber &&
@@ -4492,6 +4671,13 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Container>
                         )}
 
+                        {isReadyToPlaceOrder &&
+                          currentInstallmentRound === 0 && (
+                            <Container>
+                              {renderAmountToBeContributedField()}
+                            </Container>
+                          )}
+
                         {isOnlinePayment &&
                           !isReadyToPlaceOrder &&
                           !canMakeContribution && (
@@ -4540,6 +4726,27 @@ function TargetDetailsDeliveryAndPayment(props) {
                               )}
                             </Button>
                           )}
+                        {/* {recipientName &&
+                          isReadyToPlaceOrder &&
+                          recipientPhoneNumber &&
+                          recipientAddress &&
+                          country &&
+                          state &&
+                          city &&
+                          deliveryMode && (
+                            <Button
+                              variant="contained"
+                              className={classes.submitButton}
+                              onClick={onSubmit}
+                            >
+                              {loading ? (
+                                <CircularProgress size={30} color="inherit" />
+                              ) : (
+                                buttonClaimContent()
+                              )}
+                            </Button>
+                          )} */}
+
                         {recipientName &&
                           isReadyToPlaceOrder &&
                           recipientPhoneNumber &&
@@ -4693,6 +4900,13 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Container>
                         )}
 
+                        {isReadyToPlaceOrder &&
+                          currentInstallmentRound === 0 && (
+                            <Container>
+                              {renderAmountToBeContributedField()}
+                            </Container>
+                          )}
+
                         {isOnlinePayment &&
                           !isReadyToPlaceOrder &&
                           !canMakeContribution && (
@@ -4777,6 +4991,26 @@ function TargetDetailsDeliveryAndPayment(props) {
                               )}
                             </Button>
                           )}
+
+                        {/* {isOnlinePayment &&
+                          recipientName &&
+                          recipientPhoneNumber &&
+                          recipientAddress &&
+                          country &&
+                          state &&
+                          city &&
+                          deliveryMode &&
+                          isReadyToPlaceOrder && (
+                            <Container>
+                              {renderOnlinePaymentForOrders(
+                                customerEmail,
+                                amountForPayment,
+                                orderNumber,
+                                customerPhoneNumber,
+                                customerName
+                              )}
+                            </Container>
+                          )} */}
                       </Container>
                     ) : (
                       <Container>
@@ -4908,6 +5142,13 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Container>
                         )}
 
+                        {isReadyToPlaceOrder &&
+                          currentInstallmentRound === 0 && (
+                            <Container>
+                              {renderAmountToBeContributedField()}
+                            </Container>
+                          )}
+
                         {isOnlinePayment &&
                           !isReadyToPlaceOrder &&
                           !canMakeContribution && (
@@ -4976,6 +5217,26 @@ function TargetDetailsDeliveryAndPayment(props) {
                               )}
                             </Button>
                           )}
+
+                        {/* {isOnlinePayment &&
+                          recipientName &&
+                          recipientPhoneNumber &&
+                          recipientAddress &&
+                          country &&
+                          state &&
+                          city &&
+                          deliveryMode &&
+                          isReadyToPlaceOrder && (
+                            <Container>
+                              {renderOnlinePaymentForOrders(
+                                customerEmail,
+                                amountForPayment,
+                                orderNumber,
+                                customerPhoneNumber,
+                                customerName
+                              )}
+                            </Container>
+                          )} */}
                       </Container>
                     )}
                   </Box>
@@ -5110,6 +5371,13 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Container>
                         )}
 
+                        {isReadyToPlaceOrder &&
+                          currentInstallmentRound === 0 && (
+                            <Container>
+                              {renderAmountToBeContributedField()}
+                            </Container>
+                          )}
+
                         {isOnlinePayment &&
                           !isReadyToPlaceOrder &&
                           !canMakeContribution && (
@@ -5195,6 +5463,26 @@ function TargetDetailsDeliveryAndPayment(props) {
                               )}
                             </Button>
                           )}
+
+                        {/* {isOnlinePayment &&
+                          recipientName &&
+                          recipientPhoneNumber &&
+                          recipientAddress &&
+                          country &&
+                          state &&
+                          city &&
+                          deliveryMode &&
+                          isReadyToPlaceOrder && (
+                            <Container>
+                              {renderOnlinePaymentForOrders(
+                                customerEmail,
+                                amountForPayment,
+                                orderNumber,
+                                customerPhoneNumber,
+                                customerName
+                              )}
+                            </Container>
+                          )} */}
                       </Container>
                     ) : (
                       <Container>
@@ -5326,6 +5614,13 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Container>
                         )}
 
+                        {isReadyToPlaceOrder &&
+                          currentInstallmentRound === 0 && (
+                            <Container>
+                              {renderAmountToBeContributedField()}
+                            </Container>
+                          )}
+
                         {isOnlinePayment &&
                           !isReadyToPlaceOrder &&
                           !canMakeContribution && (
@@ -5395,6 +5690,26 @@ function TargetDetailsDeliveryAndPayment(props) {
                               )}
                             </Button>
                           )}
+
+                        {/* {isOnlinePayment &&
+                          recipientName &&
+                          recipientPhoneNumber &&
+                          recipientAddress &&
+                          country &&
+                          state &&
+                          city &&
+                          deliveryMode &&
+                          isReadyToPlaceOrder && (
+                            <Container>
+                              {renderOnlinePaymentForOrders(
+                                customerEmail,
+                                amountForPayment,
+                                orderNumber,
+                                customerPhoneNumber,
+                                customerName
+                              )}
+                            </Container>
+                          )} */}
                       </Container>
                     )}
                   </Box>
@@ -5544,6 +5859,13 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Container>
                         )}
 
+                        {isReadyToPlaceOrder &&
+                          currentInstallmentRound === 0 && (
+                            <Container>
+                              {renderAmountToBeContributedField()}
+                            </Container>
+                          )}
+
                         {isOnlinePayment &&
                           !isReadyToPlaceOrder &&
                           !canMakeContribution && (
@@ -5594,7 +5916,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                               )}
                             </Button>
                           )}
-                        {isOnlinePayment &&
+                        {/* {isOnlinePayment &&
                           isBtnVisible &&
                           isReadyToPlaceOrder && (
                             <Button
@@ -5608,6 +5930,26 @@ function TargetDetailsDeliveryAndPayment(props) {
                                 buttonContent()
                               )}
                             </Button>
+                          )} */}
+
+                        {isOnlinePayment &&
+                          isBtnVisible &&
+                          // recipientPhoneNumber &&
+                          // recipientAddress &&
+                          // country &&
+                          // state &&
+                          // city &&
+                          // deliveryMode &&
+                          isReadyToPlaceOrder && (
+                            <Container>
+                              {renderOnlinePaymentForOrders(
+                                customerEmail,
+                                amountForPayment,
+                                orderNumber,
+                                customerPhoneNumber,
+                                customerName
+                              )}
+                            </Container>
                           )}
                       </Container>
                     ) : (
@@ -5740,6 +6082,13 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Container>
                         )}
 
+                        {isReadyToPlaceOrder &&
+                          currentInstallmentRound === 0 && (
+                            <Container>
+                              {renderAmountToBeContributedField()}
+                            </Container>
+                          )}
+
                         {isOnlinePayment &&
                           !isReadyToPlaceOrder &&
                           !canMakeContribution && (
@@ -5791,7 +6140,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                               )}
                             </Button>
                           )}
-                        {isOnlinePayment &&
+                        {/* {isOnlinePayment &&
                           isBtnVisible &&
                           isReadyToPlaceOrder && (
                             // recipientAddress &&
@@ -5810,6 +6159,20 @@ function TargetDetailsDeliveryAndPayment(props) {
                                 buttonClaimContent()
                               )}
                             </Button>
+                          )} */}
+
+                        {isOnlinePayment &&
+                          isBtnVisible &&
+                          isReadyToPlaceOrder && (
+                            <Container>
+                              {renderOnlinePaymentForOrders(
+                                customerEmail,
+                                amountForPayment,
+                                orderNumber,
+                                customerPhoneNumber,
+                                customerName
+                              )}
+                            </Container>
                           )}
                       </Container>
                     )}
@@ -7213,7 +7576,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                               )}
                             </Button>
                           )}
-                        {isOnlinePayment &&
+                        {/* {isOnlinePayment &&
                           isBtnVisible &&
                           isReadyToPlaceOrder && (
                             <Button
@@ -7227,6 +7590,20 @@ function TargetDetailsDeliveryAndPayment(props) {
                                 buttonContent()
                               )}
                             </Button>
+                          )} */}
+
+                        {isOnlinePayment &&
+                          isBtnVisible &&
+                          isReadyToPlaceOrder && (
+                            <Container>
+                              {renderOnlinePaymentForOrders(
+                                customerEmail,
+                                amountForPayment,
+                                orderNumber,
+                                customerPhoneNumber,
+                                customerName
+                              )}
+                            </Container>
                           )}
                       </Container>
                     ) : (
@@ -7407,7 +7784,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                               )}
                             </Button>
                           )}
-                        {isOnlinePayment &&
+                        {/* {isOnlinePayment &&
                           isBtnVisible &&
                           isReadyToPlaceOrder &&
                           recipientName &&
@@ -7428,6 +7805,22 @@ function TargetDetailsDeliveryAndPayment(props) {
                                 buttonClaimContent()
                               )}
                             </Button>
+                          )} */}
+
+                        {isOnlinePayment &&
+                          recipientName &&
+                          recipientPhoneNumber &&
+                          isBtnVisible &&
+                          isReadyToPlaceOrder && (
+                            <Container>
+                              {renderOnlinePaymentForOrders(
+                                customerEmail,
+                                amountForPayment,
+                                orderNumber,
+                                customerPhoneNumber,
+                                customerName
+                              )}
+                            </Container>
                           )}
                       </Container>
                     )}
@@ -8772,6 +9165,13 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Container>
                         )}
 
+                        {isReadyToPlaceOrder &&
+                          currentInstallmentRound === 0 && (
+                            <Container>
+                              {renderAmountToBeContributedField()}
+                            </Container>
+                          )}
+
                         {isOnlinePayment &&
                           !isReadyToPlaceOrder &&
                           !canMakeContribution && (
@@ -8816,7 +9216,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                               )}
                             </Button>
                           )}
-                        {isOnlinePayment &&
+                        {/* {isOnlinePayment &&
                           isReadyToPlaceOrder &&
                           entityLocation && (
                             <Button
@@ -8830,6 +9230,20 @@ function TargetDetailsDeliveryAndPayment(props) {
                                 buttonContent()
                               )}
                             </Button>
+                          )} */}
+
+                        {isOnlinePayment &&
+                          entityLocation &&
+                          isReadyToPlaceOrder && (
+                            <Container>
+                              {renderOnlinePaymentForOrders(
+                                customerEmail,
+                                amountForPayment,
+                                orderNumber,
+                                customerPhoneNumber,
+                                customerName
+                              )}
+                            </Container>
                           )}
                       </Container>
                     ) : (
@@ -8962,6 +9376,13 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Container>
                         )}
 
+                        {isReadyToPlaceOrder &&
+                          currentInstallmentRound === 0 && (
+                            <Container>
+                              {renderAmountToBeContributedField()}
+                            </Container>
+                          )}
+
                         {isOnlinePayment &&
                           !isReadyToPlaceOrder &&
                           !canMakeContribution && (
@@ -9010,7 +9431,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                               )}
                             </Button>
                           )}
-                        {isOnlinePayment &&
+                        {/* {isOnlinePayment &&
                           recipientName &&
                           recipientPhoneNumber &&
                           isReadyToPlaceOrder &&
@@ -9026,6 +9447,22 @@ function TargetDetailsDeliveryAndPayment(props) {
                                 buttonClaimContent()
                               )}
                             </Button>
+                          )} */}
+
+                        {isOnlinePayment &&
+                          recipientName &&
+                          recipientPhoneNumber &&
+                          entityLocation &&
+                          isReadyToPlaceOrder && (
+                            <Container>
+                              {renderOnlinePaymentForOrders(
+                                customerEmail,
+                                amountForPayment,
+                                orderNumber,
+                                customerPhoneNumber,
+                                customerName
+                              )}
+                            </Container>
                           )}
                       </Container>
                     )}
@@ -10366,6 +10803,13 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Container>
                         )}
 
+                        {isReadyToPlaceOrder &&
+                          currentInstallmentRound === 0 && (
+                            <Container>
+                              {renderAmountToBeContributedField()}
+                            </Container>
+                          )}
+
                         {isOnlinePayment &&
                           !isReadyToPlaceOrder &&
                           !canMakeContribution && (
@@ -10416,7 +10860,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                               )}
                             </Button>
                           )}
-                        {isOnlinePayment &&
+                        {/* {isOnlinePayment &&
                           deliveryMode &&
                           isReadyToPlaceOrder && (
                             <Button
@@ -10430,6 +10874,26 @@ function TargetDetailsDeliveryAndPayment(props) {
                                 buttonContent()
                               )}
                             </Button>
+                          )} */}
+
+                        {isOnlinePayment &&
+                          // recipientName &&
+                          // recipientPhoneNumber &&
+                          // recipientAddress &&
+                          // country &&
+                          // state &&
+                          // city &&
+                          deliveryMode &&
+                          isReadyToPlaceOrder && (
+                            <Container>
+                              {renderOnlinePaymentForOrders(
+                                customerEmail,
+                                amountForPayment,
+                                orderNumber,
+                                customerPhoneNumber,
+                                customerName
+                              )}
+                            </Container>
                           )}
                       </Container>
                     ) : (
@@ -10562,6 +11026,13 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Container>
                         )}
 
+                        {isReadyToPlaceOrder &&
+                          currentInstallmentRound === 0 && (
+                            <Container>
+                              {renderAmountToBeContributedField()}
+                            </Container>
+                          )}
+
                         {isOnlinePayment &&
                           !isReadyToPlaceOrder &&
                           !canMakeContribution && (
@@ -10612,7 +11083,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                               )}
                             </Button>
                           )}
-                        {isOnlinePayment &&
+                        {/* {isOnlinePayment &&
                           isReadyToPlaceOrder &&
                           recipientName &&
                           recipientPhoneNumber &&
@@ -10631,6 +11102,26 @@ function TargetDetailsDeliveryAndPayment(props) {
                                 buttonClaimContent()
                               )}
                             </Button>
+                          )} */}
+
+                        {isOnlinePayment &&
+                          // recipientName &&
+                          // recipientPhoneNumber &&
+                          // recipientAddress &&
+                          // country &&
+                          // state &&
+                          // city &&
+                          deliveryMode &&
+                          isReadyToPlaceOrder && (
+                            <Container>
+                              {renderOnlinePaymentForOrders(
+                                customerEmail,
+                                amountForPayment,
+                                orderNumber,
+                                customerPhoneNumber,
+                                customerName
+                              )}
+                            </Container>
                           )}
                       </Container>
                     )}
@@ -12024,6 +12515,13 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Container>
                         )}
 
+                        {isReadyToPlaceOrder &&
+                          currentInstallmentRound === 0 && (
+                            <Container>
+                              {renderAmountToBeContributedField()}
+                            </Container>
+                          )}
+
                         {isOnlinePayment &&
                           !isReadyToPlaceOrder &&
                           !canMakeContribution && (
@@ -12072,23 +12570,8 @@ function TargetDetailsDeliveryAndPayment(props) {
                               )}
                             </Button>
                           )}
-                        {/* {isOnlinePayment &&
-                          recipientName &&
-                          recipientPhoneNumber &&
-                          recipientAddress &&
-                          country &&
-                          state &&
-                          city &&
-                          deliveryMode &&
-                          renderOnlinePayment(
-                            customerEmail,
-                            amountForPayment,
-                            orderNumber,
-                            customerPhoneNumber,
-                            customerName
-                          )} */}
 
-                        {isOnlinePayment &&
+                        {/* {isOnlinePayment &&
                           recipientName &&
                           recipientPhoneNumber &&
                           recipientAddress &&
@@ -12108,6 +12591,26 @@ function TargetDetailsDeliveryAndPayment(props) {
                                 buttonContent()
                               )}
                             </Button>
+                          )} */}
+
+                        {isOnlinePayment &&
+                          recipientName &&
+                          recipientPhoneNumber &&
+                          recipientAddress &&
+                          country &&
+                          state &&
+                          city &&
+                          deliveryMode &&
+                          isReadyToPlaceOrder && (
+                            <Container>
+                              {renderOnlinePaymentForOrders(
+                                customerEmail,
+                                amountForPayment,
+                                orderNumber,
+                                customerPhoneNumber,
+                                customerName
+                              )}
+                            </Container>
                           )}
                       </Container>
                     ) : (
@@ -12240,6 +12743,13 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Container>
                         )}
 
+                        {isReadyToPlaceOrder &&
+                          currentInstallmentRound === 0 && (
+                            <Container>
+                              {renderAmountToBeContributedField()}
+                            </Container>
+                          )}
+
                         {isOnlinePayment &&
                           !isReadyToPlaceOrder &&
                           !canMakeContribution && (
@@ -12288,7 +12798,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                               )}
                             </Button>
                           )}
-                        {isOnlinePayment &&
+                        {/* {isOnlinePayment &&
                           isReadyToPlaceOrder &&
                           recipientName &&
                           recipientPhoneNumber &&
@@ -12308,6 +12818,26 @@ function TargetDetailsDeliveryAndPayment(props) {
                                 buttonClaimContent()
                               )}
                             </Button>
+                          )} */}
+
+                        {isOnlinePayment &&
+                          recipientName &&
+                          recipientPhoneNumber &&
+                          recipientAddress &&
+                          country &&
+                          state &&
+                          city &&
+                          deliveryMode &&
+                          isReadyToPlaceOrder && (
+                            <Container>
+                              {renderOnlinePaymentForOrders(
+                                customerEmail,
+                                amountForPayment,
+                                orderNumber,
+                                customerPhoneNumber,
+                                customerName
+                              )}
+                            </Container>
                           )}
                       </Container>
                     )}
@@ -13718,6 +14248,13 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Container>
                         )}
 
+                        {isReadyToPlaceOrder &&
+                          currentInstallmentRound === 0 && (
+                            <Container>
+                              {renderAmountToBeContributedField()}
+                            </Container>
+                          )}
+
                         {isOnlinePayment &&
                           !isReadyToPlaceOrder &&
                           !canMakeContribution && (
@@ -13778,7 +14315,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                             customerPhoneNumber,
                             customerName
                           )} */}
-                        {isOnlinePayment &&
+                        {/* {isOnlinePayment &&
                           isBtnVisible &&
                           isReadyToPlaceOrder && (
                             <Button
@@ -13792,6 +14329,19 @@ function TargetDetailsDeliveryAndPayment(props) {
                                 buttonContent()
                               )}
                             </Button>
+                          )} */}
+                        {isOnlinePayment &&
+                          isBtnVisible &&
+                          isReadyToPlaceOrder && (
+                            <Container>
+                              {renderOnlinePaymentForOrders(
+                                customerEmail,
+                                amountForPayment,
+                                orderNumber,
+                                customerPhoneNumber,
+                                customerName
+                              )}
+                            </Container>
                           )}
                       </Container>
                     ) : (
@@ -13924,6 +14474,13 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Container>
                         )}
 
+                        {isReadyToPlaceOrder &&
+                          currentInstallmentRound === 0 && (
+                            <Container>
+                              {renderAmountToBeContributedField()}
+                            </Container>
+                          )}
+
                         {isOnlinePayment &&
                           !isReadyToPlaceOrder &&
                           !canMakeContribution && (
@@ -13974,7 +14531,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                               )}
                             </Button>
                           )}
-                        {isOnlinePayment &&
+                        {/* {isOnlinePayment &&
                           isBtnVisible &&
                           isReadyToPlaceOrder &&
                           recipientName &&
@@ -13990,6 +14547,22 @@ function TargetDetailsDeliveryAndPayment(props) {
                                 buttonClaimContent()
                               )}
                             </Button>
+                          )} */}
+
+                        {isOnlinePayment &&
+                          isBtnVisible &&
+                          isReadyToPlaceOrder &&
+                          recipientName &&
+                          recipientPhoneNumber && (
+                            <Container>
+                              {renderOnlinePaymentForOrders(
+                                customerEmail,
+                                amountForPayment,
+                                orderNumber,
+                                customerPhoneNumber,
+                                customerName
+                              )}
+                            </Container>
                           )}
                       </Container>
                     )}
@@ -15362,6 +15935,13 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Container>
                         )}
 
+                        {isReadyToPlaceOrder &&
+                          currentInstallmentRound === 0 && (
+                            <Container>
+                              {renderAmountToBeContributedField()}
+                            </Container>
+                          )}
+
                         {isOnlinePayment &&
                           !isReadyToPlaceOrder &&
                           !canMakeContribution && (
@@ -15428,7 +16008,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                             customerName
                           )} */}
 
-                        {isOnlinePayment &&
+                        {/* {isOnlinePayment &&
                           isBtnVisible &&
                           isReadyToPlaceOrder && (
                             <Button
@@ -15442,6 +16022,20 @@ function TargetDetailsDeliveryAndPayment(props) {
                                 buttonContent()
                               )}
                             </Button>
+                          )} */}
+
+                        {isOnlinePayment &&
+                          isBtnVisible &&
+                          isReadyToPlaceOrder && (
+                            <Container>
+                              {renderOnlinePaymentForOrders(
+                                customerEmail,
+                                amountForPayment,
+                                orderNumber,
+                                customerPhoneNumber,
+                                customerName
+                              )}
+                            </Container>
                           )}
                       </Container>
                     ) : (
@@ -15572,6 +16166,13 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Container>
                         )}
 
+                        {isReadyToPlaceOrder &&
+                          currentInstallmentRound === 0 && (
+                            <Container>
+                              {renderAmountToBeContributedField()}
+                            </Container>
+                          )}
+
                         {isOnlinePayment &&
                           !isReadyToPlaceOrder &&
                           !canMakeContribution && (
@@ -15622,7 +16223,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                               )}
                             </Button>
                           )}
-                        {isOnlinePayment &&
+                        {/* {isOnlinePayment &&
                           isBtnVisible &&
                           isReadyToPlaceOrder &&
                           recipientName &&
@@ -15643,6 +16244,22 @@ function TargetDetailsDeliveryAndPayment(props) {
                                 buttonClaimContent()
                               )}
                             </Button>
+                          )} */}
+
+                        {isOnlinePayment &&
+                          isBtnVisible &&
+                          isReadyToPlaceOrder &&
+                          recipientName &&
+                          recipientPhoneNumber && (
+                            <Container>
+                              {renderOnlinePaymentForOrders(
+                                customerEmail,
+                                amountForPayment,
+                                orderNumber,
+                                customerPhoneNumber,
+                                customerName
+                              )}
+                            </Container>
                           )}
                       </Container>
                     )}
@@ -17019,6 +17636,13 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Container>
                         )}
 
+                        {isReadyToPlaceOrder &&
+                          currentInstallmentRound === 0 && (
+                            <Container>
+                              {renderAmountToBeContributedField()}
+                            </Container>
+                          )}
+
                         {isOnlinePayment &&
                           !isReadyToPlaceOrder &&
                           !canMakeContribution && (
@@ -17080,7 +17704,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                             customerPhoneNumber,
                             customerName
                           )} */}
-                        {isOnlinePayment &&
+                        {/* {isOnlinePayment &&
                           recipientName &&
                           recipientPhoneNumber &&
                           entityLocation &&
@@ -17097,6 +17721,23 @@ function TargetDetailsDeliveryAndPayment(props) {
                                 buttonContent()
                               )}
                             </Button>
+                          )} */}
+
+                        {isOnlinePayment &&
+                          recipientName &&
+                          recipientPhoneNumber &&
+                          entityLocation &&
+                          // isBtnVisible &&
+                          isReadyToPlaceOrder && (
+                            <Container>
+                              {renderOnlinePaymentForOrders(
+                                customerEmail,
+                                amountForPayment,
+                                orderNumber,
+                                customerPhoneNumber,
+                                customerName
+                              )}
+                            </Container>
                           )}
                       </Container>
                     ) : (
@@ -17229,6 +17870,13 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Container>
                         )}
 
+                        {isReadyToPlaceOrder &&
+                          currentInstallmentRound === 0 && (
+                            <Container>
+                              {renderAmountToBeContributedField()}
+                            </Container>
+                          )}
+
                         {isOnlinePayment &&
                           !isReadyToPlaceOrder &&
                           !canMakeContribution && (
@@ -17279,7 +17927,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                               )}
                             </Button>
                           )}
-                        {isOnlinePayment &&
+                        {/* {isOnlinePayment &&
                           isReadyToPlaceOrder &&
                           recipientName &&
                           recipientPhoneNumber &&
@@ -17295,6 +17943,22 @@ function TargetDetailsDeliveryAndPayment(props) {
                                 buttonClaimContent()
                               )}
                             </Button>
+                          )} */}
+
+                        {isOnlinePayment &&
+                          isReadyToPlaceOrder &&
+                          recipientName &&
+                          recipientPhoneNumber &&
+                          entityLocation && (
+                            <Container>
+                              {renderOnlinePaymentForOrders(
+                                customerEmail,
+                                amountForPayment,
+                                orderNumber,
+                                customerPhoneNumber,
+                                customerName
+                              )}
+                            </Container>
                           )}
                       </Container>
                     )}
@@ -18678,6 +19342,13 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Container>
                         )}
 
+                        {isReadyToPlaceOrder &&
+                          currentInstallmentRound === 0 && (
+                            <Container>
+                              {renderAmountToBeContributedField()}
+                            </Container>
+                          )}
+
                         {isOnlinePayment &&
                           !isReadyToPlaceOrder &&
                           !canMakeContribution && (
@@ -18728,37 +19399,8 @@ function TargetDetailsDeliveryAndPayment(props) {
                               )}
                             </Button>
                           )}
-                        {/* {isOnlinePayment && isReadyToPlaceOrder && (
-                          <Button
-                            variant="contained"
-                            className={classes.submitEmptyFieldButton}
-                            onClick={
-                              onPrivateDealDecentralizedAtCostEmptyFieldSubmit
-                            }
-                          >
-                            {loading ? (
-                              <CircularProgress size={30} color="inherit" />
-                            ) : (
-                              buttonEmptyFieldsContent()
-                            )}
-                          </Button>
-                        )} */}
-                        {/* {isOnlinePayment &&
-                          recipientName &&
-                          recipientPhoneNumber &&
-                          country &&
-                          entity &&
-                          place &&
-                          deliveryMode &&
-                          renderOnlinePayment(
-                            customerEmail,
-                            amountForPayment,
-                            orderNumber,
-                            customerPhoneNumber,
-                            customerName
-                          )} */}
 
-                        {isOnlinePayment &&
+                        {/* {isOnlinePayment &&
                           recipientName &&
                           recipientPhoneNumber &&
                           country &&
@@ -18777,6 +19419,25 @@ function TargetDetailsDeliveryAndPayment(props) {
                                 buttonContent()
                               )}
                             </Button>
+                          )} */}
+
+                        {isOnlinePayment &&
+                          recipientName &&
+                          recipientPhoneNumber &&
+                          country &&
+                          entity &&
+                          place &&
+                          deliveryMode &&
+                          isReadyToPlaceOrder && (
+                            <Container>
+                              {renderOnlinePaymentForOrders(
+                                customerEmail,
+                                amountForPayment,
+                                orderNumber,
+                                customerPhoneNumber,
+                                customerName
+                              )}
+                            </Container>
                           )}
                       </Container>
                     ) : (
@@ -18909,6 +19570,13 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Container>
                         )}
 
+                        {isReadyToPlaceOrder &&
+                          currentInstallmentRound === 0 && (
+                            <Container>
+                              {renderAmountToBeContributedField()}
+                            </Container>
+                          )}
+
                         {isOnlinePayment &&
                           !isReadyToPlaceOrder &&
                           !canMakeContribution && (
@@ -18959,7 +19627,7 @@ function TargetDetailsDeliveryAndPayment(props) {
                               )}
                             </Button>
                           )}
-                        {isOnlinePayment &&
+                        {/* {isOnlinePayment &&
                           isReadyToPlaceOrder &&
                           recipientName &&
                           recipientPhoneNumber &&
@@ -18978,6 +19646,25 @@ function TargetDetailsDeliveryAndPayment(props) {
                                 buttonClaimContent()
                               )}
                             </Button>
+                          )} */}
+
+                        {isOnlinePayment &&
+                          isReadyToPlaceOrder &&
+                          recipientName &&
+                          recipientPhoneNumber &&
+                          country &&
+                          entity &&
+                          place &&
+                          deliveryMode && (
+                            <Container>
+                              {renderOnlinePaymentForOrders(
+                                customerEmail,
+                                amountForPayment,
+                                orderNumber,
+                                customerPhoneNumber,
+                                customerName
+                              )}
+                            </Container>
                           )}
                       </Container>
                     )}
@@ -19380,7 +20067,6 @@ function TargetDetailsDeliveryAndPayment(props) {
                             </Button>
                           )}
                         {isOnlinePayment &&
-                          canMakeContribution &&
                           recipientName &&
                           recipientPhoneNumber &&
                           country &&
@@ -21446,6 +22132,13 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Container>
                         )}
 
+                        {isReadyToPlaceOrder &&
+                          currentInstallmentRound === 0 && (
+                            <Container>
+                              {renderAmountToBeContributedField()}
+                            </Container>
+                          )}
+
                         {isOnlinePayment &&
                           !isReadyToPlaceOrder &&
                           !canMakeContribution && (
@@ -21497,17 +22190,15 @@ function TargetDetailsDeliveryAndPayment(props) {
                           city &&
                           deliveryMode &&
                           isReadyToPlaceOrder && (
-                            <Button
-                              variant="contained"
-                              className={classes.submitButton}
-                              onClick={onSubmit}
-                            >
-                              {loading ? (
-                                <CircularProgress size={30} color="inherit" />
-                              ) : (
-                                buttonContent()
+                            <Container>
+                              {renderOnlinePaymentForOrders(
+                                customerEmail,
+                                amountForPayment,
+                                orderNumber,
+                                customerPhoneNumber,
+                                customerName
                               )}
-                            </Button>
+                            </Container>
                           )}
                       </Container>
                     ) : (
@@ -21639,6 +22330,13 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Container>
                         )}
 
+                        {isReadyToPlaceOrder &&
+                          currentInstallmentRound === 0 && (
+                            <Container>
+                              {renderAmountToBeContributedField()}
+                            </Container>
+                          )}
+
                         {isOnlinePayment &&
                           !isReadyToPlaceOrder &&
                           !canMakeContribution && (
@@ -21689,17 +22387,15 @@ function TargetDetailsDeliveryAndPayment(props) {
                           state &&
                           city &&
                           deliveryMode && (
-                            <Button
-                              variant="contained"
-                              className={classes.submitButton}
-                              onClick={onSubmit}
-                            >
-                              {loading ? (
-                                <CircularProgress size={30} color="inherit" />
-                              ) : (
-                                buttonClaimContent()
+                            <Container>
+                              {renderOnlinePaymentForOrders(
+                                customerEmail,
+                                amountForPayment,
+                                orderNumber,
+                                customerPhoneNumber,
+                                customerName
                               )}
-                            </Button>
+                            </Container>
                           )}
                       </Container>
                     )}
@@ -23067,6 +23763,13 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Container>
                         )}
 
+                        {isReadyToPlaceOrder &&
+                          currentInstallmentRound === 0 && (
+                            <Container>
+                              {renderAmountToBeContributedField()}
+                            </Container>
+                          )}
+
                         {isOnlinePayment &&
                           !isReadyToPlaceOrder &&
                           !canMakeContribution && (
@@ -23129,17 +23832,15 @@ function TargetDetailsDeliveryAndPayment(props) {
                         {isOnlinePayment &&
                           isBtnVisible &&
                           isReadyToPlaceOrder && (
-                            <Button
-                              variant="contained"
-                              className={classes.submitButton}
-                              onClick={onSubmit}
-                            >
-                              {loading ? (
-                                <CircularProgress size={30} color="inherit" />
-                              ) : (
-                                buttonContent()
+                            <Container>
+                              {renderOnlinePaymentForOrders(
+                                customerEmail,
+                                amountForPayment,
+                                orderNumber,
+                                customerPhoneNumber,
+                                customerName
                               )}
-                            </Button>
+                            </Container>
                           )}
                       </Container>
                     ) : (
@@ -23272,6 +23973,13 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Container>
                         )}
 
+                        {isReadyToPlaceOrder &&
+                          currentInstallmentRound === 0 && (
+                            <Container>
+                              {renderAmountToBeContributedField()}
+                            </Container>
+                          )}
+
                         {isOnlinePayment &&
                           !isReadyToPlaceOrder &&
                           !canMakeContribution && (
@@ -23326,17 +24034,15 @@ function TargetDetailsDeliveryAndPayment(props) {
                             // state &&
                             // city &&
                             // deliveryMode &&
-                            <Button
-                              variant="contained"
-                              className={classes.submitButton}
-                              onClick={onSubmit}
-                            >
-                              {loading ? (
-                                <CircularProgress size={30} color="inherit" />
-                              ) : (
-                                buttonClaimContent()
+                            <Container>
+                              {renderOnlinePaymentForOrders(
+                                customerEmail,
+                                amountForPayment,
+                                orderNumber,
+                                customerPhoneNumber,
+                                customerName
                               )}
-                            </Button>
+                            </Container>
                           )}
                       </Container>
                     )}
@@ -24698,6 +25404,13 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Container>
                         )}
 
+                        {isReadyToPlaceOrder &&
+                          currentInstallmentRound === 0 && (
+                            <Container>
+                              {renderAmountToBeContributedField()}
+                            </Container>
+                          )}
+
                         {isOnlinePayment &&
                           !isReadyToPlaceOrder &&
                           !canMakeContribution && (
@@ -24761,17 +25474,15 @@ function TargetDetailsDeliveryAndPayment(props) {
                         {isOnlinePayment &&
                           isBtnVisible &&
                           isReadyToPlaceOrder && (
-                            <Button
-                              variant="contained"
-                              className={classes.submitButton}
-                              onClick={onSubmit}
-                            >
-                              {loading ? (
-                                <CircularProgress size={30} color="inherit" />
-                              ) : (
-                                buttonContent()
+                            <Container>
+                              {renderOnlinePaymentForOrders(
+                                customerEmail,
+                                amountForPayment,
+                                orderNumber,
+                                customerPhoneNumber,
+                                customerName
                               )}
-                            </Button>
+                            </Container>
                           )}
                       </Container>
                     ) : (
@@ -24902,6 +25613,13 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Container>
                         )}
 
+                        {isReadyToPlaceOrder &&
+                          currentInstallmentRound === 0 && (
+                            <Container>
+                              {renderAmountToBeContributedField()}
+                            </Container>
+                          )}
+
                         {isOnlinePayment &&
                           !isReadyToPlaceOrder &&
                           !canMakeContribution && (
@@ -24955,17 +25673,15 @@ function TargetDetailsDeliveryAndPayment(props) {
                             // state &&
                             // city &&
                             // deliveryMode &&
-                            <Button
-                              variant="contained"
-                              className={classes.submitButton}
-                              onClick={onSubmit}
-                            >
-                              {loading ? (
-                                <CircularProgress size={30} color="inherit" />
-                              ) : (
-                                buttonClaimContent()
+                            <Container>
+                              {renderOnlinePaymentForOrders(
+                                customerEmail,
+                                amountForPayment,
+                                orderNumber,
+                                customerPhoneNumber,
+                                customerName
                               )}
-                            </Button>
+                            </Container>
                           )}
                       </Container>
                     )}
@@ -26315,6 +27031,13 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Container>
                         )}
 
+                        {isReadyToPlaceOrder &&
+                          currentInstallmentRound === 0 && (
+                            <Container>
+                              {renderAmountToBeContributedField()}
+                            </Container>
+                          )}
+
                         {isOnlinePayment &&
                           !isReadyToPlaceOrder &&
                           !canMakeContribution && (
@@ -26375,17 +27098,15 @@ function TargetDetailsDeliveryAndPayment(props) {
                           recipientPhoneNumber &&
                           entityLocation &&
                           isReadyToPlaceOrder && (
-                            <Button
-                              variant="contained"
-                              className={classes.submitButton}
-                              onClick={onSubmit}
-                            >
-                              {loading ? (
-                                <CircularProgress size={30} color="inherit" />
-                              ) : (
-                                buttonContent()
+                            <Container>
+                              {renderOnlinePaymentForOrders(
+                                customerEmail,
+                                amountForPayment,
+                                orderNumber,
+                                customerPhoneNumber,
+                                customerName
                               )}
-                            </Button>
+                            </Container>
                           )}
                       </Container>
                     ) : (
@@ -26518,6 +27239,13 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Container>
                         )}
 
+                        {isReadyToPlaceOrder &&
+                          currentInstallmentRound === 0 && (
+                            <Container>
+                              {renderAmountToBeContributedField()}
+                            </Container>
+                          )}
+
                         {isOnlinePayment &&
                           !isReadyToPlaceOrder &&
                           !canMakeContribution && (
@@ -26566,17 +27294,15 @@ function TargetDetailsDeliveryAndPayment(props) {
                           isReadyToPlaceOrder &&
                           recipientPhoneNumber &&
                           entityLocation && (
-                            <Button
-                              variant="contained"
-                              className={classes.submitButton}
-                              onClick={onSubmit}
-                            >
-                              {loading ? (
-                                <CircularProgress size={30} color="inherit" />
-                              ) : (
-                                buttonClaimContent()
+                            <Container>
+                              {renderOnlinePaymentForOrders(
+                                customerEmail,
+                                amountForPayment,
+                                orderNumber,
+                                customerPhoneNumber,
+                                customerName
                               )}
-                            </Button>
+                            </Container>
                           )}
                       </Container>
                     )}
@@ -27922,6 +28648,13 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Container>
                         )}
 
+                        {isReadyToPlaceOrder &&
+                          currentInstallmentRound === 0 && (
+                            <Container>
+                              {renderAmountToBeContributedField()}
+                            </Container>
+                          )}
+
                         {isOnlinePayment &&
                           !isReadyToPlaceOrder &&
                           !canMakeContribution && (
@@ -27988,17 +28721,15 @@ function TargetDetailsDeliveryAndPayment(props) {
                           place &&
                           deliveryMode &&
                           isReadyToPlaceOrder && (
-                            <Button
-                              variant="contained"
-                              className={classes.submitButton}
-                              onClick={onSubmit}
-                            >
-                              {loading ? (
-                                <CircularProgress size={30} color="inherit" />
-                              ) : (
-                                buttonContent()
+                            <Container>
+                              {renderOnlinePaymentForOrders(
+                                customerEmail,
+                                amountForPayment,
+                                orderNumber,
+                                customerPhoneNumber,
+                                customerName
                               )}
-                            </Button>
+                            </Container>
                           )}
                       </Container>
                     ) : (
@@ -28129,6 +28860,13 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Container>
                         )}
 
+                        {isReadyToPlaceOrder &&
+                          currentInstallmentRound === 0 && (
+                            <Container>
+                              {renderAmountToBeContributedField()}
+                            </Container>
+                          )}
+
                         {isOnlinePayment &&
                           !isReadyToPlaceOrder &&
                           !canMakeContribution && (
@@ -28181,17 +28919,15 @@ function TargetDetailsDeliveryAndPayment(props) {
                           entity &&
                           place &&
                           deliveryMode && (
-                            <Button
-                              variant="contained"
-                              className={classes.submitButton}
-                              onClick={onSubmit}
-                            >
-                              {loading ? (
-                                <CircularProgress size={30} color="inherit" />
-                              ) : (
-                                buttonClaimContent()
+                            <Container>
+                              {renderOnlinePaymentForOrders(
+                                customerEmail,
+                                amountForPayment,
+                                orderNumber,
+                                customerPhoneNumber,
+                                customerName
                               )}
-                            </Button>
+                            </Container>
                           )}
                       </Container>
                     )}
@@ -29564,6 +30300,13 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Container>
                         )}
 
+                        {isReadyToPlaceOrder &&
+                          currentInstallmentRound === 0 && (
+                            <Container>
+                              {renderAmountToBeContributedField()}
+                            </Container>
+                          )}
+
                         {isOnlinePayment &&
                           !isReadyToPlaceOrder &&
                           !canMakeContribution && (
@@ -29631,17 +30374,15 @@ function TargetDetailsDeliveryAndPayment(props) {
                           city &&
                           deliveryMode &&
                           isReadyToPlaceOrder && (
-                            <Button
-                              variant="contained"
-                              className={classes.submitButton}
-                              onClick={onSubmit}
-                            >
-                              {loading ? (
-                                <CircularProgress size={30} color="inherit" />
-                              ) : (
-                                buttonContent()
+                            <Container>
+                              {renderOnlinePaymentForOrders(
+                                customerEmail,
+                                amountForPayment,
+                                orderNumber,
+                                customerPhoneNumber,
+                                customerName
                               )}
-                            </Button>
+                            </Container>
                           )}
                       </Container>
                     ) : (
@@ -29774,6 +30515,13 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Container>
                         )}
 
+                        {isReadyToPlaceOrder &&
+                          currentInstallmentRound === 0 && (
+                            <Container>
+                              {renderAmountToBeContributedField()}
+                            </Container>
+                          )}
+
                         {isOnlinePayment &&
                           !isReadyToPlaceOrder &&
                           !canMakeContribution && (
@@ -29824,17 +30572,15 @@ function TargetDetailsDeliveryAndPayment(props) {
                           state &&
                           city &&
                           deliveryMode && (
-                            <Button
-                              variant="contained"
-                              className={classes.submitButton}
-                              onClick={onSubmit}
-                            >
-                              {loading ? (
-                                <CircularProgress size={30} color="inherit" />
-                              ) : (
-                                buttonClaimContent()
+                            <Container>
+                              {renderOnlinePaymentForOrders(
+                                customerEmail,
+                                amountForPayment,
+                                orderNumber,
+                                customerPhoneNumber,
+                                customerName
                               )}
-                            </Button>
+                            </Container>
                           )}
                       </Container>
                     )}
@@ -31205,6 +31951,13 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Container>
                         )}
 
+                        {isReadyToPlaceOrder &&
+                          currentInstallmentRound === 0 && (
+                            <Container>
+                              {renderAmountToBeContributedField()}
+                            </Container>
+                          )}
+
                         {isOnlinePayment &&
                           !isReadyToPlaceOrder &&
                           !canMakeContribution && (
@@ -31264,17 +32017,15 @@ function TargetDetailsDeliveryAndPayment(props) {
                         {isOnlinePayment &&
                           isBtnVisible &&
                           isReadyToPlaceOrder && (
-                            <Button
-                              variant="contained"
-                              className={classes.submitButton}
-                              onClick={onSubmit}
-                            >
-                              {loading ? (
-                                <CircularProgress size={30} color="inherit" />
-                              ) : (
-                                buttonContent()
+                            <Container>
+                              {renderOnlinePaymentForOrders(
+                                customerEmail,
+                                amountForPayment,
+                                orderNumber,
+                                customerPhoneNumber,
+                                customerName
                               )}
-                            </Button>
+                            </Container>
                           )}
                       </Container>
                     ) : (
@@ -31407,6 +32158,13 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Container>
                         )}
 
+                        {isReadyToPlaceOrder &&
+                          currentInstallmentRound === 0 && (
+                            <Container>
+                              {renderAmountToBeContributedField()}
+                            </Container>
+                          )}
+
                         {isOnlinePayment &&
                           !isReadyToPlaceOrder &&
                           !canMakeContribution && (
@@ -31456,17 +32214,15 @@ function TargetDetailsDeliveryAndPayment(props) {
                           isReadyToPlaceOrder &&
                           recipientName &&
                           recipientPhoneNumber && (
-                            <Button
-                              variant="contained"
-                              className={classes.submitButton}
-                              onClick={onSubmit}
-                            >
-                              {loading ? (
-                                <CircularProgress size={30} color="inherit" />
-                              ) : (
-                                buttonClaimContent()
+                            <Container>
+                              {renderOnlinePaymentForOrders(
+                                customerEmail,
+                                amountForPayment,
+                                orderNumber,
+                                customerPhoneNumber,
+                                customerName
                               )}
-                            </Button>
+                            </Container>
                           )}
                       </Container>
                     )}
@@ -32807,6 +33563,13 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Container>
                         )}
 
+                        {isReadyToPlaceOrder &&
+                          currentInstallmentRound === 0 && (
+                            <Container>
+                              {renderAmountToBeContributedField()}
+                            </Container>
+                          )}
+
                         {isOnlinePayment &&
                           !isReadyToPlaceOrder &&
                           !canMakeContribution && (
@@ -32870,17 +33633,15 @@ function TargetDetailsDeliveryAndPayment(props) {
                         {isOnlinePayment &&
                           isBtnVisible &&
                           isReadyToPlaceOrder && (
-                            <Button
-                              variant="contained"
-                              className={classes.submitButton}
-                              onClick={onSubmit}
-                            >
-                              {loading ? (
-                                <CircularProgress size={30} color="inherit" />
-                              ) : (
-                                buttonContent()
+                            <Container>
+                              {renderOnlinePaymentForOrders(
+                                customerEmail,
+                                amountForPayment,
+                                orderNumber,
+                                customerPhoneNumber,
+                                customerName
                               )}
-                            </Button>
+                            </Container>
                           )}
                       </Container>
                     ) : (
@@ -33011,6 +33772,13 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Container>
                         )}
 
+                        {isReadyToPlaceOrder &&
+                          currentInstallmentRound === 0 && (
+                            <Container>
+                              {renderAmountToBeContributedField()}
+                            </Container>
+                          )}
+
                         {isOnlinePayment &&
                           !isReadyToPlaceOrder &&
                           !canMakeContribution && (
@@ -33065,17 +33833,15 @@ function TargetDetailsDeliveryAndPayment(props) {
                             // state &&
                             // city &&
                             // deliveryMode &&
-                            <Button
-                              variant="contained"
-                              className={classes.submitButton}
-                              onClick={onSubmit}
-                            >
-                              {loading ? (
-                                <CircularProgress size={30} color="inherit" />
-                              ) : (
-                                buttonClaimContent()
+                            <Container>
+                              {renderOnlinePaymentForOrders(
+                                customerEmail,
+                                amountForPayment,
+                                orderNumber,
+                                customerPhoneNumber,
+                                customerName
                               )}
-                            </Button>
+                            </Container>
                           )}
                       </Container>
                     )}
@@ -34433,6 +35199,13 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Container>
                         )}
 
+                        {isReadyToPlaceOrder &&
+                          currentInstallmentRound === 0 && (
+                            <Container>
+                              {renderAmountToBeContributedField()}
+                            </Container>
+                          )}
+
                         {isOnlinePayment &&
                           !isReadyToPlaceOrder &&
                           !canMakeContribution && (
@@ -34494,17 +35267,15 @@ function TargetDetailsDeliveryAndPayment(props) {
                           recipientPhoneNumber &&
                           entityLocation &&
                           isReadyToPlaceOrder && (
-                            <Button
-                              variant="contained"
-                              className={classes.submitButton}
-                              onClick={onSubmit}
-                            >
-                              {loading ? (
-                                <CircularProgress size={30} color="inherit" />
-                              ) : (
-                                buttonContent()
+                            <Container>
+                              {renderOnlinePaymentForOrders(
+                                customerEmail,
+                                amountForPayment,
+                                orderNumber,
+                                customerPhoneNumber,
+                                customerName
                               )}
-                            </Button>
+                            </Container>
                           )}
                       </Container>
                     ) : (
@@ -34637,6 +35408,13 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Container>
                         )}
 
+                        {isReadyToPlaceOrder &&
+                          currentInstallmentRound === 0 && (
+                            <Container>
+                              {renderAmountToBeContributedField()}
+                            </Container>
+                          )}
+
                         {isOnlinePayment &&
                           !isReadyToPlaceOrder &&
                           !canMakeContribution && (
@@ -34686,17 +35464,15 @@ function TargetDetailsDeliveryAndPayment(props) {
                           recipientName &&
                           recipientPhoneNumber &&
                           entityLocation && (
-                            <Button
-                              variant="contained"
-                              className={classes.submitButton}
-                              onClick={onSubmit}
-                            >
-                              {loading ? (
-                                <CircularProgress size={30} color="inherit" />
-                              ) : (
-                                buttonClaimContent()
+                            <Container>
+                              {renderOnlinePaymentForOrders(
+                                customerEmail,
+                                amountForPayment,
+                                orderNumber,
+                                customerPhoneNumber,
+                                customerName
                               )}
-                            </Button>
+                            </Container>
                           )}
                       </Container>
                     )}
@@ -36045,6 +36821,13 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Container>
                         )}
 
+                        {isReadyToPlaceOrder &&
+                          currentInstallmentRound === 0 && (
+                            <Container>
+                              {renderAmountToBeContributedField()}
+                            </Container>
+                          )}
+
                         {isOnlinePayment &&
                           !isReadyToPlaceOrder &&
                           !canMakeContribution && (
@@ -36112,17 +36895,15 @@ function TargetDetailsDeliveryAndPayment(props) {
                           place &&
                           deliveryMode &&
                           isReadyToPlaceOrder && (
-                            <Button
-                              variant="contained"
-                              className={classes.submitButton}
-                              onClick={onSubmit}
-                            >
-                              {loading ? (
-                                <CircularProgress size={30} color="inherit" />
-                              ) : (
-                                buttonContent()
+                            <Container>
+                              {renderOnlinePaymentForOrders(
+                                customerEmail,
+                                amountForPayment,
+                                orderNumber,
+                                customerPhoneNumber,
+                                customerName
                               )}
-                            </Button>
+                            </Container>
                           )}
                       </Container>
                     ) : (
@@ -36255,6 +37036,13 @@ function TargetDetailsDeliveryAndPayment(props) {
                           </Container>
                         )}
 
+                        {isReadyToPlaceOrder &&
+                          currentInstallmentRound === 0 && (
+                            <Container>
+                              {renderAmountToBeContributedField()}
+                            </Container>
+                          )}
+
                         {isOnlinePayment &&
                           !isReadyToPlaceOrder &&
                           !canMakeContribution && (
@@ -36307,17 +37095,15 @@ function TargetDetailsDeliveryAndPayment(props) {
                           entity &&
                           place &&
                           deliveryMode && (
-                            <Button
-                              variant="contained"
-                              className={classes.submitButton}
-                              onClick={onSubmit}
-                            >
-                              {loading ? (
-                                <CircularProgress size={30} color="inherit" />
-                              ) : (
-                                buttonClaimContent()
+                            <Container>
+                              {renderOnlinePaymentForOrders(
+                                customerEmail,
+                                amountForPayment,
+                                orderNumber,
+                                customerPhoneNumber,
+                                customerName
                               )}
-                            </Button>
+                            </Container>
                           )}
                       </Container>
                     )}

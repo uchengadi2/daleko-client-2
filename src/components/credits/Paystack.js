@@ -110,6 +110,10 @@ function Paystack(props) {
       amountAlreadyContributed:
         props.amountAlreadyContributed + props.contributedAmount,
       currentInstallmentRound: props.currentInstallmentRound + 1,
+      dealStatus:
+        props.dealNumberOfInstallments === props.currentInstallmentRound + 1
+          ? "inactive"
+          : props.dealStatus,
     };
 
     if (targetData) {
