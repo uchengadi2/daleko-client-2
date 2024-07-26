@@ -37,6 +37,7 @@ import FreezePriceForm from "./freeze/FreezePriceForm";
 import DericaHome from "./DericaHome";
 import PaintHome from "./PaintHome";
 import DealHome from "./DealHome";
+import Entities from "./Entities";
 
 import api from "./../apis/local";
 import WholesaleHome from "./WholesaleHome";
@@ -54,6 +55,7 @@ import OwnTargetsPage from "./targets/OwnTargetsPage";
 import OwnCreditScheme from "./credits/OwnCreditScheme";
 import TargetProductDetailPage from "./targets/TargetProductDetailPage";
 import CreditProductDetailPage from "./credits/TargetProductDetailPage";
+import EntityNewAdmin from "./entityDashboard/EntityNewAdmin";
 
 function App() {
   const { token, setToken } = useToken();
@@ -467,6 +469,24 @@ function App() {
                 setToken={setToken ? setToken : {}}
                 userId={userId}
                 setUserId={setUserId ? setUserId : {}}
+              />
+            </Route>
+            <Route exact path="/:entity">
+              <Entities
+                token={token}
+                userId={userId}
+                setToken={setToken ? setToken : {}}
+                setUserId={setUserId ? setUserId : {}}
+              />
+            </Route>
+            <Route path="/:entity/admin">
+              <EntityNewAdmin
+                token={token}
+                userId={userId}
+                setToken={setToken ? setToken : {}}
+                setUserId={setUserId ? setUserId : {}}
+                handleSuccessfulCreateSnackbar={handleSuccessfulCreateSnackbar}
+                handleFailedSnackbar={handleFailedSnackbar}
               />
             </Route>
           </Switch>
