@@ -88,6 +88,8 @@ function Communities(props) {
           contactPerson: community.contactPerson,
           contactPersonEmail: community.contactPersonEmail,
           contactPhoneNumber: community.contactPhoneNumber,
+          allowCreditDeal: community.allowCreditDeal,
+          allowPaymentOnDelivery: community.allowPaymentOnDelivery,
         });
       });
       setCommunityList(allData);
@@ -295,6 +297,8 @@ function Communities(props) {
         country: community.country.id,
         state: community.state.id,
         communityType: community.communityType,
+        allowCreditDeal: community.allowCreditDeal,
+        allowPaymentOnDelivery: community.allowPaymentOnDelivery,
       };
       rows.push(row);
     });

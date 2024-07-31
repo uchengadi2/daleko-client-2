@@ -84,6 +84,8 @@ function States(props) {
           description: state.description,
           entityType: state.entityType,
           entityDealCode: state.entityDealCode,
+          allowCreditDeal: state.allowCreditDeal,
+          allowPaymentOnDelivery: state.allowPaymentOnDelivery,
         });
       });
       setStateList(allData);
@@ -259,6 +261,8 @@ function States(props) {
           : "",
         entityType: state.entityType,
         entityDealCode: state.entityDealCode,
+        allowCreditDeal: state.allowCreditDeal,
+        allowPaymentOnDelivery: state.allowPaymentOnDelivery,
       };
       rows.push(row);
     });

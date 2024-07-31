@@ -922,6 +922,8 @@ function ProductForm(props) {
   const [gatewayFixedChargeValue, setGatewayFixedChargeValue] = useState(0);
   const [gatewayRateChargeValue, setGatewayRateChargeValue] = useState(0);
   const [isACreditDeal, setIsACreditDeal] = useState(false);
+  const [preferredEntityVariant, setPreferredEntityVariant] =
+    useState("not-applicable");
 
   const dispatch = useDispatch();
 
@@ -1280,6 +1282,10 @@ function ProductForm(props) {
 
   const handleIsACreditDealChange = (event) => {
     setIsACreditDeal(event.target.value);
+  };
+
+  const handlePreferredEntityVariantChange = (event) => {
+    setPreferredEntityVariant(event.target.value);
   };
 
   const handleCommunityChange = (event) => {
@@ -2254,6 +2260,39 @@ function ProductForm(props) {
     );
   };
 
+  const renderPreferredEntityVariantField = ({
+    input,
+    label,
+    meta: { touched, error, invalid },
+    type,
+    id,
+    ...custom
+  }) => {
+    return (
+      <Box>
+        <FormControl variant="outlined">
+          {/* <InputLabel id="vendor_city">City</InputLabel> */}
+          <Select
+            labelId="preferredEntityVariant"
+            id="preferredEntityVariant"
+            value={preferredEntityVariant}
+            onChange={handlePreferredEntityVariantChange}
+            //label="Preferred Entity Variant"
+            style={{ width: 500, marginTop: 10, height: 38 }}
+            //{...input}
+          >
+            <MenuItem value={"not-applicable"}>Not Applicable</MenuItem>
+            <MenuItem value={"entity"}>This is an all Entity Deal</MenuItem>
+            <MenuItem value={"community"}>
+              This is an Entity Community Deal
+            </MenuItem>
+          </Select>
+          <FormHelperText>Preferred Entity Variant</FormHelperText>
+        </FormControl>
+      </Box>
+    );
+  };
+
   const buttonContent = () => {
     return <React.Fragment> Submit</React.Fragment>;
   };
@@ -2572,6 +2611,8 @@ function ProductForm(props) {
       formValues.gatewayRateCharge ? formValues.gatewayRateCharge : 0
     );
     form.append("isACreditDeal", isACreditDeal);
+    form.append("preferredEntityVariant", preferredEntityVariant);
+    form.append("dealSlug", formValues.dealSlug ? formValues.dealSlug : null);
 
     // if (!formValues["sku"]) {
     //   const sku =
@@ -3142,6 +3183,41 @@ function ProductForm(props) {
               <Grid item style={{ width: "50%" }}>
                 <Field
                   label=""
+                  id="entity"
+                  name="entity"
+                  type="text"
+                  //helperText="Allow the Customer to Change Deal Quantity"
+                  component={renderEntityListField}
+                />
+              </Grid>
+              <Grid item style={{ marginLeft: 15, width: "47%" }}>
+                <Field
+                  label=""
+                  id="dealOwner"
+                  name="dealOwner"
+                  type="text"
+                  //helperText="Allow the Customer to Change Deal Quantity"
+                  component={renderDealOwnerField}
+                />
+              </Grid>
+            </Grid>
+          )}
+          {salesPreference === "deal" && (
+            <Field
+              label=""
+              id="preferredEntityVariant"
+              name="preferredEntityVariant"
+              //defaultValue={params[0].dealComment}
+              type="text"
+              //helperText="Deal Instruction Or Direction(optional)"
+              component={renderPreferredEntityVariantField}
+            />
+          )}
+          {salesPreference === "deal" && (
+            <Grid container direction="row" style={{ marginTop: 20 }}>
+              <Grid item style={{ width: "50%" }}>
+                <Field
+                  label=""
                   id="dealCode"
                   name="dealCode"
                   helperText="Enter the Deal Code"
@@ -3369,30 +3445,16 @@ function ProductForm(props) {
               </Grid>
             </Grid>
           )}
-
           {salesPreference === "deal" && (
-            <Grid container direction="row" style={{ marginTop: 20 }}>
-              <Grid item style={{ width: "50%" }}>
-                <Field
-                  label=""
-                  id="entity"
-                  name="entity"
-                  type="text"
-                  //helperText="Allow the Customer to Change Deal Quantity"
-                  component={renderEntityListField}
-                />
-              </Grid>
-              <Grid item style={{ marginLeft: 15, width: "47%" }}>
-                <Field
-                  label=""
-                  id="dealOwner"
-                  name="dealOwner"
-                  type="text"
-                  //helperText="Allow the Customer to Change Deal Quantity"
-                  component={renderDealOwnerField}
-                />
-              </Grid>
-            </Grid>
+            <Field
+              label=""
+              id="dealSlug"
+              name="dealSlug"
+              type="text"
+              helperText="Enter this Deal's Entity Slug"
+              component={renderEditableSingleLineField}
+              style={{ marginTop: 10 }}
+            />
           )}
 
           {salesPreference === "deal" && (

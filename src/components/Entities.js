@@ -45,6 +45,7 @@ import DealPropositionPage from "./deals/DealPropositionPage";
 import DealSearchBox from "./deals/DealSearchBox";
 import heroVideo from "./../assets/video/background_video.mp4";
 import heroVideoMobile from "./../assets/video/background_video_mobile.mp4";
+import EntityTopCover from "./entities/EntityTopCover";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -376,12 +377,12 @@ const Entities = (props) => {
 
       //data.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 
-      if (entity === "mtn") {
+      if (entity) {
         const response = await api.get("/products?sort=desc", {
           params: {
             displayOnStore: "yes",
             salesPreference: "deal",
-            dealCode: "matori-mtn-famos-rice-deal-00011",
+            dealSlug: entity,
           },
         });
         const workingData = response.data.data.data;
@@ -463,6 +464,8 @@ const Entities = (props) => {
             gatewayFixedCharge: product.gatewayFixedCharge,
             gatewayRateCharge: product.gatewayRateCharge,
             isACreditDeal: product.isACreditDeal,
+            preferredEntityVariant: product.preferredEntityVariant,
+            dealSlug: product.dealSlug,
           });
         });
         setProductsList(allData);
@@ -818,39 +821,55 @@ const Entities = (props) => {
   let entityTitle = "";
   let extend = false;
   let extendTitle = "";
+  let entityName = "";
 
   if (entity === "mtn") {
     entityTitle = "Staff Members of MTN (Nig) Plc";
+    entityName = "MTN (Nig) Limited";
   } else if (entity === "nimasa") {
     entityTitle = "Staffers of Nigerian Maritime Administration";
     extend = true;
-    extendTitle = "and Safety Agency(NIMASA)";
+    extendTitle = "and Safety Agency(NIMASA) ";
+    entityName = "Nigerian Maritime Administration and Safety Agency(NIMASA) ";
   } else if (entity === "fbn") {
     entityTitle = "Staff Members of First Bank (Nig) Plc";
+    entityName = "First Bank (Nig) Plc";
   } else if (entity === "accessbank") {
     entityTitle = "Staff Members of Access Bank (Nig) Plc";
+    entityName = "Access Bank (Nig) Plc";
   } else if (entity === "gtb") {
     entityTitle = "Staff Members of Guarantee Trust Bank";
+    entityName = "Guarantee Trust Bank (Nig) Plc";
   } else if (entity === "promasidor") {
     entityTitle = "Staff Members of Promasidor (Nig) Ltd";
+    entityName = "Promasidor (Nig) Ltd";
   } else if (entity === "uba") {
     entityTitle = "Staff Members of United Bank of Africa";
+    entityName = "United Bank of Africa (Nig) Plc";
   } else if (entity === "unilag") {
     entityTitle = "the University of Lagos Community";
+    entityName = "University of Lagos(Unilag)";
   } else if (entity === "yabatech") {
     entityTitle = "the Yaba Technology Community";
+    entityName = "Yaba College of Technology";
   } else if (entity === "lasu") {
     entityTitle = "the Lagos State Univeristy Community";
+    entityName = "Lagos State Univeristy(LASU)";
   } else if (entity === "interswitch") {
     entityTitle = "Staff Members of InterSwitch (Nig) Ltd";
+    entityName = "InterSwitch (Nig) Ltd";
   } else if (entity === "glo") {
     entityTitle = "Staff Members of Glo (Nig) Ltd";
+    entityName = "Glo (Nig) Ltd";
   } else if (entity === "airtel") {
     entityTitle = "Staff Members of Airtel (Nig) Plc";
+    entityName = "Airtel (Nig) Plc";
   } else if (entity === "nibss") {
     entityTitle = "Staff Members of NIBSS Plc";
+    entityName = "NIBBS Plc";
   } else if (entity === "shell") {
     entityTitle = "Staff Members of Shell Petroleum, Nigeria";
+    entityName = "Shell Petroleum, Nigeria";
   } else if (entity === "chevron") {
     entityTitle = "Staff Members of Chevron, Nigeria";
   } else if (entity === "mobil") {
@@ -1019,9 +1038,9 @@ const Entities = (props) => {
             </Grid>
           </Grid>
           {/* </section> */}
-          {/* <FreezePriceAdDealPage />
-          <TopCoverDeal preference={preference} />
-          <DealPropositionPage /> */}
+          {/* <FreezePriceAdDealPage /> */}
+          <EntityTopCover preference={preference} entityName={entityName} />
+          {/* <DealPropositionPage /> */}
           <DealSearchBox
             updateDealHandler={updateDealHandler}
             dealHandler={dealHandler}

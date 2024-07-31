@@ -322,6 +322,8 @@ function AddNewCommunityForm(props) {
   const [stateList, setStateList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [communityType, setCommunityType] = useState("enterprise");
+  const [allowCreditDeal, setAllowCreditDeal] = useState(false);
+  const [allowPaymentOnDelivery, setAllowPaymentOnDelivery] = useState(false);
 
   const dispatch = useDispatch();
 
@@ -367,6 +369,14 @@ function AddNewCommunityForm(props) {
 
   const handleCommunityTypeChange = (event) => {
     setCommunityType(event.target.value);
+  };
+
+  const handleAllowCreditDealChange = (event) => {
+    setAllowCreditDeal(event.target.value);
+  };
+
+  const handleAllowPaymentOnDeliveryChange = (event) => {
+    setAllowPaymentOnDelivery(event.target.value);
   };
 
   const handleCountryChange = (event) => {
@@ -481,6 +491,66 @@ function AddNewCommunityForm(props) {
     );
   };
 
+  const renderAllowCreditDealField = ({
+    input,
+    label,
+    meta: { touched, error, invalid },
+    type,
+    id,
+    ...custom
+  }) => {
+    return (
+      <Box>
+        <FormControl variant="outlined">
+          {/* <InputLabel id="vendor_city">City</InputLabel> */}
+          <Select
+            labelId="allowCreditDeal"
+            id="allowCreditDeal"
+            value={allowCreditDeal}
+            onChange={handleAllowCreditDealChange}
+            //label="Allow Credit Deal"
+            style={{ width: 500, marginTop: 10, height: 38 }}
+            //{...input}
+          >
+            <MenuItem value={"false"}>No</MenuItem>
+            <MenuItem value={"true"}>Yes</MenuItem>
+          </Select>
+          <FormHelperText>Allow Credit Deals</FormHelperText>
+        </FormControl>
+      </Box>
+    );
+  };
+
+  const renderAllowPaymentOnDeliveryField = ({
+    input,
+    label,
+    meta: { touched, error, invalid },
+    type,
+    id,
+    ...custom
+  }) => {
+    return (
+      <Box>
+        <FormControl variant="outlined">
+          {/* <InputLabel id="vendor_city">City</InputLabel> */}
+          <Select
+            labelId="allowPaymentOnDelivery"
+            id="allowPaymentOnDelivery"
+            value={allowPaymentOnDelivery}
+            onChange={handleAllowPaymentOnDeliveryChange}
+            //label="Allow Credit Deal"
+            style={{ width: 500, marginTop: 10, height: 38 }}
+            //{...input}
+          >
+            <MenuItem value={"false"}>No</MenuItem>
+            <MenuItem value={"true"}>Yes</MenuItem>
+          </Select>
+          <FormHelperText>Allow Payment On Delivery</FormHelperText>
+        </FormControl>
+      </Box>
+    );
+  };
+
   const buttonContent = () => {
     return <React.Fragment> Submit</React.Fragment>;
   };
@@ -501,6 +571,8 @@ function AddNewCommunityForm(props) {
       contactPhoneNumber: formValues.contactPhoneNumber,
       contactPersonEmail: formValues.contactPersonEmail,
       createdBy: props.userId,
+      allowCreditDeal: allowCreditDeal,
+      allowPaymentOnDelivery: allowPaymentOnDelivery,
     };
     if (data) {
       const createForm = async () => {
@@ -650,6 +722,20 @@ function AddNewCommunityForm(props) {
           name="contactPersonEmail"
           type="text"
           component={renderContactPersonEmailAddressField}
+        />
+        <Field
+          label=""
+          id="allowCreditDeal"
+          name="allowCreditDeal"
+          type="text"
+          component={renderAllowCreditDealField}
+        />
+        <Field
+          label=""
+          id="allowPaymentOnDelivery"
+          name="allowPaymentOnDelivery"
+          type="text"
+          component={renderAllowPaymentOnDeliveryField}
         />
 
         <Button

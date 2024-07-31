@@ -167,6 +167,12 @@ function StateEditForm(props) {
   const [region, setRegion] = useState(params[0].region);
   const [entityType, setEntityType] = useState(params[0].entityType);
   const [countryList, setCountryList] = useState([]);
+  const [allowCreditDeal, setAllowCreditDeal] = useState(
+    params[0].allowCreditDeal
+  );
+  const [allowPaymentOnDelivery, setAllowPaymentOnDelivery] = useState(
+    params[0].allowPaymentOnDelivery
+  );
   const [loading, setLoading] = useState(false);
 
   const dispatch = useDispatch();
@@ -181,6 +187,14 @@ function StateEditForm(props) {
 
   const handleEntityTypeChange = (event) => {
     setEntityType(event.target.value);
+  };
+
+  const handleAllowCreditDealChange = (event) => {
+    setAllowCreditDeal(event.target.value);
+  };
+
+  const handleAllowPaymentOnDeliveryChange = (event) => {
+    setAllowPaymentOnDelivery(event.target.value);
   };
 
   useEffect(() => {
@@ -311,6 +325,66 @@ function StateEditForm(props) {
     );
   };
 
+  const renderAllowCreditDealField = ({
+    input,
+    label,
+    meta: { touched, error, invalid },
+    type,
+    id,
+    ...custom
+  }) => {
+    return (
+      <Box>
+        <FormControl variant="outlined">
+          {/* <InputLabel id="vendor_city">City</InputLabel> */}
+          <Select
+            labelId="allowCreditDeal"
+            id="allowCreditDeal"
+            value={allowCreditDeal}
+            onChange={handleAllowCreditDealChange}
+            //label="Allow Credit Deal"
+            style={{ width: 500, marginTop: 10, height: 38 }}
+            //{...input}
+          >
+            <MenuItem value={"false"}>No</MenuItem>
+            <MenuItem value={"true"}>Yes</MenuItem>
+          </Select>
+          <FormHelperText>Allow Credit Deals</FormHelperText>
+        </FormControl>
+      </Box>
+    );
+  };
+
+  const renderAllowPaymentOnDeliveryField = ({
+    input,
+    label,
+    meta: { touched, error, invalid },
+    type,
+    id,
+    ...custom
+  }) => {
+    return (
+      <Box>
+        <FormControl variant="outlined">
+          {/* <InputLabel id="vendor_city">City</InputLabel> */}
+          <Select
+            labelId="allowPaymentOnDelivery"
+            id="allowPaymentOnDelivery"
+            value={allowPaymentOnDelivery}
+            onChange={handleAllowPaymentOnDeliveryChange}
+            //label="Allow Credit Deal"
+            style={{ width: 500, marginTop: 10, height: 38 }}
+            //{...input}
+          >
+            <MenuItem value={"false"}>No</MenuItem>
+            <MenuItem value={"true"}>Yes</MenuItem>
+          </Select>
+          <FormHelperText>Allow Payment On Delivery</FormHelperText>
+        </FormControl>
+      </Box>
+    );
+  };
+
   const buttonContent = () => {
     return <React.Fragment> Update State/Entity</React.Fragment>;
   };
@@ -330,6 +404,12 @@ function StateEditForm(props) {
       country: countryId ? countryId : params[0].countryId,
       code: formValues.code ? formValues.code : params[0].code,
       createdBy: userId,
+      allowCreditDeal: allowCreditDeal
+        ? allowCreditDeal
+        : params[0].allowCreditDeal,
+      allowPaymentOnDelivery: allowPaymentOnDelivery
+        ? allowPaymentOnDelivery
+        : params[0].allowPaymentOnDelivery,
     };
 
     if (data) {
@@ -457,7 +537,7 @@ function StateEditForm(props) {
           defaultValue={params[0].entityDealCode}
           type="text"
           component={renderEntityDealCodeField}
-          helperText="Enter Entity Deal Code(Optional)"
+          helperText="Enter Entity Deal Code"
           style={{ marginTop: 10 }}
         />
         <Field
@@ -468,6 +548,20 @@ function StateEditForm(props) {
           type="text"
           component={renderStateDescriptionField}
           style={{ marginTop: 10 }}
+        />
+        <Field
+          label=""
+          id="allowCreditDeal"
+          name="allowCreditDeal"
+          type="text"
+          component={renderAllowCreditDealField}
+        />
+        <Field
+          label=""
+          id="allowPaymentOnDelivery"
+          name="allowPaymentOnDelivery"
+          type="text"
+          component={renderAllowPaymentOnDeliveryField}
         />
 
         <Button

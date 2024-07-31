@@ -163,6 +163,8 @@ function AddStateForm(props) {
   const [region, setRegion] = useState();
   const [entityType, setEntityType] = useState("conventional");
   const [countryList, setCountryList] = useState([]);
+  const [allowCreditDeal, setAllowCreditDeal] = useState(false);
+  const [allowPaymentOnDelivery, setAllowPaymentOnDelivery] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const dispatch = useDispatch();
@@ -177,6 +179,14 @@ function AddStateForm(props) {
 
   const handleEntityTypeChange = (event) => {
     setEntityType(event.target.value);
+  };
+
+  const handleAllowCreditDealChange = (event) => {
+    setAllowCreditDeal(event.target.value);
+  };
+
+  const handleAllowPaymentOnDeliveryChange = (event) => {
+    setAllowPaymentOnDelivery(event.target.value);
   };
 
   useEffect(() => {
@@ -304,6 +314,66 @@ function AddStateForm(props) {
     );
   };
 
+  const renderAllowCreditDealField = ({
+    input,
+    label,
+    meta: { touched, error, invalid },
+    type,
+    id,
+    ...custom
+  }) => {
+    return (
+      <Box>
+        <FormControl variant="outlined">
+          {/* <InputLabel id="vendor_city">City</InputLabel> */}
+          <Select
+            labelId="allowCreditDeal"
+            id="allowCreditDeal"
+            value={allowCreditDeal}
+            onChange={handleAllowCreditDealChange}
+            //label="Allow Credit Deal"
+            style={{ width: 500, marginTop: 10, height: 38 }}
+            //{...input}
+          >
+            <MenuItem value={"false"}>No</MenuItem>
+            <MenuItem value={"true"}>Yes</MenuItem>
+          </Select>
+          <FormHelperText>Allow Credit Deals</FormHelperText>
+        </FormControl>
+      </Box>
+    );
+  };
+
+  const renderAllowPaymentOnDeliveryField = ({
+    input,
+    label,
+    meta: { touched, error, invalid },
+    type,
+    id,
+    ...custom
+  }) => {
+    return (
+      <Box>
+        <FormControl variant="outlined">
+          {/* <InputLabel id="vendor_city">City</InputLabel> */}
+          <Select
+            labelId="allowPaymentOnDelivery"
+            id="allowPaymentOnDelivery"
+            value={allowPaymentOnDelivery}
+            onChange={handleAllowPaymentOnDeliveryChange}
+            //label="Allow Credit Deal"
+            style={{ width: 500, marginTop: 10, height: 38 }}
+            //{...input}
+          >
+            <MenuItem value={"false"}>No</MenuItem>
+            <MenuItem value={"true"}>Yes</MenuItem>
+          </Select>
+          <FormHelperText>Allow Payment On Delivery</FormHelperText>
+        </FormControl>
+      </Box>
+    );
+  };
+
   const buttonContent = () => {
     return <React.Fragment> Add State/Entity</React.Fragment>;
   };
@@ -323,6 +393,8 @@ function AddStateForm(props) {
         ? formValues.code
         : "ST-" + Math.floor(Math.random() * 10000),
       createdBy: props.userId,
+      allowCreditDeal: allowCreditDeal,
+      allowPaymentOnDelivery: allowPaymentOnDelivery,
     };
 
     if (data) {
@@ -446,7 +518,7 @@ function AddStateForm(props) {
           id="entityDealCode"
           name="entityDealCode"
           type="text"
-          helperText="Enter Entity Deal Code(Optional)"
+          helperText="Enter Entity Deal Code"
           component={renderEntityDealCodeField}
           style={{ marginTop: 10 }}
         />
@@ -458,6 +530,20 @@ function AddStateForm(props) {
           type="text"
           component={renderStateDescriptionField}
           style={{ marginTop: 10 }}
+        />
+        <Field
+          label=""
+          id="allowCreditDeal"
+          name="allowCreditDeal"
+          type="text"
+          component={renderAllowCreditDealField}
+        />
+        <Field
+          label=""
+          id="allowPaymentOnDelivery"
+          name="allowPaymentOnDelivery"
+          type="text"
+          component={renderAllowPaymentOnDeliveryField}
         />
 
         <Button

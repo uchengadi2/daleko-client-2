@@ -954,6 +954,10 @@ function ProductEditForm(props) {
   );
 
   const [isACreditDeal, setIsACreditDeal] = useState(params[0].isACreditDeal);
+  const [preferredEntityVariant, setPreferredEntityVariant] = useState(
+    params[0].preferredEntityVariant
+  );
+  const [dealSlug, setDealSlug] = useState(params[0].dealSlug);
 
   const [loading, setLoading] = useState(false);
 
@@ -1295,6 +1299,10 @@ function ProductEditForm(props) {
 
   const handleIsACreditDealChange = (event) => {
     setIsACreditDeal(event.target.value);
+  };
+
+  const handlePreferredEntityVariantChange = (event) => {
+    setPreferredEntityVariant(event.target.value);
   };
 
   const handleCommunityChange = (event) => {
@@ -2268,6 +2276,39 @@ function ProductEditForm(props) {
     );
   };
 
+  const renderPreferredEntityVariantField = ({
+    input,
+    label,
+    meta: { touched, error, invalid },
+    type,
+    id,
+    ...custom
+  }) => {
+    return (
+      <Box>
+        <FormControl variant="outlined">
+          {/* <InputLabel id="vendor_city">City</InputLabel> */}
+          <Select
+            labelId="preferredEntityVariant"
+            id="preferredEntityVariant"
+            value={preferredEntityVariant}
+            onChange={handlePreferredEntityVariantChange}
+            //label="Preferred Entity Variant"
+            style={{ width: 500, marginTop: 10, height: 38 }}
+            //{...input}
+          >
+            <MenuItem value={"not-applicable"}>Not Applicable</MenuItem>
+            <MenuItem value={"entity"}>This is an all Entity Deal</MenuItem>
+            <MenuItem value={"community"}>
+              This is an Entity Community Deal
+            </MenuItem>
+          </Select>
+          <FormHelperText>Preferred Entity Variant</FormHelperText>
+        </FormControl>
+      </Box>
+    );
+  };
+
   const buttonContent = () => {
     return <React.Fragment> Submit</React.Fragment>;
   };
@@ -2710,6 +2751,16 @@ function ProductEditForm(props) {
     form.append(
       "isACreditDeal",
       isACreditDeal ? isACreditDeal : params[0].isACreditDeal
+    );
+    form.append(
+      "dealSlug",
+      formValues.dealSlug ? formValues.dealSlug : params[0].dealSlug
+    );
+    form.append(
+      "preferredEntityVariant",
+      preferredEntityVariant
+        ? preferredEntityVariant
+        : params[0].preferredEntityVariant
     );
 
     if (formValues.imageCover) {
@@ -3299,6 +3350,41 @@ function ProductEditForm(props) {
               <Grid item style={{ width: "50%" }}>
                 <Field
                   label=""
+                  id="entity"
+                  name="entity"
+                  type="text"
+                  //helperText="Allow the Customer to Change Deal Quantity"
+                  component={renderEntityListField}
+                />
+              </Grid>
+              <Grid item style={{ marginLeft: 15, width: "47%" }}>
+                <Field
+                  label=""
+                  id="dealOwner"
+                  name="dealOwner"
+                  type="text"
+                  //helperText="Allow the Customer to Change Deal Quantity"
+                  component={renderDealOwnerField}
+                />
+              </Grid>
+            </Grid>
+          )}
+          {salesPreference === "deal" && (
+            <Field
+              label=""
+              id="preferredEntityVariant"
+              name="preferredEntityVariant"
+              //defaultValue={params[0].dealComment}
+              type="text"
+              //helperText="Deal Instruction Or Direction(optional)"
+              component={renderPreferredEntityVariantField}
+            />
+          )}
+          {salesPreference === "deal" && (
+            <Grid container direction="row" style={{ marginTop: 20 }}>
+              <Grid item style={{ width: "50%" }}>
+                <Field
+                  label=""
                   id="dealCode"
                   name="dealCode"
                   defaultValue={params[0].dealCode}
@@ -3533,7 +3619,7 @@ function ProductEditForm(props) {
               </Grid>
             </Grid>
           )}
-          {salesPreference === "deal" && (
+          {/* {salesPreference === "deal" && (
             <Grid container direction="row" style={{ marginTop: 20 }}>
               <Grid item style={{ width: "50%" }}>
                 <Field
@@ -3556,6 +3642,18 @@ function ProductEditForm(props) {
                 />
               </Grid>
             </Grid>
+          )} */}
+          {salesPreference === "deal" && (
+            <Field
+              label=""
+              id="dealSlug"
+              name="dealSlug"
+              defaultValue={params[0].dealSlug}
+              type="text"
+              helperText="Enter this Deal's Entity Slug"
+              component={renderEditableSingleLineField}
+              style={{ marginTop: 10 }}
+            />
           )}
 
           {salesPreference === "deal" && (

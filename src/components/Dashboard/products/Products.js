@@ -171,6 +171,8 @@ function Products(props) {
           gatewayFixedCharge: product.gatewayFixedCharge,
           gatewayRateCharge: product.gatewayRateCharge,
           isACreditDeal: product.isACreditDeal,
+          preferredEntityVariant: product.preferredEntityVariant,
+          dealSlug: product.dealSlug,
         });
       });
       setProductsList(allData);
@@ -492,6 +494,8 @@ function Products(props) {
         gatewayFixedCharge: product.gatewayFixedCharge,
         gatewayRateCharge: product.gatewayRateCharge,
         isACreditDeal: product.isACreditDeal,
+        preferredEntityVariant: product.preferredEntityVariant,
+        dealSlug: product.dealSlug,
       };
       rows.push(row);
     });
