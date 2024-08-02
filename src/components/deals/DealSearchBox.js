@@ -46,6 +46,7 @@ const useStyles = makeStyles((theme) => ({
     //height: 440,
     //height: "100%",
     width: "100%",
+    //width: 500,
 
     marginLeft: "0px",
     //borderRadius: 30,
@@ -297,6 +298,7 @@ export default function DealSearchBox(props) {
               padding: 1,
               borderRadius: 5,
               width: "100%",
+              //width: 500,
               marginLeft: "-18px",
             }}
           >

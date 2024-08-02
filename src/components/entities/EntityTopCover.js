@@ -246,53 +246,6 @@ export default function EntityTopCover(props) {
     <>
       {matchesMDUp ? (
         <Card className={classes.root} disableRipple={true}>
-          {/* <CardActionArea disableRipple> */}
-          {/* <Grid
-            container
-            //direction="row"
-            alignItems="center"
-            className={classes.background}
-            justifyContent={matchesSM ? "center" : "space-between"}
-            direction={matchesSM ? "column" : "row"}
-            style={{ marginTop: 5 }}
-          >
-            <Grid item style={{ width: "48%", border: "1px dotted grey" }}>
-              <CardContent disableRipple>
-                <Typography variant="h5" color="textSecondary" component="p">
-                  At the heart of eHealt Plus lies a passion for innovation and
-                  a commitment to excellence. Our products are the result of
-                  cutting-edge research, utilizing the finest ingredients to
-                  ensure unparalleled quality. We believe in the synergy of
-                  science and nature, creating a harmonious balance that
-                  reflects in the efficacy of our offerings.
-                </Typography>
-                <br />
-                <Typography variant="h5" color="textSecondary" component="p">
-                  Experience the eHealt Plus difference – a blend of science,
-                  nature, and unwavering commitment to your well-being.
-                </Typography>
-              </CardContent>
-            </Grid>
-
-            <Grid
-              item
-              style={{
-                width: "50%",
-                marginLeft: "1.7%",
-                border: "1px dotted grey",
-              }}
-            >
-              <CardContent disableRipple>
-                <Typography variant="h5" color="textSecondary" component="p">
-                  Indulge in the luxury of self-care, embrace the transformative
-                  power of our products, and embark on a path to radiant health
-                  and timeless well-being with eHealt Plus products. Welcome to
-                  a world where excellence meets elegance
-                </Typography>
-              </CardContent>
-            </Grid>
-          </Grid> */}
-
           {/** place the grid here */}
 
           <Grid
@@ -382,33 +335,6 @@ export default function EntityTopCover(props) {
                 </Typography>
               </Grid>
             </Grid>
-            {/* <Grid
-              container
-              direction="column"
-              style={{ marginLeft: 0, width: "22%", marginTop: 0 }}
-            >
-              <Grid
-                container
-                //direction="row"
-                alignItems="center"
-                className={classes.backgroundRetail}
-                justifyContent={matchesSM ? "center" : "space-between"}
-                direction={matchesSM ? "column" : "row"}
-                item
-                style={{ height: "80%", marginTop: 0, marginLeft: 50 }}
-              ></Grid>
-              <Grid item alignItems="center" style={{ height: "20%" }}>
-                <Button
-                  variant="contained"
-                  component={Link}
-                  to="/retail"
-                  onClick={() => <RetailHome />}
-                  className={classes.actionWholesaleButton}
-                >
-                  Buy Retail
-                </Button>
-              </Grid>
-            </Grid> */}
           </Grid>
           {/* </CardActionArea> */}
         </Card>
@@ -417,12 +343,12 @@ export default function EntityTopCover(props) {
           <Grid
             container
             direction="row"
-            style={{ marginTop: 15, height: 180 }}
+            style={{ marginTop: 15, height: 380 }}
           >
             <Grid
               container
               direction="column"
-              style={{ marginLeft: 20, width: "22%", marginTop: 0 }}
+              style={{ marginLeft: 10, width: "30%", marginTop: 0 }}
             >
               <CardActionArea></CardActionArea>
               <Grid
@@ -433,29 +359,24 @@ export default function EntityTopCover(props) {
                 justifyContent={matchesSM ? "center" : "space-between"}
                 direction={matchesSM ? "column" : "row"}
                 item
-                style={{ height: "70%", marginTop: 0, marginLeft: 15 }}
+                style={{ height: "25%", marginTop: 0, marginLeft: 10 }}
               ></Grid>
-              <Grid item alignItems="center" style={{ height: "30%" }}>
-                <Button
-                  variant="contained"
-                  component={Link}
-                  to="/derica"
-                  onClick={() => <DericaHome />}
-                  className={classes.actionButton}
-                  style={{ width: 75, marginLeft: 14, fontSize: 8 }}
-                  sx={{
-                    textAlign: "left",
-                    fontSize: 8,
-                  }}
-                >
-                  Buy In Derica
-                </Button>
+              <Grid
+                item
+                alignItems="center"
+                style={{ height: "60%", marginLeft: 10 }}
+              >
+                <Typography style={{ fontSize: 11 }}>
+                  We offer a wide range of high-quality essential food items to
+                  &nbsp;{props.entityName} staff at affordable prices,
+                  leveraging the collective buying power of their workforce
+                </Typography>
               </Grid>
             </Grid>
             <Grid
               container
               direction="column"
-              style={{ marginLeft: 0, width: "22%", marginTop: 0 }}
+              style={{ marginLeft: 0, width: "30%", marginTop: 0 }}
             >
               <Grid
                 container
@@ -465,29 +386,25 @@ export default function EntityTopCover(props) {
                 justifyContent={matchesSM ? "center" : "space-between"}
                 direction={matchesSM ? "column" : "row"}
                 item
-                style={{ height: "70%", marginTop: 0, marginLeft: 15 }}
+                style={{ height: "25%", marginTop: 0, marginLeft: 20 }}
               ></Grid>
-              <Grid item alignItems="center" style={{ height: "30%" }}>
-                <Button
-                  variant="contained"
-                  component={Link}
-                  to="/paint"
-                  onClick={() => <PaintHome />}
-                  className={classes.actionButton}
-                  style={{ width: 75, marginLeft: 18, fontSize: 8 }}
-                  sx={{
-                    textAlign: "left",
-                  }}
-                >
-                  Buy In Paint
-                </Button>
+              <Grid
+                item
+                alignItems="center"
+                style={{ height: "60%", marginLeft: 25 }}
+              >
+                <Typography style={{ fontSize: 11 }}>
+                  We deliver these food items directly to the various locations
+                  and branches of {props.entityName} at no or at an affordable
+                  cost and within a specified timeframe
+                </Typography>
               </Grid>
             </Grid>
 
             <Grid
               container
               direction="column"
-              style={{ marginLeft: 0, width: "22%", marginTop: 0 }}
+              style={{ marginLeft: 0, width: "30%", marginTop: 0 }}
             >
               <Grid
                 container
@@ -497,55 +414,25 @@ export default function EntityTopCover(props) {
                 justifyContent={matchesSM ? "center" : "space-between"}
                 direction={matchesSM ? "column" : "row"}
                 item
-                style={{ height: "70%", marginTop: 0, marginLeft: 15 }}
+                style={{ height: "25%", marginTop: 0, marginLeft: 20 }}
               ></Grid>
-              <Grid item alignItems="center" style={{ height: "30%" }}>
-                <Button
-                  variant="contained"
-                  component={Link}
-                  to="/wholesale"
-                  onClick={() => <WholesaleHome />}
-                  className={classes.actionWholesaleButton}
-                  style={{ width: 75, marginLeft: 18, fontSize: 8 }}
-                  sx={{
-                    textAlign: "left",
-                  }}
-                >
-                  Buy WholeSale
-                </Button>
+              <Grid
+                item
+                alignItems="center"
+                style={{ height: "60%", marginLeft: 25 }}
+              >
+                <Typography style={{ fontSize: 11 }}>
+                  We offer multiple payment options including Pay-on-Delivery,
+                  Online Payment, Cooperative Society payments, Target Scheme,
+                  and Credit Scheme, among others
+                </Typography>
               </Grid>
             </Grid>
-            <Grid
+            {/* <Grid
               container
               direction="column"
               style={{ marginLeft: 0, width: "22%", marginTop: 0 }}
-            >
-              <Grid
-                container
-                //direction="row"
-                alignItems="center"
-                className={classes.backgroundRetail}
-                justifyContent={matchesSM ? "center" : "space-between"}
-                direction={matchesSM ? "column" : "row"}
-                item
-                style={{ height: "70%", marginTop: 0, marginLeft: 15 }}
-              ></Grid>
-              <Grid item alignItems="center" style={{ height: "30%" }}>
-                <Button
-                  variant="contained"
-                  component={Link}
-                  to="/retail"
-                  onClick={() => <RetailHome />}
-                  className={classes.actionButton}
-                  style={{ width: 75, marginLeft: 18, fontSize: 8 }}
-                  sx={{
-                    textAlign: "left",
-                  }}
-                >
-                  Buy Retail
-                </Button>
-              </Grid>
-            </Grid>
+            ></Grid> */}
           </Grid>
         </Card>
       )}

@@ -52,7 +52,6 @@ const useStyles = makeStyles((theme) => ({
     width: "100%",
     height: "80vh",
     // height: "100%",
-    marginTop: "12em",
     position: "relative",
     "& video": {
       objectFit: "cover",
@@ -60,11 +59,11 @@ const useStyles = makeStyles((theme) => ({
   },
   rootMobile: {
     maxWidth: "100%",
-    //width: "100%",
-    //width: 400,
+    width: "100%",
+
     height: "80vh",
     // height: "100%",
-    marginTop: "8.5em",
+    marginTop: "8em",
     position: "relative",
     "& video": {
       objectFit: "cover",
@@ -76,6 +75,16 @@ const useStyles = makeStyles((theme) => ({
     left: 0,
     width: "99rem",
     height: "42rem",
+    backgroundColor: "rgba(0, 0, 0, 0.2)",
+  },
+  overlayMobile: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    //width: "99rem",
+    width: "100%",
+    height: 60,
+
     backgroundColor: "rgba(0, 0, 0, 0.2)",
   },
   animation: {
@@ -98,30 +107,11 @@ const useStyles = makeStyles((theme) => ({
     fontWeight: 500,
     "&:hover": {
       backgroundColor: theme.palette.secondary.light,
-      color: "white",
-    },
-  },
-  estimateButtonMobile: {
-    ...theme.typography.estimate,
-    backgroundColor: theme.palette.common.orange,
-    borderRadius: 50,
-    height: 45,
-    width: 220,
-    marginRight: 10,
-    marginLeft: 20,
-    fontWeight: 500,
-    "&:hover": {
-      backgroundColor: theme.palette.secondary.light,
-      color: "white",
     },
   },
   buttonContainer: {
-    marginTop: "3.9em",
-    marginLeft: "6.9em",
-  },
-  buttonContainerMobile: {
-    marginTop: "4.2em",
-    marginLeft: "3.5em",
+    marginTop: "2.9em",
+    marginLeft: "1.5em",
   },
   learnButtonHero: {
     ...theme.typography.learnButton,
@@ -195,14 +185,6 @@ const useStyles = makeStyles((theme) => ({
       padding: 25,
     },
   },
-
-  topCover: {
-    marginTop: "20em",
-    [theme.breakpoints.down("sm")]: {
-      padding: 25,
-    },
-  },
-
   revolutionBackground: {
     backgroundImage: `url(${revolutionBackground})`,
     backgroundPosition: "center",
@@ -240,13 +222,27 @@ const useStyles = makeStyles((theme) => ({
     backgroundSize: "cover",
     //backgroundAttachment: "fixed",
     backgroundRepeat: "no-repeat",
-    height: "17em",
+    height: "60em",
     width: "100%",
     [theme.breakpoints.down("md")]: {
       // backgroundImage: `url(${mobileBackground})`,
       backgroundAttachment: "inherit",
     },
   },
+
+  // background: {
+  //   backgroundImage: `url(${background})`,
+  //   backgroundPosition: "center",
+  //   backgroundSize: "cover",
+  //   //backgroundAttachment: "fixed",
+  //   backgroundRepeat: "no-repeat",
+  //   height: "17em",
+  //   width: "100%",
+  //   [theme.breakpoints.down("md")]: {
+  //     // backgroundImage: `url(${mobileBackground})`,
+  //     backgroundAttachment: "inherit",
+  //   },
+  // },
   backgroundMobile: {
     backgroundImage: `url(${background})`,
     backgroundPosition: "center",
@@ -264,26 +260,6 @@ const useStyles = makeStyles((theme) => ({
   footer: {
     width: "100%",
     marginTop: "10rem",
-  },
-  category: {
-    marginTop: "1rem",
-    marginBottom: "2rem",
-  },
-  vendor: {
-    marginTop: "5rem",
-    marginBottom: "5rem",
-  },
-  logistics: {
-    marginTop: "15rem",
-    marginBottom: "5rem",
-  },
-  promotion: {
-    marginTop: "5rem",
-    marginBottom: "5rem",
-  },
-  features: {
-    marginTop: "5rem",
-    marginBottom: "5rem",
   },
 }));
 
@@ -1104,12 +1080,13 @@ const Entities = (props) => {
                   playing
                   loop
                   muted
-                  // width="100%"
-                  // height="100%"
-                  width="99rem"
-                  height="49rem"
+                  width="100%"
+                  height="100%"
+                  // width="99rem"
+                  // height="49rem"
+                  //height="29rem"
                 />
-                <div className={classes.overlay}>
+                <div className={classes.overlayMobile}>
                   {/* <img
                   src={logo}
                   alt="Udaraa Marketplace"
@@ -1127,26 +1104,32 @@ const Entities = (props) => {
                   >
                     <Grid sm item className={classes.heroTextContainer}>
                       <Typography
-                        variant={matchesSM ? "subtitle2" : "h2"}
+                        //variant={matchesSM ? "subtitle2" : "h5"}
                         align="left"
-                        style={{ marginTop: "16rem" }}
+                        style={{
+                          marginTop: -30,
+                          fontWeight: 500,
+                          fontSize: 11,
+                        }}
                       >
                         <span style={{ marginLeft: matchesSM ? 20 : 5 }}>
                           {" "}
-                          As direct Partner to Manufacturers and Dealers
+                          We utilize the Power of Numbers and Bulk Purchasing
                         </span>{" "}
                         <br />
-                        <span style={{ marginLeft: matchesSM ? 20 : 50 }}>
-                          of Fast Moving Goods & Commodities,
+                        <span style={{ marginLeft: matchesSM ? 30 : 50 }}>
+                          to provide Quality & Affordable Food Items to
                         </span>
                         <br />
-                        <span style={{ marginLeft: matchesSM ? 20 : 50 }}>
-                          We assist Retailers and Businesses
+                        <span style={{ marginLeft: matchesSM ? 50 : 115 }}>
+                          {entityTitle}
                         </span>
                         <br />
-                        <span style={{ marginLeft: matchesSM ? 50 : 200 }}>
-                          to Re-stock
-                        </span>
+                        {extend && (
+                          <span style={{ marginLeft: matchesSM ? 70 : 200 }}>
+                            {extendTitle}
+                          </span>
+                        )}
                       </Typography>
                       {matchesMD ? (
                         <Grid
@@ -1219,6 +1202,7 @@ const Entities = (props) => {
           {/* <FreezePriceAdDealPage />
           <TopCoverDeal preference={preference} />
           <DealPropositionPage /> */}
+          <EntityTopCover preference={preference} entityName={entityName} />
           <DealSearchBox
             updateDealHandler={updateDealHandler}
             dealHandler={dealHandler}
