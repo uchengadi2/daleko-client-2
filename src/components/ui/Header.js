@@ -159,7 +159,35 @@ const useStyles = makeStyles((theme) => ({
     height: "45px",
     fontSize: "13px",
     fontWeight: "500px",
-    width: "40px",
+    width: "20px",
+    "&:hover": {
+      backgroundColor: theme.palette.secondary.light,
+      color: "white",
+    },
+  },
+  order: {
+    ...theme.typography.estimate,
+    borderRadius: "250px",
+    marginLeft: "3px",
+    marginRight: "2px",
+    height: "45px",
+    fontSize: "13px",
+    fontWeight: "500px",
+    width: "20px",
+    "&:hover": {
+      backgroundColor: theme.palette.secondary.light,
+      color: "white",
+    },
+  },
+  dashboard: {
+    ...theme.typography.estimate,
+    borderRadius: "250px",
+    marginLeft: "3px",
+    marginRight: "2px",
+    height: "45px",
+    fontSize: "13px",
+    fontWeight: "500px",
+    width: "30px",
     "&:hover": {
       backgroundColor: theme.palette.secondary.light,
       color: "white",
@@ -168,8 +196,8 @@ const useStyles = makeStyles((theme) => ({
   search: {
     //...theme.typography.estimate,
     borderRadius: "250px",
-    marginLeft: "5px",
-    marginRight: "5px",
+    marginLeft: "15px",
+    marginRight: "0px",
     //height: "45px",
     width: "70px",
     backgroundColor: theme.palette.secondary.light,
@@ -199,7 +227,7 @@ const useStyles = makeStyles((theme) => ({
     marginLeft: "3px",
     marginRight: "2px",
     height: "45px",
-    width: "70px",
+    width: "40px",
     fontSize: "13px",
     fontWeight: "500px",
     "&:hover": {
@@ -213,7 +241,7 @@ const useStyles = makeStyles((theme) => ({
     marginLeft: "2px",
     marginRight: "1px",
     height: "45px",
-    width: "60px",
+    width: "50px",
     fontSize: "13px",
     fontWeight: "500px",
     "&:hover": {
@@ -227,7 +255,7 @@ const useStyles = makeStyles((theme) => ({
     marginLeft: "2px",
     marginRight: "1px",
     height: "45px",
-    width: "60px",
+    width: "50px",
     fontSize: "13px",
     fontWeight: "500px",
     "&:hover": {
@@ -241,7 +269,7 @@ const useStyles = makeStyles((theme) => ({
     marginLeft: "3px",
     marginRight: "2px",
     height: "45px",
-    width: "50px",
+    width: "30px",
     fontSize: "13px",
     fontWeight: "500px",
     "&:hover": {
@@ -397,6 +425,7 @@ const Header = (props) => {
     fetchData().catch(console.error);
   }, []);
 
+  console.log("user id is:", props.userId);
   useEffect(() => {
     const fetchData = async () => {
       let allData = [];
@@ -604,7 +633,7 @@ const Header = (props) => {
               disableRipple
               component={Link}
               to={`/dashboard/maindashboard`}
-              className={classes.cart}
+              className={classes.dashboard}
             >
               Dashboard
             </Button>
@@ -615,7 +644,7 @@ const Header = (props) => {
             component={Link}
             // to={`/carts/${props.userId}`}
             to={`/orders/orders`}
-            className={classes.cart}
+            className={classes.order}
           >
             {/* <img alt="company logo" src={logo} className={classes.logo} /> */}
             Orders
@@ -1336,7 +1365,7 @@ const Header = (props) => {
                   backgroundColor: "white",
                   padding: 10,
                   borderRadius: 20,
-                  width: 500,
+                  width: props.userId ? 500 : 450,
                 }}
               >
                 {renderCategoryField()}
