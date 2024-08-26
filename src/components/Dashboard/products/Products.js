@@ -24,6 +24,7 @@ import api from "./../../../apis/local";
 import ProductForm from "./ProductForm";
 import ProductDeleteForm from "./ProductDeleteForm";
 import ProductEditForm from "./ProductEditForm";
+import ProductDuplicateForm from "./ProductDuplicateForm";
 import OnboardProductBatchForm from "./OnboardProductBatchForm";
 
 const Item = styled(Paper)(({ theme }) => ({
@@ -54,6 +55,7 @@ function Products(props) {
   const matchesXS = useMediaQuery(theme.breakpoints.down("xs"));
   const [open, setOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
+  const [duplicateOpen, setDuplicateOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [onBoardOpen, setOnBoardOpen] = useState(false);
   const [communitySalesOpen, setCommunitySalesOpen] = useState(false);
@@ -287,6 +289,9 @@ function Products(props) {
   const handleEditDialogOpenStatus = () => {
     setEditOpen(false);
   };
+  const handleDuplicateDialogOpenStatus = () => {
+    setDuplicateOpen(false);
+  };
 
   const handleOnBoardDialogOpenStatus = () => {
     setOnBoardOpen(false);
@@ -302,6 +307,10 @@ function Products(props) {
 
   const handleEditOpen = () => {
     setEditOpen(true);
+  };
+
+  const handleDuplicateOpen = () => {
+    setDuplicateOpen(true);
   };
 
   const handleDeleteOpen = () => {
@@ -496,6 +505,8 @@ function Products(props) {
         isACreditDeal: product.isACreditDeal,
         preferredEntityVariant: product.preferredEntityVariant,
         dealSlug: product.dealSlug,
+        imageCover: product.imageCover,
+        images: product.images,
       };
       rows.push(row);
     });
@@ -531,11 +542,11 @@ function Products(props) {
       <Grid container spacing={1} direction="column">
         <Grid item xs>
           <Grid container spacing={2}>
-            <Grid item xs={8}>
+            <Grid item xs={6.7}>
               {/* <Item>xs=8</Item> */}
               <Typography variant="h4">Products</Typography>
             </Grid>
-            <Grid item xs={4}>
+            <Grid item xs={5.3}>
               <div>
                 <Stack direction="row" spacing={1.5}>
                   <Button variant="contained" onClick={handleAddOpen}>
@@ -581,6 +592,38 @@ function Products(props) {
                         userId={userId}
                         params={selectedRows}
                         handleEditDialogOpenStatus={handleEditDialogOpenStatus}
+                        handleFailedSnackbar={handleFailedSnackbar}
+                        handleSuccessfulEditSnackbar={
+                          handleSuccessfulEditSnackbar
+                        }
+                        renderProductEdittedUpdateCounter={
+                          renderProductEdittedUpdateCounter
+                        }
+                      />
+                    </DialogContent>
+                  </Dialog>
+                  <Button
+                    variant="contained"
+                    onClick={handleDuplicateOpen}
+                    disabled={rowSelected ? false : true}
+                  >
+                    Duplicate
+                  </Button>
+                  <Dialog
+                    //style={{ zIndex: 1302 }}
+                    fullScreen={matchesXS}
+                    open={duplicateOpen}
+                    // onClose={() => [setOpen(false), history.push("/utilities/countries")]}
+                    onClose={() => [setDuplicateOpen(false)]}
+                  >
+                    <DialogContent>
+                      <ProductDuplicateForm
+                        token={token}
+                        userId={userId}
+                        params={selectedRows}
+                        handleDuplicateDialogOpenStatus={
+                          handleDuplicateDialogOpenStatus
+                        }
                         handleFailedSnackbar={handleFailedSnackbar}
                         handleSuccessfulEditSnackbar={
                           handleSuccessfulEditSnackbar

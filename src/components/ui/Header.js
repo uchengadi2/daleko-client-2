@@ -168,10 +168,10 @@ const useStyles = makeStyles((theme) => ({
   search: {
     //...theme.typography.estimate,
     borderRadius: "250px",
-    marginLeft: "10px",
-    marginRight: "0px",
+    marginLeft: "5px",
+    marginRight: "5px",
     //height: "45px",
-    // width: "30px",
+    width: "70px",
     backgroundColor: theme.palette.secondary.light,
     color: "white",
     "&:hover": {
@@ -213,7 +213,7 @@ const useStyles = makeStyles((theme) => ({
     marginLeft: "2px",
     marginRight: "1px",
     height: "45px",
-    width: "70px",
+    width: "60px",
     fontSize: "13px",
     fontWeight: "500px",
     "&:hover": {
@@ -227,7 +227,7 @@ const useStyles = makeStyles((theme) => ({
     marginLeft: "2px",
     marginRight: "1px",
     height: "45px",
-    width: "70px",
+    width: "60px",
     fontSize: "13px",
     fontWeight: "500px",
     "&:hover": {
@@ -316,6 +316,8 @@ const useStyles = makeStyles((theme) => ({
     "& .MuiFilledInput-root": {
       background: "white",
     },
+    maxWidth: "100%",
+    width: "100%",
   },
   rootMobile: {
     maxWidth: "100%",
