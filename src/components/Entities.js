@@ -840,8 +840,6 @@ const Entities = (props) => {
     fetchData().catch(console.error);
   }, [updateShoppingPath, preference, deal, entity]);
 
-  console.log("tis is the preference:", preference);
-
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);

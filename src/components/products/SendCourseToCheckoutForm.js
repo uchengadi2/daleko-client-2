@@ -460,7 +460,8 @@ function SendCourseToCheckoutForm(props) {
   const renderPreferredNumberOfInstallmentField = () => {
     return (
       <TextField
-        label="Enter Your Preferred Number of Installments"
+        //label="Enter Your Preferred Number of Installments"
+        helperText="Enter Your Preferred Number of Installments"
         variant="outlined"
         fullWidth
         type="number"
@@ -470,7 +471,7 @@ function SendCourseToCheckoutForm(props) {
         style={{
           marginTop: 20,
           marginLeft: -13,
-          marginBottom: 20,
+          marginBottom: 50,
           width: 300,
           height: 30,
         }}
@@ -478,8 +479,6 @@ function SendCourseToCheckoutForm(props) {
       />
     );
   };
-  console.log("dealNumberOfInstallments:", dealNumberOfInstallments);
-  console.log("isACreditDeal is:", isACreditDeal);
 
   const renderTotalField = ({
     input,
@@ -1320,7 +1319,12 @@ function SendCourseToCheckoutForm(props) {
               style={{ width: 300, marginBottom: 20 }}
             />
           </Grid> */}
-          <Container>{renderPreferredNumberOfInstallmentField()}</Container>
+          {props.isACreditDeal && props.isAContributoryDeal && (
+            <Container>{renderPreferredNumberOfInstallmentField()}</Container>
+          )}
+          {!props.isACreditDeal && props.isAContributoryDeal && (
+            <Container>{renderPreferredNumberOfInstallmentField()}</Container>
+          )}
         </Grid>
 
         {props.pricingMechanism === "pricing" &&
