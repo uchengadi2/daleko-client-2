@@ -2438,7 +2438,7 @@ function ProductForm(props) {
     form.append("keyword3", formValues.keyword3 ? formValues.keyword3 : null);
     form.append(
       "minimumQuantity",
-      formValues.minimumQuantity ? formValues.minimumQuantity : 0
+      formValues.minimumQuantity ? formValues.minimumQuantity : 1
     );
 
     form.append(

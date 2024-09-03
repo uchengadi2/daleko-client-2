@@ -1244,6 +1244,8 @@ function SendCourseToCheckoutForm(props) {
 
   const onSubmitABidRequest = (formValues) => {};
 
+  console.log("Just testing");
+
   return (
     <form id="sendCourseToCheckoutForm">
       <Box

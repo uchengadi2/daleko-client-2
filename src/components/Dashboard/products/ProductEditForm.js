@@ -960,6 +960,8 @@ function ProductEditForm(props) {
   const [dealSlug, setDealSlug] = useState(params[0].dealSlug);
 
   const [loading, setLoading] = useState(false);
+  const [imageCover, setImageCover] = useState(params[0].imageCover);
+  const [images, setImages] = useState(params[0].images);
 
   const dispatch = useDispatch();
 
@@ -2704,14 +2706,16 @@ function ProductEditForm(props) {
       "isAContributoryDeal",
       isAContributoryDeal ? isAContributoryDeal : params[0].isAContributoryDeal
     );
-    form.append("dealOwnerEntity", entity ? entity : params[0].dealOwnerEntity);
-    form.append("dealOwner", community ? community : params[0].dealOwner);
-    // form.append(
-    //   "includeGatewayChargesInPrice",
-    //   includeGatewayChargesInPrice
-    //     ? includeGatewayChargesInPrice
-    //     : params[0].includeGatewayChargesInPrice
-    // );
+    if (salesPreference === "deal") {
+      form.append(
+        "dealOwnerEntity",
+        entity ? entity : params[0].dealOwnerEntity
+      );
+    }
+
+    if (salesPreference === "deal") {
+      form.append("dealOwner", community ? community : params[0].dealOwner);
+    }
 
     form.append(
       "dealInitialPercentageContribution",
@@ -2763,12 +2767,28 @@ function ProductEditForm(props) {
         : params[0].preferredEntityVariant
     );
 
+    // if (formValues.imageCover) {
+    //   form.append("imageCover", formValues.imageCover[0]);
+    // }
+
+    // for (let i = 0; i < uploadedFiles.length; i++) {
+    //   form.append(`images`, uploadedFiles[i]);
+    // }
+
     if (formValues.imageCover) {
       form.append("imageCover", formValues.imageCover[0]);
+    } else if (imageCover) {
+      form.append("imageCover", imageCover);
     }
 
-    for (let i = 0; i < uploadedFiles.length; i++) {
-      form.append(`images`, uploadedFiles[i]);
+    if (uploadedFiles.length > 0) {
+      for (let i = 0; i < uploadedFiles.length; i++) {
+        form.append(`images`, uploadedFiles[i]);
+      }
+    } else if (images.length > 0) {
+      for (let i = 0; i < images.length; i++) {
+        form.append(`images`, images[i]);
+      }
     }
 
     if (form) {

@@ -963,9 +963,6 @@ function ProductDuplicateForm(props) {
   const [imageCover, setImageCover] = useState(params[0].imageCover);
   const [images, setImages] = useState(params[0].images);
 
-  console.log("image cover is:", imageCover);
-  console.log("images are:", images);
-
   const dispatch = useDispatch();
 
   // useEffect(() => {
@@ -2318,6 +2315,11 @@ function ProductDuplicateForm(props) {
     return <React.Fragment> Submit</React.Fragment>;
   };
 
+  console.log(
+    "params[0].communityDeliveryType:",
+    params[0].communityDeliveryType
+  );
+
   const onSubmit = (formValues) => {
     setLoading(true);
 
@@ -2493,7 +2495,14 @@ function ProductDuplicateForm(props) {
       "priceLabel",
       formValues.priceLabel ? formValues.priceLabel : params[0].priceLabel
     );
-    form.append("slug", formValues.slug ? formValues.slug : params[0].slug);
+    form.append(
+      "slug",
+      formValues.slug
+        ? formValues.slug
+        : params[0].slug
+        ? params[0].slug + "-" + Math.floor(Math.random() * 100000000000)
+        : null
+    );
     form.append("brand", formValues.brand ? formValues.brand : params[0].brand);
     form.append(
       "barcode",
@@ -2504,6 +2513,10 @@ function ProductDuplicateForm(props) {
       formValues.weightPerUnit
         ? formValues.weightPerUnit
         : params[0].weightPerUnit
+    );
+    form.append(
+      "productType",
+      productType ? productType : params[0].productType
     );
 
     form.append("sku", formValues.sku ? formValues.sku : params[0].sku);
@@ -2603,10 +2616,6 @@ function ProductDuplicateForm(props) {
       formValues.communityInstruction
         ? formValues.communityInstruction
         : params[0].communityInstruction
-    );
-    form.append(
-      "productType",
-      productType ? productType : params[0].productType
     );
     form.append(
       "dealCode",
@@ -2709,14 +2718,23 @@ function ProductDuplicateForm(props) {
       "isAContributoryDeal",
       isAContributoryDeal ? isAContributoryDeal : params[0].isAContributoryDeal
     );
-    form.append("dealOwnerEntity", entity ? entity : params[0].dealOwnerEntity);
-    form.append("dealOwner", community ? community : params[0].dealOwner);
-    // form.append(
-    //   "includeGatewayChargesInPrice",
-    //   includeGatewayChargesInPrice
-    //     ? includeGatewayChargesInPrice
-    //     : params[0].includeGatewayChargesInPrice
-    // );
+
+    if (salesPreference === "deal") {
+      form.append(
+        "dealOwnerEntity",
+        entity ? entity : params[0].dealOwnerEntity
+      );
+    }
+    if (salesPreference === "deal") {
+      form.append("dealOwner", community ? community : params[0].dealOwner);
+    }
+
+    form.append(
+      "includeGatewayChargesInPrice",
+      includeGatewayChargesInPrice
+        ? includeGatewayChargesInPrice
+        : params[0].includeGatewayChargesInPrice
+    );
 
     form.append(
       "dealInitialPercentageContribution",
@@ -2730,27 +2748,6 @@ function ProductDuplicateForm(props) {
       formValues.dealMaximumInstallmentAllowed
         ? formValues.dealMaximumInstallmentAllowed
         : params[0].dealMaximumInstallmentAllowed
-    );
-
-    form.append(
-      "includeGatewayChargesInPrice",
-      includeGatewayChargesInPrice
-        ? includeGatewayChargesInPrice
-        : params[0].includeGatewayChargesInPrice
-    );
-
-    form.append(
-      "gatewayFixedCharge",
-      formValues.gatewayFixedCharge
-        ? formValues.gatewayFixedCharge
-        : params[0].gatewayFixedCharge
-    );
-
-    form.append(
-      "gatewayRateCharge",
-      formValues.gatewayRateCharge
-        ? formValues.gatewayRateCharge
-        : params[0].gatewayRateCharge
     );
 
     form.append(
@@ -2768,23 +2765,414 @@ function ProductDuplicateForm(props) {
         : params[0].preferredEntityVariant
     );
 
-    if (imageCover) {
-      //form.append("imageCover", formValues.imageCover[0]);
-      form.append(
-        "imageCover",
-        formValues.imageCover ? formValues.imageCover[0] : imageCover
-      );
+    form.append(
+      "gatewayFixedCharge",
+      formValues.gatewayFixedCharge
+        ? formValues.gatewayFixedCharge
+        : params[0].gatewayFixedCharge
+    );
+
+    form.append(
+      "gatewayRateCharge",
+      formValues.gatewayRateCharge
+        ? formValues.gatewayRateCharge
+        : params[0].gatewayRateCharge
+    );
+
+    if (formValues.imageCover) {
+      form.append("imageCover", formValues.imageCover[0]);
+    } else if (imageCover) {
+      form.append("imageCover", imageCover);
     }
 
-    if (uploadedFiles) {
+    if (uploadedFiles.length > 0) {
       for (let i = 0; i < uploadedFiles.length; i++) {
         form.append(`images`, uploadedFiles[i]);
       }
-    } else {
+    } else if (images.length > 0) {
       for (let i = 0; i < images.length; i++) {
         form.append(`images`, images[i]);
       }
     }
+
+    // //sales preference ==== deal
+
+    // if (salesPreference === "deal") {
+    //   // const form = new FormData();
+    //   form.append("name", formValues.name ? formValues.name : params[0].name);
+    //   form.append(
+    //     "configuration",
+    //     formValues.configuration
+    //       ? formValues.configuration
+    //       : params[0].configuration
+    //   );
+    //   form.append(
+    //     "isFeaturedProduct",
+    //     isFeaturedProduct ? isFeaturedProduct : params[0].isFeaturedProduct
+    //   );
+    //   form.append(
+    //     "shortDescription",
+    //     formValues.shortDescription
+    //       ? formValues.shortDescription
+    //       : params[0].shortDescription
+    //   );
+    //   form.append(
+    //     "fullDescription",
+    //     formValues.fullDescription
+    //       ? formValues.fullDescription
+    //       : params[0].fullDescription
+    //   );
+
+    //   form.append("category", category ? category : params[0].category);
+    //   form.append(
+    //     "displayOnStore",
+    //     displayOnStore ? displayOnStore : params[0].displayOnStore
+    //   );
+    //   form.append(
+    //     "stockStatus",
+    //     stockStatus ? stockStatus : params[0].stockStatus
+    //   );
+    //   form.append("unit", unit ? unit : params[0].unit);
+    //   form.append(
+    //     "salesPreference",
+    //     salesPreference ? salesPreference : params[0].salesPreference
+    //   );
+    //   form.append(
+    //     "allowSubscription",
+    //     allowSubscription ? allowSubscription : params[0].allowSubscription
+    //   );
+    //   form.append(
+    //     "pricingMechanism",
+    //     pricingMechanism ? pricingMechanism : params[0].pricingMechanism
+    //   );
+    //   form.append("isVatable", isVatable ? isVatable : params[0].isVatable);
+    //   form.append("hasVariant", hasVariant ? hasVariant : params[0].hasVariant);
+
+    //   form.append("currency", currency ? currency : params[0].currency);
+    //   form.append("createdBy", userId);
+
+    //   form.append(
+    //     "pricePerUnit",
+    //     formValues.pricePerUnit
+    //       ? formValues.pricePerUnit
+    //       : params[0].pricePerUnit
+    //   );
+    //   form.append(
+    //     "keyword1",
+    //     formValues.keyword1 ? formValues.keyword1 : params[0].keyword1
+    //   );
+    //   form.append(
+    //     "keyword2",
+    //     formValues.keyword2 ? formValues.keyword2 : params[0].keyword2
+    //   );
+    //   form.append(
+    //     "keyword3",
+    //     formValues.keyword3 ? formValues.keyword3 : params[0].keyword3
+    //   );
+    //   form.append(
+    //     "minimumQuantity",
+    //     formValues.minimumQuantity
+    //       ? formValues.minimumQuantity
+    //       : params[0].minimumQuantity
+    //   );
+
+    //   form.append(
+    //     "priceLabel",
+    //     formValues.priceLabel ? formValues.priceLabel : params[0].priceLabel
+    //   );
+    //   form.append("slug", formValues.slug ? formValues.slug : params[0].slug);
+    //   form.append(
+    //     "brand",
+    //     formValues.brand ? formValues.brand : params[0].brand
+    //   );
+    //   form.append(
+    //     "barcode",
+    //     formValues.barcode ? formValues.barcode : params[0].barcode
+    //   );
+    //   form.append(
+    //     "weightPerUnit",
+    //     formValues.weightPerUnit
+    //       ? formValues.weightPerUnit
+    //       : params[0].weightPerUnit
+    //   );
+
+    //   form.append("sku", formValues.sku ? formValues.sku : params[0].sku);
+    //   form.append(
+    //     "marketPricingCondition",
+    //     formValues.marketPricingCondition
+    //       ? formValues.marketPricingCondition
+    //       : params[0].marketPricingCondition
+    //   );
+    //   form.append(
+    //     "deliverability",
+    //     formValues.deliverability
+    //       ? formValues.deliverability
+    //       : params[0].deliverability
+    //   );
+    //   form.append(
+    //     "pickupInfo",
+    //     formValues.pickupInfo ? formValues.pickupInfo : params[0].pickupInfo
+    //   );
+
+    //   form.append(
+    //     "allowPriceFreezing",
+    //     allowPriceFreezing ? allowPriceFreezing : params[0].allowPriceFreezing
+    //   );
+    //   form.append(
+    //     "allowFreezedPriceLowBound",
+    //     allowPriceFreezing === true
+    //       ? allowFreezedPriceLowBound
+    //         ? allowFreezedPriceLowBound
+    //         : params[0].allowFreezedPriceLowBound
+    //       : 0
+    //   );
+    //   form.append(
+    //     "freezedPriceLowBound",
+    //     allowPriceFreezing === true
+    //       ? formValues.freezedPriceLowBound
+    //         ? formValues.freezedPriceLowBound
+    //         : params[0].freezedPriceLowBound
+    //       : 0
+    //   );
+    //   form.append(
+    //     "chargesPerWeekOnFreezedPriceServiceWithoutPriceLowBound",
+    //     allowPriceFreezing === true
+    //       ? formValues.chargesPerWeekOnFreezedPriceServiceWithoutPriceLowBound
+    //         ? formValues.chargesPerWeekOnFreezedPriceServiceWithoutPriceLowBound
+    //         : params[0].chargesPerWeekOnFreezedPriceServiceWithoutPriceLowBound
+    //       : 0
+    //   );
+    //   form.append(
+    //     "chargesPerWeekOnFreezedPriceServiceWithPriceLowBound",
+    //     allowPriceFreezing === true
+    //       ? formValues.chargesPerWeekOnFreezedPriceServiceWithPriceLowBound
+    //         ? formValues.chargesPerWeekOnFreezedPriceServiceWithPriceLowBound
+    //         : params[0].chargesPerWeekOnFreezedPriceServiceWithPriceLowBound
+    //       : 0
+    //   );
+    //   form.append(
+    //     "freezedPriceMaximumDurationInWeeks",
+    //     allowPriceFreezing === true
+    //       ? formValues.freezedPriceMaximumDurationInWeeks
+    //         ? formValues.freezedPriceMaximumDurationInWeeks
+    //         : params[0].freezedPriceMaximumDurationInWeeks
+    //       : 0
+    //   );
+    //   form.append(
+    //     "minimumFreezableQuantity",
+    //     formValues.minimumFreezableQuantity
+    //       ? formValues.minimumFreezableQuantity
+    //       : params[0].minimumFreezableQuantity
+    //   );
+    //   form.append(
+    //     "requiredMaximumNumberOfCommunityMembers",
+    //     formValues.requiredMaximumNumberOfCommunityMembers
+    //       ? formValues.requiredMaximumNumberOfCommunityMembers
+    //       : params[0].requiredMaximumNumberOfCommunityMembers
+    //   );
+    //   form.append(
+    //     "communityTotalPurchaseableUnit",
+    //     formValues.communityTotalPurchaseableUnit
+    //       ? formValues.communityTotalPurchaseableUnit
+    //       : params[0].communityTotalPurchaseableUnit
+    //   );
+    //   form.append(
+    //     "communityDeliveryPeriod",
+    //     formValues.communityDeliveryPeriod
+    //       ? formValues.communityDeliveryPeriod
+    //       : params[0].communityDeliveryPeriod
+    //   );
+    //   form.append(
+    //     "communityDeliveryType",
+    //     communityDeliveryType
+    //       ? communityDeliveryType
+    //       : params[0].communityDeliveryType
+    //   );
+    //   form.append(
+    //     "communityInstruction",
+    //     formValues.communityInstruction
+    //       ? formValues.communityInstruction
+    //       : params[0].communityInstruction
+    //   );
+    //   form.append(
+    //     "dealCode",
+    //     formValues.dealCode ? formValues.dealCode : params[0].dealCode
+    //   );
+    //   form.append(
+    //     "dealExpiryDate",
+    //     formValues.dealExpiryDate
+    //       ? formValues.dealExpiryDate
+    //       : params[0].dealExpiryDate
+    //   );
+
+    //   form.append("dealType", dealType ? dealType : params[0].dealType);
+
+    //   form.append(
+    //     "showDealPricePerUnit",
+    //     showDealPricePerUnit
+    //       ? showDealPricePerUnit
+    //       : params[0].showDealPricePerUnit
+    //   );
+
+    //   form.append(
+    //     "allowDealQuantityChange",
+    //     allowDealQuantityChange
+    //       ? allowDealQuantityChange
+    //       : params[0].allowDealQuantityChange
+    //   );
+    //   form.append("dealStatus", dealStatus ? dealStatus : params[0].dealStatus);
+    //   form.append(
+    //     "dealComment",
+    //     formValues.dealComment ? formValues.dealComment : params[0].dealComment
+    //   );
+
+    //   form.append(
+    //     "productType",
+    //     productType ? productType : params[0].productType
+    //   );
+    //   form.append(
+    //     "dealDeliveryMode",
+    //     dealDeliveryMode ? dealDeliveryMode : params[0].dealDeliveryMode
+    //   );
+    //   form.append(
+    //     "showDealDeliveryCost",
+    //     showDealDeliveryCost
+    //       ? showDealDeliveryCost
+    //       : params[0].showDealDeliveryCost
+    //   );
+    //   form.append(
+    //     "dealCentralizedDeliveryLocation",
+    //     formValues.dealCentralizedDeliveryLocation
+    //       ? formValues.dealCentralizedDeliveryLocation
+    //       : params[0].dealCentralizedDeliveryLocation
+    //   );
+    //   form.append(
+    //     "dealCentralizedAgreedDeliveryCost",
+    //     formValues.dealCentralizedAgreedDeliveryCost
+    //       ? formValues.dealCentralizedAgreedDeliveryCost
+    //       : params[0].dealCentralizedAgreedDeliveryCost
+    //   );
+
+    //   //converting string to array
+    //   if (formValues.dealDecentralizedDeliveryLocation) {
+    //     for (
+    //       let i = 0;
+    //       i < formValues.dealDecentralizedDeliveryLocation.split("\n").length;
+    //       i++
+    //     ) {
+    //       form.append(
+    //         `dealDecentralizedDeliveryLocation`,
+    //         formValues.dealDecentralizedDeliveryLocation.split("\n")[i]
+    //       );
+    //     }
+    //   }
+
+    //   form.append(
+    //     "dealDecentralizedAgreedDeliveryCost",
+    //     formValues.dealDecentralizedAgreedDeliveryCost
+    //       ? formValues.dealDecentralizedAgreedDeliveryCost
+    //       : params[0].dealDecentralizedAgreedDeliveryCost
+    //   );
+
+    //   form.append(
+    //     "showDealPaymentDetails",
+    //     showDealPaymentDetails
+    //       ? showDealPaymentDetails
+    //       : params[0].showDealPaymentDetails
+    //   );
+
+    //   form.append(
+    //     "dealPaymentPreference",
+    //     dealPaymentPreference
+    //       ? dealPaymentPreference
+    //       : params[0].dealPaymentPreference
+    //   );
+
+    //   form.append(
+    //     "requestDealRedemptionCode",
+    //     requestDealRedemptionCode
+    //       ? requestDealRedemptionCode
+    //       : params[0].requestDealRedemptionCode
+    //   );
+
+    //   form.append(
+    //     "isAContributoryDeal",
+    //     isAContributoryDeal
+    //       ? isAContributoryDeal
+    //       : params[0].isAContributoryDeal
+    //   );
+    //   form.append(
+    //     "dealOwnerEntity",
+    //     entity ? entity : params[0].dealOwnerEntity
+    //   );
+    //   form.append("dealOwner", community ? community : params[0].dealOwner);
+
+    //   form.append(
+    //     "dealInitialPercentageContribution",
+    //     formValues.dealInitialPercentageContribution
+    //       ? formValues.dealInitialPercentageContribution
+    //       : params[0].dealInitialPercentageContribution
+    //   );
+
+    //   form.append(
+    //     "dealMaximumInstallmentAllowed",
+    //     formValues.dealMaximumInstallmentAllowed
+    //       ? formValues.dealMaximumInstallmentAllowed
+    //       : params[0].dealMaximumInstallmentAllowed
+    //   );
+
+    //   form.append(
+    //     "includeGatewayChargesInPrice",
+    //     includeGatewayChargesInPrice
+    //       ? includeGatewayChargesInPrice
+    //       : params[0].includeGatewayChargesInPrice
+    //   );
+
+    //   form.append(
+    //     "gatewayFixedCharge",
+    //     formValues.gatewayFixedCharge
+    //       ? formValues.gatewayFixedCharge
+    //       : params[0].gatewayFixedCharge
+    //   );
+
+    //   form.append(
+    //     "gatewayRateCharge",
+    //     formValues.gatewayRateCharge
+    //       ? formValues.gatewayRateCharge
+    //       : params[0].gatewayRateCharge
+    //   );
+
+    //   form.append(
+    //     "isACreditDeal",
+    //     isACreditDeal ? isACreditDeal : params[0].isACreditDeal
+    //   );
+    //   form.append(
+    //     "dealSlug",
+    //     formValues.dealSlug ? formValues.dealSlug : params[0].dealSlug
+    //   );
+    //   form.append(
+    //     "preferredEntityVariant",
+    //     preferredEntityVariant
+    //       ? preferredEntityVariant
+    //       : params[0].preferredEntityVariant
+    //   );
+
+    //   if (formValues.imageCover) {
+    //     form.append("imageCover", formValues.imageCover[0]);
+    //   } else if (imageCover) {
+    //     form.append("imageCover", imageCover);
+    //   }
+
+    //   if (uploadedFiles.length > 0) {
+    //     for (let i = 0; i < uploadedFiles.length; i++) {
+    //       form.append(`images`, uploadedFiles[i]);
+    //     }
+    //   } else if (images.length > 0) {
+    //     for (let i = 0; i < images.length; i++) {
+    //       form.append(`images`, images[i]);
+    //     }
+    //   }
+    // }
 
     if (form) {
       const duplicateForm = async () => {
