@@ -33,7 +33,7 @@ const useStyles = makeStyles((theme) => ({
   root: {
     maxWidth: "100%",
     //height: "100%",
-    //height: 350,
+    height: 400,
     width: "100%",
 
     marginLeft: "10px",
@@ -251,7 +251,7 @@ export default function EntityTopCover(props) {
           <Grid
             container
             direction="row"
-            style={{ marginTop: 20, height: 580 }}
+            style={{ marginTop: 20, height: "100%" }}
           >
             <Grid
               container
@@ -266,17 +266,21 @@ export default function EntityTopCover(props) {
                 justifyContent={matchesSM ? "center" : "space-between"}
                 direction={matchesSM ? "column" : "row"}
                 item
-                style={{ height: "35%", marginTop: 0, marginLeft: 50 }}
+                style={{ height: "50%", marginTop: 0, marginLeft: 50 }}
               ></Grid>
               <Grid
                 item
                 alignItems="center"
-                style={{ height: "60%", marginLeft: "3.5em" }}
+                style={{ height: "40%", marginLeft: "3.5em" }}
               >
                 <Typography>
                   We offer a wide range of high-quality essential food items to
-                  &nbsp;{props.entityName} staff at affordable prices,
-                  leveraging the collective buying power of their workforce
+                  &nbsp;{props.entityName}{" "}
+                  {props.entityType === "enterprise"
+                    ? "staff"
+                    : "community members"}{" "}
+                  at affordable prices, leveraging the collective buying power
+                  of their workforce
                 </Typography>
               </Grid>
             </Grid>
@@ -293,17 +297,22 @@ export default function EntityTopCover(props) {
                 justifyContent={matchesSM ? "center" : "space-between"}
                 direction={matchesSM ? "column" : "row"}
                 item
-                style={{ height: "35%", marginTop: 0, marginLeft: 50 }}
+                style={{ height: "50%", marginTop: 0, marginLeft: 50 }}
               ></Grid>
               <Grid
                 item
                 alignItems="center"
-                style={{ height: "60%", marginLeft: "3.5em" }}
+                style={{ height: "40%", marginLeft: "3.5em" }}
               >
                 <Typography>
-                  We deliver these food items directly to the various locations
-                  and branches of {props.entityName} at no or at an affordable
-                  cost and within a specified timeframe
+                  We deliver these food items directly to the various{" "}
+                  {props.entityType === "enterprise"
+                    ? "locations and branches of"
+                    : props.entityType === "tertiary"
+                    ? "locations and places within the campus of"
+                    : "locations and places at"}{" "}
+                  {props.entityName} at no or at an affordable cost and within a
+                  specified timeframe
                 </Typography>
               </Grid>
             </Grid>
@@ -321,12 +330,12 @@ export default function EntityTopCover(props) {
                 justifyContent={matchesSM ? "center" : "space-between"}
                 direction={matchesSM ? "column" : "row"}
                 item
-                style={{ height: "35%", marginTop: 0, marginLeft: 50 }}
+                style={{ height: "50%", marginTop: 0, marginLeft: 50 }}
               ></Grid>
               <Grid
                 item
                 alignItems="center"
-                style={{ height: "60%", marginLeft: "3.5em" }}
+                style={{ height: "40%", marginLeft: "3.5em" }}
               >
                 <Typography>
                   We offer multiple payment options including Pay-on-Delivery,
@@ -368,8 +377,12 @@ export default function EntityTopCover(props) {
               >
                 <Typography style={{ fontSize: 11 }}>
                   We offer a wide range of high-quality essential food items to
-                  &nbsp;{props.entityName} staff at affordable prices,
-                  leveraging the collective buying power of their workforce
+                  &nbsp;{props.entityName}{" "}
+                  {props.entityType === "enterprise"
+                    ? "staff"
+                    : "community members"}{" "}
+                  at affordable prices, leveraging the collective buying power
+                  of their workforce
                 </Typography>
               </Grid>
             </Grid>
@@ -394,9 +407,14 @@ export default function EntityTopCover(props) {
                 style={{ height: "60%", marginLeft: 25 }}
               >
                 <Typography style={{ fontSize: 11 }}>
-                  We deliver these food items directly to the various locations
-                  and branches of {props.entityName} at no or at an affordable
-                  cost and within a specified timeframe
+                  We deliver these food items directly to the various{" "}
+                  {props.entityType === "enterprise"
+                    ? "locations and branches of"
+                    : props.entityType === "tertiary"
+                    ? "locations and places within the campus of"
+                    : "locations and places at"}{" "}
+                  {props.entityName} at no or at an affordable cost and within a
+                  specified timeframe
                 </Typography>
               </Grid>
             </Grid>

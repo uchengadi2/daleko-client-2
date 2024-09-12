@@ -1088,6 +1088,7 @@ const Entities = (props) => {
   let extend = false;
   let extendTitle = "";
   let entityName = "";
+  let entityType = "enterprise";
 
   if (entity === "mtn") {
     entityTitle = "Staff Members of MTN (Nig) Plc";
@@ -1115,12 +1116,15 @@ const Entities = (props) => {
   } else if (entity === "unilag") {
     entityTitle = "the University of Lagos Community";
     entityName = "University of Lagos(Unilag)";
+    entityType = "tertiary";
   } else if (entity === "yabatech") {
     entityTitle = "the Yaba Technology Community";
     entityName = "Yaba College of Technology";
+    entityType = "tertiary";
   } else if (entity === "lasu") {
     entityTitle = "the Lagos State Univeristy Community";
     entityName = "Lagos State Univeristy(LASU)";
+    entityType = "tertiary";
   } else if (entity === "interswitch") {
     entityTitle = "Staff Members of InterSwitch (Nig) Ltd";
     entityName = "InterSwitch (Nig) Ltd";
@@ -1157,7 +1161,31 @@ const Entities = (props) => {
   } else if (entity === "yabafstc") {
     entityTitle = "Staff Members of Federal Science & Technical";
     extend = true;
-    extendTitle = "College, Yaba";
+    //extendTitle = "College, Yaba";
+    entityType = "place";
+  } else if (entity === "ican") {
+    entityTitle = "Institute of Chartered Accountants ";
+    extend = true;
+    extendTitle = "of Nigeria (ICAN)";
+    entityName = "Institute of Chartered Accountants of Nigeria(ICAN)";
+  } else if (entity === "coralspring") {
+    entityTitle = "Coral Spring Cooperative Society";
+    extend = false;
+    // extendTitle = "College, Yaba";
+    entityName = "Coral Spring Cooperative Society";
+    entityType = "place";
+  } else if (entity === "ago") {
+    entityTitle = "Ago Palace Community Members, Okota";
+    extend = false;
+    //extendTitle = "College, Yaba";
+    entityName = "Ago Palace, Okota";
+    entityType = "place";
+  } else if (entity === "ilasa") {
+    entityTitle = "Ilasa, Lagos";
+    extend = false;
+    //extendTitle = "College, Yaba";
+    entityName = "Ilasa, Lagos";
+    entityType = "place";
   } else {
     entityTitle = "Members of a Community/Organization";
   }
@@ -1305,7 +1333,11 @@ const Entities = (props) => {
           </Grid>
           {/* </section> */}
           {/* <FreezePriceAdDealPage /> */}
-          <EntityTopCover preference={preference} entityName={entityName} />
+          <EntityTopCover
+            preference={preference}
+            entityName={entityName}
+            entityType={entityType}
+          />
           {/* <DealPropositionPage /> */}
           {/* <DealSearchBox
             updateDealHandler={updateDealHandler}
