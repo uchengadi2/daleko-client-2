@@ -353,6 +353,21 @@ function Products(props) {
 
         //editable: true,
       },
+
+      {
+        field: "dealSlug",
+        headerName: "Deal Slug",
+        width: 150,
+
+        //editable: true,
+      },
+      {
+        field: "salesPreference",
+        headerName: "Sales Preference",
+        width: 150,
+
+        //editable: true,
+      },
       {
         field: "brand",
         headerName: "Product Brand",
