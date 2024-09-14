@@ -47,6 +47,7 @@ import heroVideo from "./../assets/video/background_video.mp4";
 import heroVideoMobile from "./../assets/video/background_video_mobile.mp4";
 import EntityTopCover from "./entities/EntityTopCover";
 import EntityPurchaseSchemes from "./deals/EntityPurchaseSchemes";
+import EntityRating from "./entities/EntityRating";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -1333,7 +1334,13 @@ const Entities = (props) => {
           </Grid>
           {/* </section> */}
           {/* <FreezePriceAdDealPage /> */}
+
           <EntityTopCover
+            preference={preference}
+            entityName={entityName}
+            entityType={entityType}
+          />
+          <EntityRating
             preference={preference}
             entityName={entityName}
             entityType={entityType}
@@ -1531,6 +1538,11 @@ const Entities = (props) => {
           <TopCoverDeal preference={preference} />
           <DealPropositionPage /> */}
           <EntityTopCover preference={preference} entityName={entityName} />
+          <EntityRating
+            preference={preference}
+            entityName={entityName}
+            entityType={entityType}
+          />
           <EntityPurchaseSchemes
             updateDealHandler={updateDealHandler}
             updatePreferenceHandler={updatePreferenceHandler}
