@@ -326,12 +326,11 @@ export default function EntityRating(props) {
                   fontWeight: 700,
                 }}
               >
-                The current community rating for the &nbsp;{props.entityName}{" "}
-                community is
+                With a community rating of E-, the current discount available to
+                the &nbsp;{props.entityName} community is
                 <span style={{ color: "red", marginLeft: 4, fontSize: 16 }}>
                   0.00%
                 </span>{" "}
-                which is classified as E- .
               </Typography>
             </Grid>
             {/* </Grid> */}
@@ -394,12 +393,11 @@ export default function EntityRating(props) {
                   fontSize: 10,
                 }}
               >
-                The current community rating for the &nbsp;{props.entityName}{" "}
-                community is{" "}
+                With a community rating of E-, the current discount available to
+                the &nbsp;{props.entityName} community is{" "}
                 <span style={{ color: "red", marginLeft: 4, fontSize: 16 }}>
                   0.00%
                 </span>{" "}
-                which is classified as E-.
               </Typography>
             </Grid>
             {/* </Grid> */}
