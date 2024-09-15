@@ -311,16 +311,27 @@ export default function EntityRating(props) {
                 marginTop: "2.5em",
               }}
             >
-              <Typography>
+              <Typography style={{ textAlign: "justify", textJustify: "auto" }}>
                 We provide community-based discounts of up to 20% or more on
                 every purchase made through a community portal. These discounts
                 are determined by the community's previous total purchase value
                 and are reflected in ratings ranging from A+ (the highest) to E-
                 (the lowest).
               </Typography>
-              <Typography style={{ marginTop: 30, fontWeight: 700 }}>
+              <Typography
+                style={{
+                  textAlign: "justify",
+                  textJustify: "auto",
+                  marginTop: 30,
+                  fontWeight: 700,
+                }}
+              >
                 The current community rating for the &nbsp;{props.entityName}{" "}
-                community is 0.00% which is classified as E-.
+                community is
+                <span style={{ color: "red", marginLeft: 4, fontSize: 16 }}>
+                  0.00%
+                </span>{" "}
+                which is classified as E- .
               </Typography>
             </Grid>
             {/* </Grid> */}
@@ -360,7 +371,14 @@ export default function EntityRating(props) {
               alignItems="center"
               style={{ height: "45%", marginLeft: 10, width: "50%" }}
             >
-              <Typography style={{ marginTop: 5, fontSize: 10 }}>
+              <Typography
+                style={{
+                  textAlign: "justify",
+                  textJustify: "auto",
+                  marginTop: 5,
+                  fontSize: 10,
+                }}
+              >
                 We provide community-based discounts of up to 20% or more on
                 every purchase made through a community portal. These discounts
                 are determined by the community's previous total purchase value
@@ -368,10 +386,20 @@ export default function EntityRating(props) {
                 (the lowest).
               </Typography>
               <Typography
-                style={{ marginTop: 15, fontWeight: 700, fontSize: 10 }}
+                style={{
+                  textAlign: "justify",
+                  textJustify: "auto",
+                  marginTop: 15,
+                  fontWeight: 700,
+                  fontSize: 10,
+                }}
               >
                 The current community rating for the &nbsp;{props.entityName}{" "}
-                community is 0.00% which is classified as E-.
+                community is{" "}
+                <span style={{ color: "red", marginLeft: 4, fontSize: 16 }}>
+                  0.00%
+                </span>{" "}
+                which is classified as E-.
               </Typography>
             </Grid>
             {/* </Grid> */}
