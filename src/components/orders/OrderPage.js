@@ -316,12 +316,16 @@ function OrderPage(props) {
       );
       const items = response.data.data.data;
 
+      console.log("these are the orders:", items);
+
       items.map((order) => {
+        // console.log("the product details ids are:", order.product.id);
         allData.push({
           id: order._id,
           orderNumber: order.orderNumber,
           cartId: order.cartId,
-          product: order.product.id,
+          product: order.product ? order.product.id : null,
+          //product: order.product.id,
           dateAddedToCart: order.dateAddedToCart,
           orderedQuantity: order.orderedQuantity,
           orderedPrice: order.orderedPrice,
