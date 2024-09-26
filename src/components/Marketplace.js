@@ -1040,7 +1040,7 @@ const Marketplace = (props) => {
             className={classes.background}
             justifyContent={matchesSM ? "center" : "space-between"}
             direction={matchesSM ? "column" : "row"}
-            style={{ marginTop: -100 }}
+            style={{ marginTop: -70 }}
           >
             <Grid item>
               {" "}

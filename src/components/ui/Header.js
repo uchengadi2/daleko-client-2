@@ -1219,17 +1219,17 @@ const Header = (props) => {
     <React.Fragment>
       <ElevationScroll>
         <AppBar position="fixed" className={classes.appbar}>
-          {/* {matchesMDUp ? (
+          {matchesMDUp ? (
             <Grid container direction="row" className={classes.topHeader}>
               <Grid item style={{ width: 250 }}>
                 <Typography>
                   {" "}
-                  <span>Email: sales@eshieldafrica.com</span>
+                  <span>Email: dalekoshops@gmail.com</span>
                 </Typography>
               </Grid>
               <Grid item style={{ width: 250 }}>
                 <Typography>
-                  <span>Tel: 0803 937 3978; 0802 469 7155</span>
+                  <span>Tel: 0812 610 4035; 0803 201 5819</span>
                 </Typography>
               </Grid>
               {props.token && (
@@ -1244,7 +1244,8 @@ const Header = (props) => {
               <Grid
                 item
                 component={"a"}
-                href="https://www.facebook.com/eshieldafricab2b/"
+                //href="https://www.facebook.com/eshieldafricab2b/"
+                href="#"
                 rel="noopener noreferrer"
                 target="_blank"
                 className={
@@ -1260,7 +1261,8 @@ const Header = (props) => {
               <Grid
                 item
                 component={"a"}
-                href="https://www.linkedin.com/company/e-shield-africa"
+                //href="https://www.linkedin.com/company/e-shield-africa"
+                href="#"
                 rel="noopener noreferrer"
                 target="_blank"
                 style={{ marginLeft: 30 }}
@@ -1274,7 +1276,8 @@ const Header = (props) => {
               <Grid
                 item
                 component={"a"}
-                href="https://www.instagram.com/e_shieldafrica/"
+                //href="https://www.instagram.com/e_shieldafrica/"
+                href="#"
                 rel="noopener noreferrer"
                 target="_blank"
                 style={{ marginLeft: 30 }}
@@ -1288,26 +1291,26 @@ const Header = (props) => {
             </Grid>
           ) : (
             <Grid container direction="row" className={classes.topHeader}>
-              <Grid item style={{ width: 180 }}>
+              <Grid item style={{ width: 150 }}>
+                <Typography>
+                  {" "}
+                  <span style={{ fontSize: 11 }}>dalekoshops@gmail.com</span>
+                </Typography>
+              </Grid>
+              <Grid item style={{ width: 200 }}>
                 <Typography>
                   {" "}
                   <span style={{ fontSize: 11 }}>
-                    Email: sales@eshieldafrica.com
-                  </span>
-                </Typography>
-              </Grid>
-              <Grid item style={{ width: 230 }}>
-                <Typography>
-                  <span style={{ fontSize: 11 }}>
-                    Tel: 0803 937 3978; 0802 469 7155
+                    Tel: 0812 610 4035; 0803 201 5819
                   </span>
                 </Typography>
               </Grid>
 
-              <Grid
+              {/* <Grid
                 item
                 component={"a"}
-                href="https://www.facebook.com/eshieldafricab2b/"
+                //href="https://www.facebook.com/eshieldafricab2b/"
+                href="#"
                 rel="noopener noreferrer"
                 target="_blank"
                 className={classes.socialPos}
@@ -1321,7 +1324,8 @@ const Header = (props) => {
               <Grid
                 item
                 component={"a"}
-                href="https://www.linkedin.com/company/e-shield-africa"
+                //href="https://www.linkedin.com/company/e-shield-africa"
+                href="#"
                 rel="noopener noreferrer"
                 target="_blank"
                 style={{ marginLeft: 30 }}
@@ -1335,7 +1339,8 @@ const Header = (props) => {
               <Grid
                 item
                 component={"a"}
-                href="https://www.instagram.com/e_shieldafrica/"
+                //href="https://www.instagram.com/e_shieldafrica/"
+                href="#"
                 rel="noopener noreferrer"
                 target="_blank"
                 style={{ marginLeft: 30 }}
@@ -1345,9 +1350,10 @@ const Header = (props) => {
                   src={instagram}
                   className={classes.icon}
                 />
-              </Grid>
+              </Grid> */}
             </Grid>
-          )} */}
+          )}
+          {/** This is the end of the contacts in the header section */}
 
           {matchesMDUp ? (
             <Toolbar disableGutters>

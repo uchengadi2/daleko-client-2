@@ -374,10 +374,10 @@ function UpperFooter(props) {
                       <span> Shop 96, Daleko Market, Isolo, Lagos</span>
                       <br />
 
-                      <span>sales@daleko.com.ng</span>
+                      <span>dalekoshops@gmail.com</span>
                       <br />
 
-                      <span>+234 0803 200 5819, +234 0803 201 5819</span>
+                      <span>+234 081 2610 4035, +234 0803 201 5819</span>
                     </Typography>
                   )}
                   {matchesMD ? (

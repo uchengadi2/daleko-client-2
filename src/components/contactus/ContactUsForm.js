@@ -97,7 +97,7 @@ function ContactUsForm(props) {
           </Typography>
           <Typography variant="h5" style={{ marginTop: 10 }}>
             <span style={{ color: "orange" }}>Email:</span>{" "}
-            <span style={{ marginLeft: 30 }}>sales@daleko.com.ng </span>
+            <span style={{ marginLeft: 30 }}>dalekoshops@gmail.com </span>
             <br /> <br /> <span style={{ color: "orange" }}>Tel:</span>{" "}
             <span style={{ marginLeft: 50 }}>+234 0812 610 4035</span>
             <br /> <br />
